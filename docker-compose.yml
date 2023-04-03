@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  backend:
+    container_name: backend
+    build: ./backend
+    ports:
+      - '3000:3000'
+    volumes:
+      - 'v_backend:/app'
+      - '/app/node_modules'
+    command: npm run start:dev
+
+  frontend:
+    container_name: frontend
+    build: ./frontend
+    ports:
+      - '8080:8080'
+    command: npm run dev
+
+  db:
+    container_name: database
+    image: postgres:13
+    environment:
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+      POSTGRES_DB: mydatabase
+    volumes:
+      - 'v_database:/var/lib/postgresql/data'
+
+volumes:
+  v_database:
+  v_backend:
+  v_frontend:
