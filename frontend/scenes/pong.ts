@@ -2,9 +2,9 @@ import Phaser, { Game } from 'phaser';
 
 export default class Pong extends Phaser.Scene
 {
-	private player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-	private enemy?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-	private ball?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+	private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+	private enemy!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+	private ball!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
 
   constructor()
   {
@@ -31,23 +31,23 @@ export default class Pong extends Phaser.Scene
 	this.ball.setCollideWorldBounds(true);
 	this.ball.setVelocity(200, 100);
 
-	this.physics.add.collider(this.player, this.ball, this.ball_hit);
-	this.physics.add.collider(this.enemy, this.ball, this.ball_hit);
+	this.physics.add.collider(this.player, this.ball, this.ball_hit, undefined, this);
+	this.physics.add.collider(this.enemy, this.ball, this.ball_hit, undefined, this);
   }
 
   update()
   {
 	const cursors = this.input.keyboard.createCursorKeys();
     if (cursors.up.isDown == true)
-		this.player?.setVelocityY(-400);
+		this.player.setVelocityY(-400);
 	else if (cursors.down.isDown)
-		this.player?.setVelocityY(400);
+		this.player.setVelocityY(400);
 	else
-		this.player?.setVelocityY(0);
+		this.player.setVelocityY(0);
   }
 
-  ball_hit()
+  ball_hit() //for some reason this function get's called multiple times during a collision
   {
-	this.ball?.setVelocity(this.ball?.body.velocity.x * -1, this.ball?.body.velocity.y * -1);
+	this.ball.setVelocityX(-200 * this.ball.body.velocity.x);
   }
 }
