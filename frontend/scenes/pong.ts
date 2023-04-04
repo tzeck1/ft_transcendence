@@ -1,7 +1,11 @@
-import Phaser from 'phaser';
+import Phaser, { Game } from 'phaser';
 
 export default class Pong extends Phaser.Scene
 {
+	private player?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+	private enemy?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+	private ball?: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+
   constructor()
   {
     super("pong");
@@ -9,16 +13,41 @@ export default class Pong extends Phaser.Scene
 
   preload()
   {
-    this.load.image("back", "./assets/back.png");
+    this.load.image("back", "./assets/Back.png");
+    this.load.image("player", "./assets/Player.png");
+    this.load.image("enemy", "./assets/Enemy.png");
+    this.load.image("ball", "./assets/Ball.png");
   }
 
   create()
   {
-	this.add.image(800, 450, "back");
+	this.add.image(800, 455, "back").scale = 2;
+
+	this.player = this.physics.add.sprite(8.5, 450, "player").setCollideWorldBounds(true);
+	this.enemy = this.physics.add.sprite(1591.5, 450, "enemy").setCollideWorldBounds(true);
+
+	this.ball = this.physics.add.sprite(800, 450, "ball");
+	this.ball.setBounce(1.1);
+	this.ball.setCollideWorldBounds(true);
+	this.ball.setVelocity(200, 100);
+
+	this.physics.add.collider(this.player, this.ball, this.ball_hit);
+	this.physics.add.collider(this.enemy, this.ball, this.ball_hit);
   }
 
   update()
   {
-    
+	const cursors = this.input.keyboard.createCursorKeys();
+    if (cursors.up.isDown == true)
+		this.player?.setVelocityY(-400);
+	else if (cursors.down.isDown)
+		this.player?.setVelocityY(400);
+	else
+		this.player?.setVelocityY(0);
+  }
+
+  ball_hit()
+  {
+	this.ball?.setVelocity(this.ball?.body.velocity.x * -1, this.ball?.body.velocity.y * -1);
   }
 }
