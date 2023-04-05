@@ -1,0 +1,173 @@
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+  }
+  
+  @font-face {
+	font-family: ibm-3270;
+	src: url('3270-Regular.ttf') format('truetype');
+  }
+
+  html, body {
+    font-family: 'ibm-3270', monospace;
+    background-image: url("bg.gif");
+    background-size: cover;
+    background-repeat: no-repeat;
+    color: white;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 1rem;
+  flex-shrink: 0;
+  }
+  
+  .logo {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 1rem;
+    margin-left: 5rem;
+  }
+
+  .nav-buttons {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-grow: 1;
+  }
+  
+  button {
+	background-color: transparent;
+	color: rgb(255, 255, 255);
+	border: 2px solid rgba(255, 255, 255, 0);
+	border-radius: 25px;
+	padding: 20px 50px;
+	margin: 0 45px;
+	cursor: pointer;
+	outline: none;
+	font-size: 2rem;
+	font-family: 'ibm-3270', monospace;
+  }
+  
+  button:hover {
+	background-color: rgba(255, 255, 255, 0.1);
+  }
+  
+  .game-button {
+    border-radius: 35px;
+    font-size: 3.5rem;
+  }
+
+  .logout-button {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100px; /* Adjust the size of the logout button accordingly */
+	height: 100%;
+  }
+
+  .logout-button img {
+	display: flex;
+    justify-content: center;
+    align-items: center;
+	width: 100px; /* Adjust this value to match the logo width */
+	height: auto;
+	transition: transform 0.3s;
+  }
+
+  .logout-button:hover {
+	transform: scale(1.1);
+	cursor: pointer;
+  }
+  
+  nav {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	width: 100%;
+  }
+  
+  .sidebar {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	padding: 2rem;
+	width: 20%;
+	min-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  }
+  
+  .profile-picture {
+	width: 200px;
+	height: 200px;
+	border-radius: 50%;
+	margin-top: 2rem;
+	margin-bottom: 2rem;
+  }
+
+  .rank {
+	width: 75px;
+	height: 75px;
+	margin-top: 1rem;
+	margin-bottom: 1rem;
+  }
+  
+  .grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	grid-gap: 1rem;
+	width: 80%;
+	padding: 2rem;
+  overflow-y: auto;
+  height: 100%;
+  }
+  
+  .grid-item {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	background-color: rgba(0, 0, 0, 0.5);
+	border-radius: 25px;
+	padding: 1rem;
+	font-size: 2rem;
+  }
+  
+  
+  .main {
+    display: flex;
+    flex-grow: 1;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  
+  @keyframes glowing {
+	0% {
+	  text-shadow: 0 0 25px rgb(255, 255, 255);
+	}
+	50% {
+	  text-shadow: 0 0 25px rgb(255, 255, 255);
+	}
+	100% {
+	  text-shadow: 0 0 25px rgb(255, 255, 255);
+	}
+  }
+  
+  body,
+  body * {
+    animation: glowing 3s infinite;
+  }
+
+  .two-factor-button {
+    margin-top: auto;
+    margin-bottom: 1rem;
+    margin-left: 2rem;
+  }
+  
+  

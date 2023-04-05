@@ -1,33 +1,38 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8">
-		<link rel="stylesheet" href="/profile.css?<?=time()?>">
-		<title>Profile</title>
-	</head>
-	<body>
-		<div class="sidenav">
-			<div class="profile">
-				<img src="https://i.kym-cdn.com/photos/images/facebook/002/522/861/4f0.jpg" width="100" height="100">
-				<div class="username">Test User</div>
-				<div class="rank">Noob</div>
-			</div>
-		</div>
-		<br> <br>
-		<div class="main">
-			<h2> Info </h2>
-			<div class="card">
-				<div class="card_body">
-					<table>
-						<tbody>
-							<tr> <td>Name</td>			<td>:&emsp;</td>	<td>Intra Test User</td>	</tr>
-							<tr> <td>Email</td>			<td>:&emsp;</td>	<td>Intra Test Mail</td>	</tr>
-							<tr> <td>Joined</td>		<td>:&emsp;</td>	<td>01.01.2023</td>			</tr>
-							<tr> <td>Games played</td>	<td>:&emsp;</td>	<td>42</td>					</tr>
-						</tbody>
-					</table>
-				</div>
-			</div>
-		</div>
-	</body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Profile Page</title>
+</head>
+<body>
+    <header>
+        <img class="logo" src="logo.png" alt="Logo">
+        <nav>
+            <div class="nav-buttons">
+                <button>Profile</button>
+                <button class="game-button">Game</button>
+                <button>Leaderboard</button>
+            </div>
+            <div class="logout-button">
+                <img src="logout.png" alt="Logout">
+            </div>
+        </nav>
+    </header>
+    <div class="main">
+        <div class="sidebar">
+            <img class="profile-picture" src="profile-picture.png" alt="Profile picture">
+            <h1>Username</h1>
+            <img class="rank" src="rank.png" alt="Rank">
+            <button class="two-factor-button">Enable 2FA</button>
+        </div>
+        <div class="grid">
+            <div class="grid-item">Match History</div>
+            <div class="grid-item">Friends</div>
+            <div class="grid-item">Achievements</div>
+            <div class="grid-item">Statistics</div>
+        </div>
+    </div>
+</body>
 </html>
