@@ -25,14 +25,16 @@ export default class Pong extends Phaser.Scene
 
 	this.player = this.physics.add.sprite(8.5, 450, "player").setCollideWorldBounds(true);
 	this.enemy = this.physics.add.sprite(1591.5, 450, "enemy").setCollideWorldBounds(true);
+	this.player.setImmovable(true);
+	this.enemy.setImmovable(true);
 
 	this.ball = this.physics.add.sprite(800, 450, "ball");
 	this.ball.setBounce(1.1);
 	this.ball.setCollideWorldBounds(true);
 	this.ball.setVelocity(200, 100);
 
-	this.physics.add.collider(this.player, this.ball, this.ball_hit, undefined, this);
-	this.physics.add.collider(this.enemy, this.ball, this.ball_hit, undefined, this);
+	this.physics.add.collider(this.player, this.ball);
+	this.physics.add.collider(this.enemy, this.ball);
   }
 
   update()
@@ -46,8 +48,4 @@ export default class Pong extends Phaser.Scene
 		this.player.setVelocityY(0);
   }
 
-  ball_hit() //for some reason this function get's called multiple times during a collision
-  {
-	this.ball.setVelocityX(-200 * this.ball.body.velocity.x);
-  }
 }
