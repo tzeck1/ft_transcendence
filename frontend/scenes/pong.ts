@@ -11,7 +11,7 @@ export default class Pong extends Phaser.Scene
 	private score2 = 0;
 	private on_paddle = false;
 	private width = 1920;
-	private hight = 1080;
+	private height = 1080;
 
   constructor()
   {
@@ -28,14 +28,14 @@ export default class Pong extends Phaser.Scene
 
   create()
   {
-	this.add.image(this.width / 2, this.hight / 2, "back");
+	this.add.image(this.width / 2, this.height / 2, "back");
 
-	this.player = this.physics.add.sprite(this.width * 0.04, this.hight / 2, "player").setCollideWorldBounds(true);
-	this.enemy = this.physics.add.sprite(this.width * 0.96, this.hight / 2, "enemy").setCollideWorldBounds(true);
+	this.player = this.physics.add.sprite(this.width * 0.04, this.height / 2, "player").setCollideWorldBounds(true);
+	this.enemy = this.physics.add.sprite(this.width * 0.96, this.height / 2, "enemy").setCollideWorldBounds(true);
 	this.player.setImmovable(true);
 	this.enemy.setImmovable(true);
 
-	this.ball = this.physics.add.sprite(this.width / 2, this.hight / 2, "ball");
+	this.ball = this.physics.add.sprite(this.width / 2, this.height / 2, "ball");
 	this.ball.setBounce(1.1);
 	this.ball.setCollideWorldBounds(true);
 	this.ball.setVelocity(200, 100);
@@ -43,8 +43,8 @@ export default class Pong extends Phaser.Scene
 	this.physics.add.collider(this.player, this.ball, this.hit_paddle, undefined, this);
 	this.physics.add.collider(this.enemy, this.ball, this.hit_paddle, undefined, this);
 
-	this.score1_text = this.add.text(this.width / 3, this.hight / 4, '0', { fontFamily: "ibm-3270", fontSize: "128px" });
-	this.score2_text = this.add.text(2 * this.width / 3 - 64, this.hight / 4, '0', { fontFamily: "ibm-3270", fontSize: "128px" });
+	this.score1_text = this.add.text(this.width / 3, this.height / 4, '0', { fontFamily: "ibm-3270", fontSize: "128px" });
+	this.score2_text = this.add.text(2 * this.width / 3 - 64, this.height / 4, '0', { fontFamily: "ibm-3270", fontSize: "128px" });
   }
 
   update()
