@@ -38,7 +38,7 @@ export default class Pong extends Phaser.Scene
 	this.ball = this.physics.add.sprite(this.width / 2, this.height / 2, "ball");
 	this.ball.setBounce(1.1);
 	this.ball.setCollideWorldBounds(true);
-	this.ball.setVelocity(200, 100);
+	this.ball.setVelocity(this.random_velocity(), this.random_velocity());
 
 	this.physics.add.collider(this.player, this.ball, this.hit_paddle, undefined, this);
 	this.physics.add.collider(this.enemy, this.ball, this.hit_paddle, undefined, this);
@@ -56,16 +56,29 @@ export default class Pong extends Phaser.Scene
 		this.player.setVelocityY(400);
 	else
 		this.player.setVelocityY(0);
-	if (this.ball.body.blocked.right && !this.on_paddle)
-		this.score1_text.text = String(++this.score1);
-	else if (this.ball.body.blocked.left && !this.on_paddle)
-		this.score2_text.text = String(++this.score2);
+	if (this.ball.body.onWall() && !this.on_paddle)
+		this.scored();
 	this.on_paddle = false;
   }
 
   hit_paddle() // not the best solution to check if it hits the world borders
   {
 	this.on_paddle= true;
+  }
+
+  scored()
+  {
+	if (this.ball.body.blocked.right)
+		this.score1_text.text = String(++this.score1);
+	else
+		this.score2_text.text = String(++this.score2);
+	this.ball.setVelocity(this.random_velocity(), this.random_velocity());
+	this.ball.setPosition(this.width / 2, this.height / 2);
+  }
+
+  random_velocity()
+  {
+		return Phaser.Math.FloatBetween(-200, 200)
   }
 
 }
