@@ -13,20 +13,36 @@ exports.Api42Strategy = void 0;
 const common_1 = require("@nestjs/common");
 const passport_1 = require("@nestjs/passport");
 const passport_oauth2_1 = require("passport-oauth2");
+const axios_1 = require("axios");
 let Api42Strategy = class Api42Strategy extends (0, passport_1.PassportStrategy)(passport_oauth2_1.Strategy, 'api42') {
     constructor() {
         const options = {
-            authorizationURL: 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-8b9da2df9f37fabf5fe6330ad83da6cf15f65455a8add2bc5d0ebda92eaf4b88&redirect_uri=http%3A%2F%2Flocalhost%3A8080&response_type=code',
+            authorizationURL: 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-8b9da2df9f37fabf5fe6330ad83da6cf15f65455a8add2bc5d0ebda92eaf4b88&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fapi42%2Fcallback&response_type=code',
             tokenURL: 'https://api.intra.42.fr/oauth/token',
             clientID: process.env.API_42_CLIENT_ID,
             clientSecret: process.env.API_42_CLIENT_SECRET,
-            callbackURL: process.env.API_42_CALLBACK_URL,
-            scope: ['public'],
+            callbackURL: process.env.API_42_CALLBACK_URL || 'http://localhost:3000/auth/api42/callback',
+            scope: ['public profile'],
         };
-        console.log('Api42Strategy options:', options);
         super(options);
     }
     async validate(accessToken, refreshToken, profile, done) {
+        try {
+            const response = await axios_1.default.get('https://api.intra.42.fr/v2/me', {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
+            const api42User = response.data;
+            const userData = {
+                displayName: api42User.login,
+                photos: api42User.image.link ? [{ value: api42User.image.link }] : [],
+            };
+            console.log("User data in validate:", userData);
+            done(null, userData);
+        }
+        catch (error) {
+            console.error('Error fetching user data from 42 API:', error);
+            done(error);
+        }
     }
 };
 Api42Strategy = __decorate([

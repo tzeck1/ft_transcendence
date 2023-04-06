@@ -17,15 +17,19 @@ const common_1 = require("@nestjs/common");
 const passport_1 = require("@nestjs/passport");
 let AuthController = class AuthController {
     async api42Callback(req, res) {
+        console.log('api42Callback called, req.user:', req.user);
         const user = req.user;
+        console.log("User photos:", user.photos);
         const userData = {
             name: user.displayName,
-            avatarUrl: user.photos && user.photos[0].value,
+            avatarUrl: user.photos && user.photos.length > 0 && user.photos[0].value,
         };
+        console.log("User data:", userData);
         const frontendUrl = "http://localhost:8080";
         res.redirect(`${frontendUrl}?name=${encodeURIComponent(userData.name)}&avatarUrl=${encodeURIComponent(userData.avatarUrl)}`);
     }
     api42Login() {
+        console.log('login called');
     }
 };
 __decorate([

@@ -1,27 +1,22 @@
-document.addEventListener('DOMContentLoaded', () => {
-	function getUrlParams(url) {
-	  const params = {};
-	  const parser = document.createElement('a');
-	  parser.href = url;
-	  const query = parser.search.substring(1);
-	  const pairs = query.split('&');
+// Get the user's name from the URL query string
+function getParameterByName(name) {
+	name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+	const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+	const results = regex.exec(location.search);
+	return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+  }
   
-	  for (let i = 0; i < pairs.length; i++) {
-		const pair = pairs[i].split('=');
-		params[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
-	  }
+  const userName = getParameterByName('name');
   
-	  return params;
-	}
+  // Update the HTML content with the user's name
+  document.querySelector('h1').textContent = userName || 'Anonymous';
   
-	const params = getUrlParams(window.location.href);
-	console.log(params);
+  // Update the profile picture with the user's avatar URL
+  const profilePictureElement = document.getElementById('profile-picture');
+  const avatarUrl = getParameterByName('avatarUrl');
   
-	// Update the user's name
-	const userName = document.querySelector('h1');
-	userName.textContent = params.name || 'Unknown';
-  
-	// Update the user's profile picture
-	const profilePicture = document.querySelector('.profile-picture');
-	profilePicture.src = params.avatarUrl || '../assets/profile-picture.png';
-  });
+  if (avatarUrl) {
+	profilePictureElement.src = avatarUrl;
+  } else {
+	profilePictureElement.src = '../assets/profile-picture.png';
+  }

@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
-    <script src="main.js"> </script>
     <title>Profile Page</title>
 </head>
 <body>
@@ -23,7 +22,7 @@
     </header>
     <div class="main">
         <div class="sidebar">
-            <img class="profile-picture" src="../assets/profile-picture.png" alt="Profile picture">
+            <img id="profile-picture" class="profile-picture" src="../assets/profile-picture.png" alt="Profile picture">
             <h1>Totoro</h1>
             <img class="rank" src="../assets/rank.png" alt="Rank">
             <button class="two-factor-button">Enable 2FA</button>
@@ -35,5 +34,21 @@
             <div class="grid-item">Statistics</div>
         </div>
     </div>
+    <script>
+        function getUrlParameter(name) {
+          const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+          const results = regex.exec(window.location.search);
+          return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+        }
+      
+        const nameParam = getUrlParameter('name');
+        console.log('Name parameter:', nameParam);
+      
+        if (!nameParam) {
+          console.log('Redirecting to authentication route');
+          window.location.href = 'http://localhost:3000/auth/api42';
+        }
+      </script>
+    <script src="main.js"> </script>
 </body>
 </html>
