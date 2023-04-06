@@ -38,7 +38,7 @@ export default class Pong extends Phaser.Scene
 	this.ball = this.physics.add.sprite(this.width / 2, this.height / 2, "ball");
 	this.ball.setBounce(1.1);
 	this.ball.setCollideWorldBounds(true);
-	this.ball.setVelocity(this.random_velocity(), this.random_velocity());
+	this.ball.setVelocity(this.random_velocity(false), this.random_velocity(true));
 
 	this.physics.add.collider(this.player, this.ball, this.hit_paddle, undefined, this);
 	this.physics.add.collider(this.enemy, this.ball, this.hit_paddle, undefined, this);
@@ -72,13 +72,16 @@ export default class Pong extends Phaser.Scene
 		this.score1_text.text = String(++this.score1);
 	else
 		this.score2_text.text = String(++this.score2);
-	this.ball.setVelocity(this.random_velocity(), this.random_velocity());
+	this.ball.setVelocity(this.random_velocity(false), this.random_velocity(true));
 	this.ball.setPosition(this.width / 2, this.height / 2);
   }
 
-  random_velocity()
+  random_velocity(y)
   {
-		return Phaser.Math.FloatBetween(-200, 200)
+	if (y == true)
+		return Phaser.Math.FloatBetween(-200, 200);
+	if (Phaser.Math.Between(0, 1) == 0)
+		return 200;
+	return -200;
   }
-
 }
