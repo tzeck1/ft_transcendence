@@ -41,8 +41,8 @@ export default class Pong extends Phaser.Scene
 	this.physics.add.collider(this.player, this.ball, this.hit_paddle, undefined, this);
 	this.physics.add.collider(this.enemy, this.ball, this.hit_paddle, undefined, this);
 
-	this.score1_text = this.add.text(400, 250, '0', { font: "128px Press Start 2P" });
-	this.score2_text = this.add.text(1200, 250, '0', { font: "128px Press Start 2P" });
+	this.score1_text = this.add.text(400, 250, '0', { fontFamily: "ibm-3270", fontSize: "128px" });
+	this.score2_text = this.add.text(1200, 250, '0', { fontFamily: "ibm-3270", fontSize: "128px" });
   }
 
   update()
