@@ -18,10 +18,10 @@ export default class Pong extends Phaser.Scene
 
   preload()
   {
-    this.load.image("back", "./assets/Back.png");
-    this.load.image("player", "./assets/Player.png");
-    this.load.image("enemy", "./assets/Enemy.png");
-    this.load.image("ball", "./assets/Ball.png");
+    this.load.image("back", "./assets/field.png");
+    this.load.image("player", "./assets/paddle.png");
+    this.load.image("enemy", "./assets/paddle.png");
+    this.load.image("ball", "./assets/ball.png");
   }
 
   create()
