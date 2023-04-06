@@ -2,3 +2,15 @@
 	font-family: ibm-3270;
 	src: url('../assets/3270-Regular.ttf') format('truetype');
   }
+
+body {
+	background-color: #242424;
+}
+
+.game {
+	height: 62%;
+	position: relative;
+	transform: translate(-50%, 0);
+	left: 50%;
+	top: 10%;
+}
