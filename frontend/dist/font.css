@@ -3,9 +3,16 @@
 	src: url('../assets/3270-Regular.ttf') format('truetype');
   }
 
-body {
-	background-color: #242424;
-}
+html, body {
+    font-family: 'ibm-3270', monospace;
+    background-image: url("../assets/bg.gif");
+    background-size: cover;
+    background-repeat: no-repeat;
+    color: white;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
 
 .game {
 	height: 62%;
