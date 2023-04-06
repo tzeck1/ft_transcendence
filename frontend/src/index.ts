@@ -12,11 +12,11 @@ const config: Phaser.Types.Core.GameConfig = {
       gravity: { y: 0 },
     },
   },
-  //scale: {
-  //  mode: Phaser.Scale.FIT,
-  //  width: 1920,
-  //  height: 1088
-  //},
+  scale: {
+    mode: Phaser.Scale.FIT,
+    width: 1920,
+    height: 1088
+  },
   scene: [Pong]
 };
 
