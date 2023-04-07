@@ -113,9 +113,9 @@
   }
 
   .rank {
-	width: 75px;
-	height: 75px;
-	margin-top: 1rem;
+	width: 60px;
+	height: 60px;
+	margin-top: 2rem;
 	margin-bottom: 1rem;
   }
   
@@ -168,5 +168,66 @@
     margin-top: auto;
     margin-bottom: 1rem;
     margin-left: 2rem;
+  }
+  
+  .name-container {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.username-wrapper {
+    display: inline-flex;
+    position: relative;
+}
+
+#username span {
+    position: relative;
+    z-index: 1;
+}
+
+#toggle-username {
+	font-family: 'ibm-3270', monospace;
+    position: absolute;
+    left: 110%;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: transparent;
+    color: white;
+    border: none;
+    font-size: 2.5rem;
+    cursor: pointer;
+    outline: none;
+    padding: 5px;
+    margin-left: 5px; /* Adjust this value based on the desired distance from the username */
+}
+
+#toggle-username:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+#edit-username {
+    font-family: 'ibm-3270', monospace;
+    font-size: 2rem;
+    background-color: transparent;
+    border: none;
+    color: white;
+    outline: none;
+    padding: 0;
+    margin: 0;
+    width: 1ch;
+    text-align: center;
+    animation: glowing 3s infinite;
+}
+
+.profile-picture-drop-area {
+	position: relative;
+	display: inline-block;
+	border: none;
+	outline: none;
+  }
+  
+  .profile-picture-drop-area:hover {
+	border-color: rgba(255, 255, 255, 0.5);
   }
   

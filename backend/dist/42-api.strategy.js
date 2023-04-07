@@ -36,7 +36,6 @@ let Api42Strategy = class Api42Strategy extends (0, passport_1.PassportStrategy)
                 displayName: api42User.login,
                 photos: api42User.image.link ? [{ value: api42User.image.link }] : [],
             };
-            console.log("User data in validate:", userData);
             done(null, userData);
         }
         catch (error) {
