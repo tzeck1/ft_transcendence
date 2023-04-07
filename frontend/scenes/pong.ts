@@ -12,6 +12,9 @@ export default class Pong extends Phaser.Scene
 	private on_paddle = false;
 	private width = 1920;
 	private height = 1080;
+	private pattern!: Phaser.GameObjects.Image;
+	private maskPattern!: Phaser.GameObjects.Graphics;
+	private field!: Phaser.GameObjects.Image;
 
   constructor()
   {
@@ -24,21 +27,31 @@ export default class Pong extends Phaser.Scene
     this.load.image("player", "./assets/paddle.png");
     this.load.image("enemy", "./assets/paddle.png");
     this.load.image("ball", "./assets/ball.png");
+	this.load.image("pattern", "./assets/striped_pattern.png");
   }
 
   create()
   {
-	this.add.image(this.width / 2, this.height / 2, "back");
+	this.pattern = this.add.image(this.width / 2, this.height / 2, "pattern");
+	this.maskPattern = this.add.graphics();
+	this.maskPattern.fillStyle(0xffffff);
+	this.pattern.setMask(this.maskPattern.createGeometryMask());
+	this.field = this.add.image(this.width / 2, this.height / 2, "back");
+	this.field.setMask(this.pattern.createBitmapMask());
+
 
 	this.player = this.physics.add.sprite(this.width * 0.04, this.height / 2, "player").setCollideWorldBounds(true);
 	this.enemy = this.physics.add.sprite(this.width * 0.96, this.height / 2, "enemy").setCollideWorldBounds(true);
 	this.player.setImmovable(true);
 	this.enemy.setImmovable(true);
+	this.player.setMask(this.pattern.createBitmapMask());
+	this.enemy.setMask(this.pattern.createBitmapMask());
 
 	this.ball = this.physics.add.sprite(this.width / 2, this.height / 2, "ball");
 	this.ball.setBounce(1.1);
 	this.ball.setCollideWorldBounds(true);
 	this.ball.setVelocity(this.random_velocity(false), this.random_velocity(true));
+	this.ball.setMask(this.pattern.createBitmapMask());
 
 	this.physics.add.collider(this.player, this.ball, this.hit_paddle, undefined, this);
 	this.physics.add.collider(this.enemy, this.ball, this.hit_paddle, undefined, this);
