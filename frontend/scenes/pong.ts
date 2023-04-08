@@ -165,8 +165,8 @@ export default class Pong extends Phaser.Scene
 			x = 400;
 	}
 	this.ball.setVelocity(x, y);
+	this.ball.body.setMaxSpeed(2400);
 	this.player_scored = false;
 	this.enemy_scored = false;
-	return function(){};
   }
 }
