@@ -26,17 +26,9 @@ export default class Pong extends Phaser.Scene
     super("pong");
   }
 
-  preload()
-  {
-    this.load.image("back", "./assets/back.png");
-    this.load.image("player", "./assets/paddle.png");
-    this.load.image("enemy", "./assets/paddle.png");
-    this.load.image("ball", "./assets/ball.png");
-	this.load.image("pattern", "./assets/striped_pattern.png");
-  }
-
   create()
   {
+
 	this.pattern = this.add.image(this.width / 2, this.height / 2, "pattern");
 	this.maskPattern = this.add.graphics();
 	this.maskPattern.fillStyle(0xffffff);
@@ -143,6 +135,8 @@ export default class Pong extends Phaser.Scene
 		this.score2_text.text = String(++this.score2);
 		this.enemy_scored = true;
 	}
+	if (this.score1 == 11 || this.score2 == 11)
+		this.scene.start("end");
 	this.spawn_ball();
   }
 

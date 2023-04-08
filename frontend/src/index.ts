@@ -1,6 +1,8 @@
 import Phaser from 'phaser';
 
 import Pong from "../scenes/pong";
+import Start from "../scenes/start";
+import End from "../scenes/end";
 
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -21,7 +23,7 @@ const config: Phaser.Types.Core.GameConfig = {
     width: 1920,
     height: 1080
   },
-  scene: [Pong]
+  scene: [Start, Pong, End]
 };
 
 export default new Phaser.Game(config);
