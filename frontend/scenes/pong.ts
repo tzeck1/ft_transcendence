@@ -17,6 +17,9 @@ export default class Pong extends Phaser.Scene
 	private field!: Phaser.GameObjects.Image;
 	private player_scored = false;
 	private enemy_scored = false;
+	private ball_trail!: Phaser.GameObjects.Particles.ParticleEmitter;
+	private player_trail!: Phaser.GameObjects.Particles.ParticleEmitter;
+	private enemy_trail!: Phaser.GameObjects.Particles.ParticleEmitter;
 
   constructor()
   {
@@ -41,7 +44,6 @@ export default class Pong extends Phaser.Scene
 	this.field = this.add.image(this.width / 2, this.height / 2, "back");
 	this.field.setMask(this.pattern.createBitmapMask());
 
-
 	this.player = this.physics.add.sprite(this.width * 0.04, this.height / 2, "player").setCollideWorldBounds(true);
 	this.enemy = this.physics.add.sprite(this.width * 0.96, this.height / 2, "enemy").setCollideWorldBounds(true);
 	this.player.setImmovable(true);
@@ -60,6 +62,31 @@ export default class Pong extends Phaser.Scene
 
 	this.score1_text = this.add.text(this.width / 3, this.height / 4, '0', { fontFamily: "ibm-3270", fontSize: "128px" });
 	this.score2_text = this.add.text(2 * this.width / 3 - 64, this.height / 4, '0', { fontFamily: "ibm-3270", fontSize: "128px" });
+
+	this.ball_trail = this.add.particles("ball").createEmitter({
+		follow: this.ball,
+		frequency: 142,
+		alpha: {start: 0.4, end: 0.2},
+		lifespan: 420
+	})
+	this.ball_trail.setMask(this.pattern.createBitmapMask());
+	this.ball_trail.start();
+	this.player_trail = this.add.particles("player").createEmitter({
+		follow: this.player,
+		frequency: 142,
+		alpha: {start: 0.4, end: 0.2},
+		lifespan: 420
+	})
+	this.player_trail.setMask(this.pattern.createBitmapMask());
+	this.player_trail.start();
+	this.enemy_trail = this.add.particles("enemy").createEmitter({
+		follow: this.enemy,
+		frequency: 142,
+		alpha: {start: 0.4, end: 0.2},
+		lifespan: 420
+	})
+	this.enemy_trail.setMask(this.pattern.createBitmapMask());
+	this.enemy_trail.start();
   }
 
   update()
