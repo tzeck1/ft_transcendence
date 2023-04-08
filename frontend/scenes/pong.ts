@@ -48,7 +48,7 @@ export default class Pong extends Phaser.Scene
 	this.enemy.setMask(this.pattern.createBitmapMask());
 
 	this.ball = this.physics.add.sprite(this.width / 2, this.height / 2, "ball");
-	this.ball.setBounce(1.1);
+	this.ball.setBounce(1);
 	this.ball.setCollideWorldBounds(true);
 	this.ball.setVelocity(this.random_velocity(false), this.random_velocity(true));
 	this.ball.setMask(this.pattern.createBitmapMask());
@@ -64,11 +64,20 @@ export default class Pong extends Phaser.Scene
   {
 	const cursors = this.input.keyboard.createCursorKeys();
     if (cursors.up.isDown)
+	{
 		this.player.setVelocityY(-400);
+		this.enemy.setVelocityY(-400);
+	}
 	else if (cursors.down.isDown)
+	{
 		this.player.setVelocityY(400);
+		this.enemy.setVelocityY(400);
+	}
 	else
+	{
 		this.player.setVelocityY(0);
+		this.enemy.setVelocityY(0);
+	}
 	if (this.ball.body.onWall() && !this.on_paddle)
 		this.scored();
 	this.on_paddle = false;
@@ -76,7 +85,21 @@ export default class Pong extends Phaser.Scene
 
   hit_paddle() // not the best solution to check if it hits the world borders
   {
-	this.on_paddle= true;
+	let distance = Phaser.Math.Distance.Between(1, this.player.y, 1, this.ball.y);
+	let angle = 0;
+	if (distance > 96)
+		angle = 45;
+	else if (distance > 64)
+		angle = 30;
+	else if (distance > 32)
+		angle = 15;
+	if ((this.player.y > this.ball.y && this.ball.x < this.width / 2) || this.player.y < this.ball.y && this.ball.x > this.width / 2)
+		angle *= -1;
+	if (this.ball.x > this.width / 2)
+		angle += 180;
+  	this.physics.velocityFromAngle(angle, this.ball.body.speed, this.ball.body.velocity);
+	this.ball.body.velocity.scale(1.1);
+	this.on_paddle = true;
   }
 
   scored()
@@ -92,9 +115,9 @@ export default class Pong extends Phaser.Scene
   random_velocity(y)
   {
 	if (y == true)
-		return Phaser.Math.FloatBetween(-200, 200);
+		return Phaser.Math.FloatBetween(-400, 400);
 	if (Phaser.Math.Between(0, 1) == 0)
-		return 200;
-	return -200;
+		return 400;
+	return -400;
   }
 }
