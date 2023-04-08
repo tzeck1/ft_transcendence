@@ -15,6 +15,8 @@ export default class Pong extends Phaser.Scene
 	private pattern!: Phaser.GameObjects.Image;
 	private maskPattern!: Phaser.GameObjects.Graphics;
 	private field!: Phaser.GameObjects.Image;
+	private player_scored = false;
+	private enemy_scored = false;
 
   constructor()
   {
@@ -50,8 +52,8 @@ export default class Pong extends Phaser.Scene
 	this.ball = this.physics.add.sprite(this.width / 2, this.height / 2, "ball");
 	this.ball.setBounce(1);
 	this.ball.setCollideWorldBounds(true);
-	this.ball.setVelocity(this.random_velocity(false), this.random_velocity(true));
 	this.ball.setMask(this.pattern.createBitmapMask());
+	this.spawn_ball();
 
 	this.physics.add.collider(this.player, this.ball, this.hit_paddle, undefined, this);
 	this.physics.add.collider(this.enemy, this.ball, this.hit_paddle, undefined, this);
@@ -65,13 +67,13 @@ export default class Pong extends Phaser.Scene
 	const cursors = this.input.keyboard.createCursorKeys();
     if (cursors.up.isDown)
 	{
-		this.player.setVelocityY(-400);
-		this.enemy.setVelocityY(-400);
+		this.player.setVelocityY(-800);
+		this.enemy.setVelocityY(-800);
 	}
 	else if (cursors.down.isDown)
 	{
-		this.player.setVelocityY(400);
-		this.enemy.setVelocityY(400);
+		this.player.setVelocityY(800);
+		this.enemy.setVelocityY(800);
 	}
 	else
 	{
@@ -105,19 +107,45 @@ export default class Pong extends Phaser.Scene
   scored()
   {
 	if (this.ball.body.blocked.right)
+	{
 		this.score1_text.text = String(++this.score1);
+		this.player_scored = true;
+	}
 	else
+	{
 		this.score2_text.text = String(++this.score2);
-	this.ball.setVelocity(this.random_velocity(false), this.random_velocity(true));
-	this.ball.setPosition(this.width / 2, this.height / 2);
+		this.enemy_scored = true;
+	}
+	this.spawn_ball();
   }
 
-  random_velocity(y)
+  spawn_ball()
   {
-	if (y == true)
-		return Phaser.Math.FloatBetween(-400, 400);
+	let x = this.width / 2;
+	let y;
 	if (Phaser.Math.Between(0, 1) == 0)
-		return 400;
-	return -400;
+		y = Phaser.Math.Between(0, this.height / 6);
+	else
+		y = Phaser.Math.Between(5 * this.height / 6, this.height);
+	this.ball.setPosition(x, y);
+	if (y > this.height / 2)
+		y = Phaser.Math.Between(-200, -600);
+	else
+		y = Phaser.Math.Between(200, 600);
+	if (this.player_scored)
+		x = 400;
+	else if (this.enemy_scored)
+		x = -400;
+	else
+	{
+		if (Phaser.Math.Between(0, 1) == 0)
+			x = -400;
+		else
+			x = 400;
+	}
+	this.ball.setVelocity(x, y);
+	this.player_scored = false;
+	this.enemy_scored = false;
+	return function(){};
   }
 }
