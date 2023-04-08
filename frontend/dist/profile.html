@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Profile</title>
+</head>
+<body>
+    <div class="main">
+        <div class="sidebar">
+            <div class="profile-picture-drop-area">
+                <img id="profile-picture" class="profile-picture" src="../assets/profile-picture.png" alt="Profile picture">
+            </div>
+            <div class="name-container">
+                <div class="username-wrapper">
+                    <h1 id="username"><span>Totoro</span></h1>
+                    <input type="text" id="edit-username" style="display: none;" oninput="resizeInput(this)">
+                    <button id="toggle-username">&#9998;</button>
+                </div>
+            </div>
+            <img class="rank" src="../assets/rank.png" alt="Rank">
+            <button class="two-factor-button">Enable 2FA</button>
+        </div>
+        <div class="grid">
+            <div class="grid-item">Match History</div>
+            <div class="grid-item">Friends</div>
+            <div class="grid-item">Achievements</div>
+            <div class="grid-item">Statistics</div>
+        </div>
+    </div>
+    <script src="profile.js"></script>
+</body>
+</html>
