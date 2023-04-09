@@ -108,7 +108,9 @@ export default class Pong extends Phaser.Scene
   {
 	let distance = Phaser.Math.Distance.Between(1, this.player.y, 1, this.ball.y);
 	let angle = 0;
-	if (distance > 96)
+	if (distance > 128)
+		angle = 60;
+	else if (distance > 96)
 		angle = 45;
 	else if (distance > 64)
 		angle = 30;
