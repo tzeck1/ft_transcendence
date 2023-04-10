@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+//import * as Colyseus from 'colyseus';
 
 import Pong from "../scenes/pong";
 import Start from "../scenes/start";
@@ -26,4 +27,5 @@ const config: Phaser.Types.Core.GameConfig = {
   scene: [Start, Pong, End]
 };
 
+//var client = new Colyseus.Client("ws://127.0.0.1:2567");
 export default new Phaser.Game(config);
