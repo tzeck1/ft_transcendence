@@ -18,6 +18,13 @@ services:
       - '8080:8080'
     command: npm run dev
 
+  colyseus:
+    container_name: colyseus
+    build: ./colyseus-examples
+    ports:
+      - '2567:2567'
+    command: npm run start
+
   db:
     container_name: database
     image: postgres:13
