@@ -1,12 +1,14 @@
-FROM node:14
+FROM node:lts
 
 WORKDIR /app
 
 COPY package*.json ./
+
 RUN npm install
 
+COPY . .
 
-# COPY . .
+COPY vite.config.ts ./
 
 EXPOSE 8080
 
