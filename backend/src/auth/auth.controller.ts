@@ -3,24 +3,31 @@ import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
 import { CustomRequest } from './custom-request.interface';
 
+let userData;
+
 @Controller('auth')
 export class AuthController {
   @Get('api42/callback')
   @UseGuards(AuthGuard('api42'))
   async api42Callback(@Req() req: CustomRequest, @Res() res: Response) {
-    console.log('api42Callback called, req.user:', req.user);
+    // console.log('api42Callback called, req.user:', req.user);
     const user = req.user;
-    console.log("User photos:", user.photos); // Add this line
-    const userData = {
+    // console.log("User photos:", user.photos); // Add this line
+    userData = {
       name: user.displayName,
       avatarUrl: user.photos && user.photos.length > 0 && user.photos[0].value,
     };
     console.log("User data:", userData);
-    const frontendUrl = "http://localhost:8080";
+    const frontendUrl = "http://localhost:8080/profile";
     res.redirect(
-      `${frontendUrl}?name=${encodeURIComponent(userData.name)}&avatarUrl=${encodeURIComponent(userData.avatarUrl)}`
+      `${frontendUrl}`
     );
   }
+
+  @Get('getUserData')
+    async getUserData(@Req() req: CustomRequest): Promise<any> {
+  return userData;
+}
 
   @Get('api42')
   @UseGuards(AuthGuard('api42'))

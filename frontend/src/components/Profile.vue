@@ -28,7 +28,8 @@
   </template>
   
   <script setup lang="ts">
-  import { ref, onMounted, watch } from 'vue';
+	import { ref, onMounted, watch } from 'vue';
+	import axios from 'axios';
 
 	const usernameInput = ref<HTMLInputElement | null>(null);
 	const profilePictureSrc = ref('../assets/profile-picture.png');
@@ -65,8 +66,16 @@
 	}
 	}
   
-  onMounted(() => {
-	// Add your logic to retrieve the initial userName and profilePictureSrc values from URL parameters or other sources here
+  onMounted(async () => {
+	try {
+    const response = await axios.get('http://localhost:3000/auth/getUserData');
+      const data = response.data;
+	//   alert(data.name);
+      userName.value = data.name;
+      profilePictureSrc.value = data.avatarUrl;
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+    }
   });
 
   function highlight() {

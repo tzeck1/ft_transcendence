@@ -125,6 +125,10 @@
 	transform: scale(1.1);
 	cursor: pointer;
 	}
+
+	.auth-intra {
+		margin-top: 10rem;
+	}
 	
 	nav {
 	display: flex;
@@ -304,5 +308,10 @@
 	.intro a {
 		color: white;
 		text-decoration: none;
+	}
+
+	.icon {
+		width: 40px; /* Adjust the size of the logout button accordingly */
+		height: 100%;
 	}
 </style>

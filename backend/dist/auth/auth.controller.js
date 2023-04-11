@@ -15,18 +15,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
 const common_1 = require("@nestjs/common");
 const passport_1 = require("@nestjs/passport");
+let userData;
 let AuthController = class AuthController {
     async api42Callback(req, res) {
-        console.log('api42Callback called, req.user:', req.user);
         const user = req.user;
-        console.log("User photos:", user.photos);
-        const userData = {
+        userData = {
             name: user.displayName,
             avatarUrl: user.photos && user.photos.length > 0 && user.photos[0].value,
         };
         console.log("User data:", userData);
-        const frontendUrl = "http://localhost:8080";
-        res.redirect(`${frontendUrl}?name=${encodeURIComponent(userData.name)}&avatarUrl=${encodeURIComponent(userData.avatarUrl)}`);
+        const frontendUrl = "http://localhost:8080/profile";
+        res.redirect(`${frontendUrl}`);
+    }
+    async getUserData(req) {
+        return userData;
     }
     api42Login() {
         console.log('login called');
@@ -41,6 +43,13 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "api42Callback", null);
+__decorate([
+    (0, common_1.Get)('getUserData'),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "getUserData", null);
 __decorate([
     (0, common_1.Get)('api42'),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('api42')),
