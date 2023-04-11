@@ -18,7 +18,7 @@ const gameServer = new Server({
 })
 
 //register your room handlers;
-//gameServer.define("MyRoom", MyRoom);
+gameServer.define("MyRoom", MyRoom);
 
 //register colyseus monitor AFTER registering your room handlers
 app.use("/colyseus", monitor());
