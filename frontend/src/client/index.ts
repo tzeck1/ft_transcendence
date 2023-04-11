@@ -27,5 +27,4 @@ const config: Phaser.Types.Core.GameConfig = {
   scene: [Start, Pong, End]
 };
 
-var client = new Colyseus.Client("ws://127.0.0.1:2567");
 export default new Phaser.Game(config);

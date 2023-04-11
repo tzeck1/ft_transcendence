@@ -1,4 +1,5 @@
 import Phaser, { Game } from 'phaser';
+import Colyseus, { Client } from 'colyseus_client';
 
 export default class Pong extends Phaser.Scene
 {
@@ -20,6 +21,7 @@ export default class Pong extends Phaser.Scene
 	private ball_trail!: Phaser.GameObjects.Particles.ParticleEmitter;
 	private player_trail!: Phaser.GameObjects.Particles.ParticleEmitter;
 	private enemy_trail!: Phaser.GameObjects.Particles.ParticleEmitter;
+	private client = new Colyseus.Client("ws://127.0.0.1:2567");
 
   constructor()
   {
@@ -79,6 +81,8 @@ export default class Pong extends Phaser.Scene
 	})
 	this.enemy_trail.setMask(this.pattern.createBitmapMask());
 	this.enemy_trail.start();
+
+	this.client.joinOrCreate("test");
   }
 
   update()
