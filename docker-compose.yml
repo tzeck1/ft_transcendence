@@ -13,17 +13,21 @@ services:
 
   frontend:
     container_name: frontend
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: ./frontend.Dockerfile
     ports:
       - '8080:8080'
     command: npm run dev
 
   colyseus:
     container_name: colyseus
-    build: ./colyseus-examples
+    build:
+      context: ./frontend
+      dockerfile: ./gameServer.Dockerfile
     ports:
       - '2567:2567'
-    command: npm run start
+    command: npm run start-server
 
   db:
     container_name: database

@@ -1,17 +1,19 @@
 {
 	"compilerOptions": {
-	  "target": "es2016",
-	  "module": "es6",
-	  "strict": true,
-	  "noImplicitAny": false,
-	  "allowJs": true,
-	  "jsx": "preserve",
-	  "importHelpers": true,
-	  "moduleResolution": "node",
-	  "esModuleInterop": true,
-	  "skipLibCheck": true,
-	  "forceConsistentCasingInFileNames": true,
-	  "outDir": "dist",
+		"target": "es2016",
+		"module": "es6",
+		"strict": true,
+		"noImplicitAny": false,
+		"allowJs": true,
+		"jsx": "preserve",
+		"importHelpers": true,
+		"moduleResolution": "node",
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"outDir": "dist",
 	},
-	"include": ["src"]
-  }
+	"include": [
+		"src"
+	]
+}

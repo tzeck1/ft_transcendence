@@ -2,16 +2,24 @@
   "name": "frontend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
-    "dev": "webpack serve --config webpack.config.js --mode development",
-    "build": "webpack --config webpack.config.js --mode production"
+    "dev": "webpack serve --entry ./src/client/index.ts --config webpack.config.js --mode development",
+    "build": "webpack --config webpack.config.js --mode production",
+    "start-server": "ts-node-dev --respawn --transpile-only src/server/index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "phaser": "^3.55.2"
+    "phaser": "^3.55.2",
+    "@colyseus/arena": "^0.14.24",
+    "@colyseus/monitor": "^0.14.22",
+    "colyseus": "^0.14.23",
+    "cors": "^2.8.5",
+    "express": "^4.16.4",
+    "serve-index": "^1.8.0",
+    "superagent": "^3.8.1"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^11.0.0",
@@ -20,6 +28,14 @@
     "typescript": "^5.0.2",
     "webpack": "^5.61.0",
     "webpack-cli": "^4.9.1",
-    "webpack-dev-server": "^4.3.1"
+    "webpack-dev-server": "^4.3.1",
+    "@colyseus/uwebsockets-transport": "^0.14.24",
+    "@types/cors": "^2.8.6",
+    "@types/express": "^4.17.14",
+    "copyfiles": "^2.4.1",
+    "rimraf": "^2.7.1",
+    "ts-node": "^8.1.0",
+    "ts-node-dev": "^1.0.0-pre.63",
+    "uwebsockets-express": "^1.1.14"
   }
 }
