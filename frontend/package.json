@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "webpack serve --entry ./src/client/index.ts --config webpack.config.js --mode development",
     "build": "webpack --config webpack.config.js --mode production",
-    "start-server": "ts-node-dev --respawn --transpile-only src/server/index.ts"
+    "start-server": "ts-node-dev --project gameServer.tsconfig.json --respawn --transpile-only src/server/index.ts"
   },
   "keywords": [],
   "author": "",
