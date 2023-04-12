@@ -4,6 +4,8 @@ services:
   backend:
     container_name: backend
     build: ./backend
+    depends_on:
+      - db
     ports:
       - '3000:3000'
     volumes:
