@@ -12,7 +12,8 @@
 
 <template>
 	<header>
-		<img src="./assets/logo.png" alt="Logo" class="logo" />
+		<span class="logo">PONG</span>
+		<!-- <img src="./assets/logo.png" alt="Logo" class="logo" /> -->
 		<nav>
 				<div class="nav-buttons">
 						<router-link to="/profile" v-slot="{ navigate, isActive }">
@@ -33,15 +34,20 @@
 </template>
 
 <style global>
-* {
-	margin: 0;
-	padding: 0;
-	box-sizing: border-box;
+	* {
+		margin: 0;
+		padding: 0;
+		box-sizing: border-box;
 	}
 	
 	@font-face {
-	font-family: ibm-3270;
-	src: url('./assets/3270-Regular.ttf') format('truetype');
+		font-family: ibm-3270;
+		src: url('./assets/3270-Regular.ttf') format('truetype');
+	}
+
+	@font-face {
+		font-family: ibm-logo;
+		src: url('./assets/mib.ttf') format('truetype');
 	}
 
 	html, body {
@@ -57,47 +63,47 @@
 	
 	
 	header {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 1rem;
-	flex-shrink: 0;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 1rem;
+		flex-shrink: 0;
 	}
 	
 	.logo {
-		width: 100px;
-		height: 100px;
-		margin-bottom: 1rem;
-		margin-left: 5rem;
+		display: flex;
+		font-family: ibm-logo;
+		font-size: 3rem;
+		margin-left: 3rem;
 	}
 
 	.nav-buttons {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	flex-grow: 1;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		flex-grow: 1;
 	}
 	
 	button {
-	background-color: transparent;
-	color: rgb(255, 255, 255);
-	border: 2px solid rgba(255, 255, 255, 0);
-	border-radius: 25px;
-	padding: 20px 50px;
-	margin: 0 45px;
-	cursor: pointer;
-	outline: none;
-	font-size: 2rem;
-	font-family: 'ibm-3270', monospace;
+		background-color: transparent;
+		color: rgb(255, 255, 255);
+		border: 2px solid rgba(255, 255, 255, 0);
+		border-radius: 25px;
+		padding: 20px 50px;
+		margin: 0 45px;
+		cursor: pointer;
+		outline: none;
+		font-size: 2rem;
+		font-family: 'ibm-3270', monospace;
 	}
 	
 	button:hover {
-	background-color: rgba(255, 255, 255, 0.1);
+		background-color: rgba(255, 255, 255, 0.1);
 	}
 	
 	.active-button {
-	background-color: rgba(255, 255, 255, 0.1);
-}
+		background-color: rgba(255, 255, 255, 0.1);
+	}
 
 	.game-button {
 		border-radius: 35px;
@@ -105,82 +111,85 @@
 	}
 
 	.logout-button {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	width: 100px; /* Adjust the size of the logout button accordingly */
-	height: 100%;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		width: 100px;
+		height: 100%;
 	}
 
 	.logout-button img {
-	display: flex;
+		display: flex;
 		justify-content: center;
 		align-items: center;
-	width: 100px; /* Adjust this value to match the logo width */
-	height: auto;
-	transition: transform 0.3s;
+		width: 100px;
+		height: auto;
+		transition: transform 0.3s;
+		margin-right: 2rem;
 	}
 
 	.logout-button:hover {
-	transform: scale(1.1);
-	cursor: pointer;
+		transform: scale(1.1);
+		cursor: pointer;
 	}
 
 	.auth-intra {
-		margin-top: 10rem;
+		display: inline-flex;
+		align-items: center; 
+		margin-top: 7rem;
 	}
 	
 	nav {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	width: 100%;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		width: 100%;
 	}
 	
 	.sidebar {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	padding: 2rem;
-	width: 20%;
-	min-height: 100%;
-	overflow-y: auto;
-	overflow-x: hidden;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		padding: 2rem;
+		width: 20%;
+		min-height: 100%;
+		overflow-y: auto;
+		overflow-x: hidden;
 	}
 	
 	.profile-picture {
-	width: 200px;
-	height: 200px;
-	border-radius: 50%;
-	margin-top: 2rem;
-	margin-bottom: 2rem;
+		width: 200px;
+		height: 200px;
+		border-radius: 50%;
+		margin-top: 2rem;
+		margin-bottom: 2rem;
 	}
 
 	.rank {
-	width: 60px;
-	height: 60px;
-	margin-top: 2rem;
-	margin-bottom: 1rem;
+		width: 60px;
+		height: 60px;
+		margin-top: 2rem;
+		margin-bottom: 1rem;
 	}
 	
 	.grid {
-	display: grid;
-	grid-template-columns: repeat(2, 1fr);
-	grid-gap: 1rem;
-	width: 80%;
-	padding: 2rem;
-	overflow-y: auto;
-	height: 100%;
+		display: grid;
+		grid-template-columns: repeat(2, 1fr);
+		grid-gap: 1rem;
+		width: 80%;
+		padding: 2rem;
+		overflow-y: auto;
+		height: 100%;
 	}
 	
 	.grid-item {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	background-color: rgba(0, 0, 0, 0.5);
-	border-radius: 25px;
-	padding: 1rem;
-	font-size: 2rem;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		background-color: rgba(0, 0, 0, 0.5);
+		border-radius: 25px;
+		padding: 1rem;
+		font-size: 2rem;
 	}
 	
 	
@@ -192,19 +201,18 @@
 	}
 	
 	@keyframes glowing {
-	0% {
-		text-shadow: 0 0 25px rgb(255, 255, 255);
-	}
-	50% {
-		text-shadow: 0 0 25px rgb(255, 255, 255);
-	}
-	100% {
-		text-shadow: 0 0 25px rgb(255, 255, 255);
-	}
+		0% {
+			text-shadow: 0 0 25px rgb(255, 255, 255);
+		}
+		50% {
+			text-shadow: 0 0 25px rgb(255, 255, 255);
+		}
+		100% {
+			text-shadow: 0 0 25px rgb(255, 255, 255);
+		}
 	}
 	
-	body,
-	body * {
+	body, body * {
 		animation: glowing 3s infinite;
 	}
 
@@ -218,20 +226,20 @@
 		display: flex;
 		justify-content: center;
 		width: 100%;
-}
+	}
 
-.username-wrapper {
+	.username-wrapper {
 		display: inline-flex;
 		position: relative;
-}
+	}
 
-#username span {
+	#username span {
 		position: relative;
 		z-index: 1;
-}
+	}
 
-#toggle-username {
-	font-family: 'ibm-3270', monospace;
+	#toggle-username {
+		font-family: 'ibm-3270', monospace;
 		position: absolute;
 		left: 110%;
 		top: 50%;
@@ -243,14 +251,14 @@
 		cursor: pointer;
 		outline: none;
 		padding: 5px;
-		margin-left: 5px; /* Adjust this value based on the desired distance from the username */
-}
+		margin-left: 5px;
+	}
 
-#toggle-username:hover {
+	#toggle-username:hover {
 		background-color: rgba(255, 255, 255, 0.1);
-}
+	}
 
-#edit-username {
+	#edit-username {
 		font-family: 'ibm-3270', monospace;
 		font-size: 2rem;
 		background-color: transparent;
@@ -262,29 +270,29 @@
 		width: 1ch;
 		text-align: center;
 		animation: glowing 3s infinite;
-}
+	}
 
-.profile-picture-drop-area {
-    position: relative;
-  }
+	.profile-picture-drop-area {
+		position: relative;
+	}
 
-  .profile-picture-drop-area.highlight .profile-picture {
-    opacity: 0.5;
-  }
+	.profile-picture-drop-area.highlight .profile-picture {
+		opacity: 0.5;
+	}
 
-  .drop-icon {
-    display: none;
-    font-size: 15rem;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: white;
-  }
+	.drop-icon {
+		display: none;
+		font-size: 15rem;
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		color: white;
+	}
 
-  .profile-picture-drop-area.highlight .drop-icon {
-    display: block;
-  }
+	.profile-picture-drop-area.highlight .drop-icon {
+		display: block;
+	}
 	
 	.intro {
 		display: flex;
@@ -311,7 +319,23 @@
 	}
 
 	.icon {
-		width: 40px; /* Adjust the size of the logout button accordingly */
+		width: 40px;
+		height: 100%;
+		margin-left: 1rem;
+	}
+
+	.intro_game {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		margin-top: 5rem;
+		width: 30rem;
 		height: 100%;
 	}
+
+	.intro-ascii {
+		/* font-family: 'ibm-3270'; */
+		font-size: 1.2rem;
+	}
+
 </style>

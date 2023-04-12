@@ -9,16 +9,22 @@
 			<a href="https://github.com/eschirni" target="_blank">eschirni</a>
 		</p>
 		<button class="auth-intra" @click="auth_intra">
-			<img src="../assets/42_Logo.ico" alt="Icon" class="icon" /> Authenticate with 42 Intra
+			Authenticate with
+			<img src="../assets/42_Logo.png" alt="Icon" class="icon" />
 		</button>
+		<IntroGame></IntroGame>
 	</div>
 </template>
 
 <script lang="ts">
 	import { defineComponent } from 'vue'
+	import IntroGame from "./IntroGame.vue"
 
 	export default defineComponent({
 	name: 'Intro',
+	components: {
+		IntroGame,
+	},
 	setup() {
 		// Your intro.js code goes here
 	},
