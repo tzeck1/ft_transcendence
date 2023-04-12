@@ -90,7 +90,6 @@
 		border: 2px solid rgba(255, 255, 255, 0);
 		border-radius: 25px;
 		padding: 20px 50px;
-		margin: 0 45px;
 		cursor: pointer;
 		outline: none;
 		font-size: 2rem;
