@@ -31,6 +31,8 @@ services:
       POSTGRES_DB: mydatabase
     volumes:
       - 'v_database:/var/lib/postgresql/data'
+    ports:
+      - "5432:5432"
 
 volumes:
   v_database:

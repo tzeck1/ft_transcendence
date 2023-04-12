@@ -13,18 +13,20 @@ exports.Api42Strategy = void 0;
 const common_1 = require("@nestjs/common");
 const passport_1 = require("@nestjs/passport");
 const passport_oauth2_1 = require("passport-oauth2");
+const user_service_1 = require("./user/user.service");
 const axios_1 = require("axios");
 let Api42Strategy = class Api42Strategy extends (0, passport_1.PassportStrategy)(passport_oauth2_1.Strategy, 'api42') {
-    constructor() {
+    constructor(users) {
         const options = {
-            authorizationURL: 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-8b9da2df9f37fabf5fe6330ad83da6cf15f65455a8add2bc5d0ebda92eaf4b88&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fapi42%2Fcallback&response_type=code',
+            authorizationURL: 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-8b9da2df9f37fabf5fe6330ad83da6cf15f65455a8add2bc5d0ebda92eaf4b88&redirect_uri=http%3A%2F%2F10.11.4.27%3A3000%2Fauth%2Fapi42%2Fcallback&response_type=code',
             tokenURL: 'https://api.intra.42.fr/oauth/token',
             clientID: process.env.API_42_CLIENT_ID,
             clientSecret: process.env.API_42_CLIENT_SECRET,
-            callbackURL: process.env.API_42_CALLBACK_URL || 'http://localhost:3000/auth/api42/callback',
+            callbackURL: process.env.API_42_CALLBACK_URL || 'http://10.11.4.27:3000/auth/api42/callback',
             scope: ['public profile'],
         };
         super(options);
+        this.users = users;
     }
     async validate(accessToken, refreshToken, profile, done) {
         try {
@@ -36,6 +38,7 @@ let Api42Strategy = class Api42Strategy extends (0, passport_1.PassportStrategy)
                 displayName: api42User.login,
                 photos: api42User.image.link ? [{ value: api42User.image.link }] : [],
             };
+            this.users.createNewUser(userData.displayName);
             done(null, userData);
         }
         catch (error) {
@@ -46,7 +49,7 @@ let Api42Strategy = class Api42Strategy extends (0, passport_1.PassportStrategy)
 };
 Api42Strategy = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [])
+    __metadata("design:paramtypes", [user_service_1.Users])
 ], Api42Strategy);
 exports.Api42Strategy = Api42Strategy;
 //# sourceMappingURL=42-api.strategy.js.map
