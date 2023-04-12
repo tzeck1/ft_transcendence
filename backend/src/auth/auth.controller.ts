@@ -18,7 +18,7 @@ export class AuthController {
       avatarUrl: user.photos && user.photos.length > 0 && user.photos[0].value,
     };
     console.log("User data:", userData);
-    const frontendUrl = "http://10.11.4.27:8080/profile";
+    const frontendUrl = "http://localhost:8080/profile";
     res.redirect(
       `${frontendUrl}`
     );
