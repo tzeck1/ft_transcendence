@@ -2,13 +2,13 @@
 	<div class="profile">
 		<div class="sidebar">
 			<div class="profile-picture-drop-area" @dragenter.prevent.stop="highlight" @dragover.prevent.stop="highlight" @dragleave.prevent.stop="unhighlight" @drop.prevent.stop="handleDrop">
-			<img id="profile-picture" class="profile-picture" :src="profilePictureSrc" alt="Profile picture" />
+			<img id="profile-picture" class="profile-picture" :src="profile_picture" alt="Profile picture" />
 			<div class="drop-icon" v-show="showDropIcon">&#x21E3;</div>
 		</div>
 		<div class="name-container">
 		  <div class="username-wrapper">
-			<h1 v-show="!isEditing">{{ userName }}</h1>
-			<input ref="usernameInput" v-show="isEditing" v-model="userName" @input="resizeInput" type="text" id="edit-username"/>
+			<h1 v-show="!isEditing">{{ username }}</h1>
+			<input ref="usernameInput" v-show="isEditing" v-model="username" @input="resizeInput" type="text" id="edit-username"/>
 			<button @click="toggleEditing" id="toggle-username">
 		  		<span v-show="!isEditing">&#x270E;</span>
 		  		<span v-show="isEditing">&#x2713;</span>
@@ -30,10 +30,13 @@
   <script setup lang="ts">
 	import { ref, onMounted, watch } from 'vue';
 	import axios from 'axios';
+	import { useUserStore } from '../stores/UserStore';
+	import { storeToRefs } from 'pinia';
 
+	const store = useUserStore();
+	const { username } = storeToRefs(store);
+	const { profile_picture } = storeToRefs(store);
 	const usernameInput = ref<HTMLInputElement | null>(null);
-	const profilePictureSrc = ref('../assets/profile-picture.png');
-	const userName = ref('Totoro');
 	const isEditing = ref(false);
 	const showDropIcon = ref(false);
 
@@ -62,7 +65,7 @@
 	function resizeInput() {
 	if (usernameInput.value) {
 		usernameInput.value.style.width =
-		(userName.value.length + 1) + "ch";
+		(username.value.length + 1) + "ch";
 	}
 	}
   
@@ -70,9 +73,11 @@
 	try {
     const response = await axios.get('http://localhost:3000/auth/getUserData');
       const data = response.data;
+	  store.setUsername(data.name);
+	  store.setProfilePicture(data.avatarUrl);
 	//   alert(data.name);
-      userName.value = data.name;
-      profilePictureSrc.value = data.avatarUrl;
+    //   username.value = data.name;
+    //   profile_picture.value = data.avatarUrl;
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
@@ -99,7 +104,8 @@
 	  if (file && file.type.startsWith('image/')) {
 		const reader = new FileReader();
 		reader.onload = function (event) {
-		  profilePictureSrc.value = event.target!.result as string;
+			store.setProfilePicture(event.target!.result as string);
+		//   profile_picture.value = event.target!.result as string;
 		};
 		reader.readAsDataURL(file);
 	  } else {

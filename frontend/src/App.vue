@@ -1,6 +1,7 @@
 <script setup lang="ts">
 	import { ref } from 'vue';
 	import { useRouter } from 'vue-router';
+	import { useUserStore } from './stores/UserStore';
 
 	const router = useRouter();
 
@@ -8,6 +9,7 @@
 		router.push('/');
 	}
 
+	const store = useUserStore();
 </script>
 
 <template>
