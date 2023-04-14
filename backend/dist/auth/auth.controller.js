@@ -23,7 +23,6 @@ let AuthController = class AuthController {
             name: user.displayName,
             avatarUrl: user.photos && user.photos.length > 0 && user.photos[0].value,
         };
-        console.log("User data:", userData);
         const frontendUrl = "http://localhost:8080/profile";
         res.redirect(`${frontendUrl}`);
     }
@@ -31,7 +30,7 @@ let AuthController = class AuthController {
         return userData;
     }
     api42Login() {
-        console.log('login called');
+        console.log('Api42Login called');
     }
 };
 __decorate([

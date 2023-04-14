@@ -13,7 +13,7 @@ exports.Api42Strategy = void 0;
 const common_1 = require("@nestjs/common");
 const passport_1 = require("@nestjs/passport");
 const passport_oauth2_1 = require("passport-oauth2");
-const user_service_1 = require("./user/user.service");
+const user_service_1 = require("../user/user.service");
 const axios_1 = require("axios");
 let Api42Strategy = class Api42Strategy extends (0, passport_1.PassportStrategy)(passport_oauth2_1.Strategy, 'api42') {
     constructor(users) {
@@ -22,13 +22,13 @@ let Api42Strategy = class Api42Strategy extends (0, passport_1.PassportStrategy)
             tokenURL: 'https://api.intra.42.fr/oauth/token',
             clientID: process.env.API_42_CLIENT_ID,
             clientSecret: process.env.API_42_CLIENT_SECRET,
-            callbackURL: process.env.API_42_CALLBACK_URL || 'http://localhost:3000/auth/api42/callback',
+            callbackURL: process.env.API_42_CALLBACK_URL,
             scope: ['public profile'],
         };
         super(options);
         this.users = users;
     }
-    async validate(accessToken, refreshToken, profile, done) {
+    async validate(accessToken, refreshToken, profile) {
         try {
             const response = await axios_1.default.get('https://api.intra.42.fr/v2/me', {
                 headers: { Authorization: `Bearer ${accessToken}` },
@@ -39,11 +39,10 @@ let Api42Strategy = class Api42Strategy extends (0, passport_1.PassportStrategy)
                 photos: api42User.image.link ? [{ value: api42User.image.link }] : [],
             };
             this.users.createNewUser(userData.displayName);
-            done(null, userData);
+            return (userData);
         }
         catch (error) {
             console.error('Error fetching user data from 42 API:', error);
-            done(error);
         }
     }
 };
@@ -52,4 +51,4 @@ Api42Strategy = __decorate([
     __metadata("design:paramtypes", [user_service_1.Users])
 ], Api42Strategy);
 exports.Api42Strategy = Api42Strategy;
-//# sourceMappingURL=42-api.strategy.js.map
+//# sourceMappingURL=42api.strategy.js.map
