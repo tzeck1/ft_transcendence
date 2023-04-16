@@ -578,17 +578,16 @@
 </script>
 
 <style scoped>
-	.intro_game {
+	intro_game {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		margin-top: 5rem;
+		margin-top: 7vw;
 		width: 30rem;
 		height: 100%;
 	}
 
 	.intro-ascii {
-		/* font-family: 'ibm-3270'; */
-		font-size: 1.2rem;
+		font-size: 1vw;
 	}
 </style>

@@ -61,6 +61,7 @@
 		height: 100%;
 		display: flex;
 		flex-direction: column;
+		font-size: 1vw;
 	}
 	
 	header {
@@ -75,7 +76,7 @@
 		display: flex;
 		font-family: ibm-logo;
 		font-size: 3rem;
-		margin-left: 3rem;
+		margin-left: 3vw;
 	}
 
 	.nav-buttons {
@@ -88,12 +89,12 @@
 	button {
 		background-color: transparent;
 		color: rgb(255, 255, 255);
-		border: 2px solid rgba(255, 255, 255, 0);
+		border: 1px solid rgba(255, 255, 255, 0);
 		border-radius: 25px;
-		padding: 20px 50px;
+		padding: 2vw 5vw;
 		cursor: pointer;
 		outline: none;
-		font-size: 2rem;
+		font-size: 2vw;
 		font-family: 'ibm-3270', monospace;
 	}
 	
@@ -106,8 +107,7 @@
 	}
 
 	.game-button {
-		border-radius: 35px;
-		font-size: 3.5rem;
+		font-size: 3.5vw;
 	}
 
 	.logout-button {
@@ -125,7 +125,7 @@
 		width: 100px;
 		height: auto;
 		transition: transform 0.3s;
-		margin-right: 2rem;
+		margin-right: 2vw;
 	}
 
 	.logout-button:hover {
@@ -159,7 +159,33 @@
 	.icon {
 		width: 40px;
 		height: 100%;
-		margin-left: 1rem;
+		margin-left: 1vw;
 	}
 
+	@media (max-width: 768px) {
+		html, body {
+			font-size: 2vw;
+		}
+
+		button {
+			padding: 3vw 6vw;
+			font-size: 3vw;
+		}
+		
+		.game-button {
+			font-size: 5vw;
+		}
+		
+		.intro h1 {
+			font-size: 6vw;
+		}
+		
+		.intro p {
+			font-size: 3vw;
+		}
+
+		.intro-ascii {
+			font-size: 3vw;
+		}
+	}
 </style>

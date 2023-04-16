@@ -120,6 +120,7 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+		justify-content: center;
 		padding: 2rem;
 		width: 20%;
 		min-height: 100%;
@@ -128,18 +129,18 @@
 	}
 
 	.profile-picture {
-		width: 200px;
-		height: 200px;
+		width: 15vw;
+		height: 15vw;
 		border-radius: 50%;
-		margin-top: 2rem;
-		margin-bottom: 2rem;
+		margin-top: 2vw;
+		margin-bottom: 2vw;
 	}
 
 	.rank {
-		width: 60px;
-		height: 60px;
-		margin-top: 2rem;
-		margin-bottom: 1rem;
+		width: 5vw;
+		height: 5vw;
+		margin-top: 2vw;
+		margin-bottom: 1vw;
 	}
 
 	.grid {
@@ -159,7 +160,7 @@
 		background-color: rgba(0, 0, 0, 0.5);
 		border-radius: 25px;
 		padding: 1rem;
-		font-size: 2rem;
+		font-size: 1.5vw;
 	}
 
 	.profile {
@@ -171,8 +172,6 @@
 
 	.two-factor-button {
 		margin-top: auto;
-		margin-bottom: 1rem;
-		margin-left: 2rem;
 	}
 	
 	.name-container {
@@ -200,12 +199,13 @@
 		background-color: transparent;
 		color: white;
 		border: none;
-		font-size: 2.5rem;
+		font-size: 2.5vw;
 		cursor: pointer;
 		outline: none;
 		padding: 5px;
-		margin-left: 5px;
+		margin-left: 1vw;
 	}
+
 
 	#toggle-username:hover {
 		background-color: rgba(255, 255, 255, 0.1);
@@ -213,7 +213,7 @@
 
 	#edit-username {
 		font-family: 'ibm-3270', monospace;
-		font-size: 2rem;
+		font-size: 2vw;
 		background-color: transparent;
 		border: none;
 		color: white;
