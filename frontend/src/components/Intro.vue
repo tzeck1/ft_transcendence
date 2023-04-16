@@ -35,3 +35,35 @@
 	},
 	})
 </script>
+
+<style scoped>
+	.auth-intra {
+		display: inline-flex;
+		align-items: center; 
+		margin-top: 7rem;
+	}
+
+	.intro {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		height: 100%;
+		margin-top: 5rem;;
+	}
+	
+	.intro h1 {
+		font-size: 4rem;
+		margin-bottom: 1rem;
+	}
+	
+	.intro p {
+		font-size: 1.5rem;
+		margin-top: 2rem;
+	}
+	
+	.intro a {
+		color: white;
+		text-decoration: none;
+	}
+</style>

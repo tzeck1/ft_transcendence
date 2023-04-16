@@ -1,16 +1,16 @@
 <template>
 	<div class="intro_game">
-	  <pre class="intro-ascii" v-html="asciiFrames[currentFrame]"></pre>
+		<pre class="intro-ascii" v-html="asciiFrames[currentFrame]"></pre>
 	</div>
-  </template>
-  
-  <script lang="ts">
-  import { defineComponent, ref, computed } from "vue";
-  
-  export default defineComponent({
-	name: "IntroGame",
-	setup() {
-		const asciiFrames = [
+</template>
+
+<script lang="ts">
+	import { defineComponent, ref, computed } from "vue";
+
+	export default defineComponent({
+		name: "IntroGame",
+		setup() {
+			const asciiFrames = [
 		// Frame 1
 		`             ,----------------,              ,---------,
         ,-----------------------,          ,"        ,"|
@@ -555,31 +555,40 @@
 /_==__==========__==_ooo__ooo=_/'   /___________,"      
 \`-----------------------------'                         `
 	];
-  
-	  const currentFrame = ref(0);
-  
-	  const animate = () => {
-  if (currentFrame.value === asciiFrames.length - 1) {
-    setTimeout(() => {
-      currentFrame.value = 0;
-    }, 1000); // 1-second pause before restarting the animation
-  } else {
-    currentFrame.value = (currentFrame.value + 1) % asciiFrames.length;
-  }
-};
-  
-	  const startAnimation = () => {
-		setInterval(animate, 250); // Set the animation interval in milliseconds
-	  };
-  
-	  return {
-		asciiFrames,
-		currentFrame,
-		startAnimation,
-	  };
+
+	const currentFrame = ref(0);
+
+	const animate = () => {
+		if (currentFrame.value === asciiFrames.length - 1) {
+			setTimeout(() => { currentFrame.value = 0; }, 1000); // 1-second pause before restarting the animation
+		}
+		else {
+			currentFrame.value = (currentFrame.value + 1) % asciiFrames.length;
+		}
+	};
+
+	const startAnimation = () => { setInterval(animate, 250); };
+
+	return { asciiFrames, currentFrame, startAnimation };
 	},
 	mounted() {
-	  this.startAnimation();
+		this.startAnimation();
 	},
-  });
-  </script>
+	});
+</script>
+
+<style scoped>
+	.intro_game {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		margin-top: 5rem;
+		width: 30rem;
+		height: 100%;
+	}
+
+	.intro-ascii {
+		/* font-family: 'ibm-3270'; */
+		font-size: 1.2rem;
+	}
+</style>

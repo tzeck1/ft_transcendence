@@ -63,7 +63,6 @@
 		flex-direction: column;
 	}
 	
-	
 	header {
 		display: flex;
 		justify-content: space-between;
@@ -133,12 +132,6 @@
 		transform: scale(1.1);
 		cursor: pointer;
 	}
-
-	.auth-intra {
-		display: inline-flex;
-		align-items: center; 
-		margin-top: 7rem;
-	}
 	
 	nav {
 		display: flex;
@@ -146,61 +139,7 @@
 		align-items: center;
 		width: 100%;
 	}
-	
-	.sidebar {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		padding: 2rem;
-		width: 20%;
-		min-height: 100%;
-		overflow-y: auto;
-		overflow-x: hidden;
-	}
-	
-	.profile-picture {
-		width: 200px;
-		height: 200px;
-		border-radius: 50%;
-		margin-top: 2rem;
-		margin-bottom: 2rem;
-	}
 
-	.rank {
-		width: 60px;
-		height: 60px;
-		margin-top: 2rem;
-		margin-bottom: 1rem;
-	}
-	
-	.grid {
-		display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		grid-gap: 1rem;
-		width: 80%;
-		padding: 2rem;
-		overflow-y: auto;
-		height: 100%;
-	}
-	
-	.grid-item {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		background-color: rgba(0, 0, 0, 0.5);
-		border-radius: 25px;
-		padding: 1rem;
-		font-size: 2rem;
-	}
-	
-	
-	.profile {
-		display: flex;
-		flex-grow: 1;
-		flex-shrink: 0;
-		overflow: hidden;
-	}
-	
 	@keyframes glowing {
 		0% {
 			text-shadow: 0 0 25px rgb(255, 255, 255);
@@ -217,126 +156,10 @@
 		animation: glowing 3s infinite;
 	}
 
-	.two-factor-button {
-		margin-top: auto;
-		margin-bottom: 1rem;
-		margin-left: 2rem;
-	}
-	
-	.name-container {
-		display: flex;
-		justify-content: center;
-		width: 100%;
-	}
-
-	.username-wrapper {
-		display: inline-flex;
-		position: relative;
-	}
-
-	#username span {
-		position: relative;
-		z-index: 1;
-	}
-
-	#toggle-username {
-		font-family: 'ibm-3270', monospace;
-		position: absolute;
-		left: 110%;
-		top: 50%;
-		transform: translateY(-50%);
-		background-color: transparent;
-		color: white;
-		border: none;
-		font-size: 2.5rem;
-		cursor: pointer;
-		outline: none;
-		padding: 5px;
-		margin-left: 5px;
-	}
-
-	#toggle-username:hover {
-		background-color: rgba(255, 255, 255, 0.1);
-	}
-
-	#edit-username {
-		font-family: 'ibm-3270', monospace;
-		font-size: 2rem;
-		background-color: transparent;
-		border: none;
-		color: white;
-		outline: none;
-		padding: 0;
-		margin: 0;
-		width: 1ch;
-		text-align: center;
-		animation: glowing 3s infinite;
-	}
-
-	.profile-picture-drop-area {
-		position: relative;
-	}
-
-	.profile-picture-drop-area.highlight .profile-picture {
-		opacity: 0.5;
-	}
-
-	.drop-icon {
-		display: none;
-		font-size: 15rem;
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		color: white;
-	}
-
-	.profile-picture-drop-area.highlight .drop-icon {
-		display: block;
-	}
-	
-	.intro {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		height: 100%;
-		margin-top: 5rem;;
-	}
-	
-	.intro h1 {
-		font-size: 4rem;
-		margin-bottom: 1rem;
-	}
-	
-	.intro p {
-		font-size: 1.5rem;
-		margin-top: 2rem;
-	}
-	
-	.intro a {
-		color: white;
-		text-decoration: none;
-	}
-
 	.icon {
 		width: 40px;
 		height: 100%;
 		margin-left: 1rem;
-	}
-
-	.intro_game {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		margin-top: 5rem;
-		width: 30rem;
-		height: 100%;
-	}
-
-	.intro-ascii {
-		/* font-family: 'ibm-3270'; */
-		font-size: 1.2rem;
 	}
 
 </style>
