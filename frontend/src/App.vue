@@ -61,7 +61,7 @@
 		height: 100%;
 		display: flex;
 		flex-direction: column;
-		font-size: 1vw;
+		font-size: 1vh;
 	}
 	
 	header {
@@ -91,10 +91,10 @@
 		color: rgb(255, 255, 255);
 		border: 1px solid rgba(255, 255, 255, 0);
 		border-radius: 25px;
-		padding: 2vw 5vw;
+		padding: 2vh 5vh;
 		cursor: pointer;
 		outline: none;
-		font-size: 2vw;
+		font-size: 2vh;
 		font-family: 'ibm-3270', monospace;
 	}
 	
@@ -107,7 +107,9 @@
 	}
 
 	.game-button {
-		font-size: 3.5vw;
+		margin-left: 2vw;
+		margin-right: 2vw;
+		font-size: 3.5vh;
 	}
 
 	.logout-button {
@@ -159,33 +161,33 @@
 	.icon {
 		width: 40px;
 		height: 100%;
-		margin-left: 1vw;
+		margin-left: 1vh;
 	}
 
 	@media (max-width: 768px) {
 		html, body {
-			font-size: 2vw;
+			font-size: 2vh;
 		}
 
 		button {
-			padding: 3vw 6vw;
-			font-size: 3vw;
+			padding: 3vh 6vh;
+			font-size: 3vh;
 		}
 		
 		.game-button {
-			font-size: 5vw;
+			font-size: 5vh;
 		}
 		
 		.intro h1 {
-			font-size: 6vw;
+			font-size: 6vh;
 		}
 		
 		.intro p {
-			font-size: 3vw;
+			font-size: 3vh;
 		}
 
 		.intro-ascii {
-			font-size: 3vw;
+			font-size: 3vh;
 		}
 	}
 </style>

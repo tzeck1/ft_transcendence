@@ -40,8 +40,8 @@
 	.auth-intra {
 		display: inline-flex;
 		align-items: center; 
-		margin-top: 2vw;
-		margin-bottom: 2vw;
+		margin-top: 8vh;
+		margin-bottom: 2vh;
 	}
 
 	.intro {
@@ -50,17 +50,17 @@
 		justify-content: center;
 		align-items: center;
 		height: 100%;
-		margin-top: 5vw;
+		margin-top: 5vh;
 	}
 
 	.intro h1 {
-		font-size: 4vw;
-		/* margin-top: 1vw; */
+		font-size: 4vh;
+		/* margin-top: 1vh; */
 	}
 
 	.intro p {
-		font-size: 1.5vw;
-		margin-top: 2vw;
+		font-size: 1.5vh;
+		margin-top: 2vh;
 	}
 	
 	.intro a {

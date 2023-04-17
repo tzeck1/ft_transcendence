@@ -582,12 +582,12 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		margin-top: 7vw;
 		width: 30rem;
 		height: 100%;
 	}
 
 	.intro-ascii {
-		font-size: 1vw;
+    margin-top: 7vh;
+		font-size: 1vh;
 	}
 </style>
