@@ -9,6 +9,7 @@ export declare class Users {
     }, never, false>;
     createNewUser(name: string): Promise<void>;
     getUsername(id: number): Promise<string>;
+    getUsernameByIntra(intra_name: string): Promise<string>;
     getIntraName(id: number): Promise<string>;
     getId(intra_name: string): Promise<string>;
     setUsername(id: number, new_username: string): Promise<void>;

@@ -5,6 +5,7 @@ import { Users } from '../user/user.service';
 import axios from 'axios';
 import fetch from 'node-fetch';
 import { User } from './user.type';
+import { AuthController } from './auth.controller';
 
 @Injectable()
 export class Api42Strategy extends PassportStrategy(Strategy, 'api42') {
@@ -17,7 +18,6 @@ export class Api42Strategy extends PassportStrategy(Strategy, 'api42') {
 			callbackURL: process.env.API_42_CALLBACK_URL,
 			scope: ['public profile'],
 		};
-
 		super(options);
 	}
 

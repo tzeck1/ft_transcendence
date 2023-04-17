@@ -34,6 +34,11 @@ export class Users {
     return usersEntry.username;
   }
 
+  async getUsernameByIntra(intra_name: string): Promise<string> {
+    const usersEntry = await this.prisma.users.findUnique( {where: {intra_name: intra_name}} );
+    return usersEntry.username;
+  }
+
   async getIntraName(id: number): Promise<string> {
     const usersEntry = await this.prisma.users.findUnique( {where: {id: id}} );
     return usersEntry.intra_name;

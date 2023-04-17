@@ -15,22 +15,30 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthController = void 0;
 const common_1 = require("@nestjs/common");
 const passport_1 = require("@nestjs/passport");
+const user_service_1 = require("../user/user.service");
 let userData;
 let AuthController = class AuthController {
+    constructor(users) {
+        this.users = users;
+    }
     async api42Callback(req, res) {
         const user = req.user;
         userData = {
             name: user.displayName,
             avatarUrl: user.photos && user.photos.length > 0 && user.photos[0].value,
         };
-        const frontendUrl = "http://localhost:8080/profile";
-        res.redirect(`${frontendUrl}`);
+        const username = await this.users.getUsernameByIntra(req.user.displayName);
+        const frontendUrl = `http://localhost:8080/profile?${username}`;
+        res.cookie('username', JSON.stringify(username), { httpOnly: false });
+        res.redirect(frontendUrl);
     }
     async getUserData(req) {
         return userData;
     }
-    api42Login() {
+    api42Login(res) {
         console.log('Api42Login called');
+        const authorizationURL = 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-8b9da2df9f37fabf5fe6330ad83da6cf15f65455a8add2bc5d0ebda92eaf4b88&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fapi42%2Fcallback&response_type=code';
+        res.json({ url: authorizationURL });
     }
 };
 __decorate([
@@ -51,13 +59,14 @@ __decorate([
 ], AuthController.prototype, "getUserData", null);
 __decorate([
     (0, common_1.Get)('api42'),
-    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('api42')),
+    __param(0, (0, common_1.Res)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", []),
+    __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "api42Login", null);
 AuthController = __decorate([
-    (0, common_1.Controller)('auth')
+    (0, common_1.Controller)('auth'),
+    __metadata("design:paramtypes", [user_service_1.Users])
 ], AuthController);
 exports.AuthController = AuthController;
 //# sourceMappingURL=auth.controller.js.map

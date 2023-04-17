@@ -37,6 +37,10 @@ let Users = class Users {
         const usersEntry = await this.prisma.users.findUnique({ where: { id: id } });
         return usersEntry.username;
     }
+    async getUsernameByIntra(intra_name) {
+        const usersEntry = await this.prisma.users.findUnique({ where: { intra_name: intra_name } });
+        return usersEntry.username;
+    }
     async getIntraName(id) {
         const usersEntry = await this.prisma.users.findUnique({ where: { id: id } });
         return usersEntry.intra_name;

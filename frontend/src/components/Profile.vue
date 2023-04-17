@@ -73,7 +73,7 @@
 	try {
     const response = await axios.get('http://localhost:3000/auth/getUserData');
       const data = response.data;
-	  store.setUsername(data.name);
+	//   store.setUsername(data.name);
 	  store.setProfilePicture(data.avatarUrl);
 	//   alert(data.name);
     //   username.value = data.name;
