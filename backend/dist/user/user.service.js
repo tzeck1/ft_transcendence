@@ -60,6 +60,12 @@ let Users = class Users {
             data: { username: new_username },
         });
     }
+    async setAvatar(intra, picture) {
+        const updateUser = await this.prisma.users.update({
+            where: { intra_name: intra },
+            data: { profile_picture: picture },
+        });
+    }
 };
 Users = __decorate([
     (0, common_1.Injectable)()

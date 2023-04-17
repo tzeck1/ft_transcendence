@@ -62,5 +62,10 @@ export class Users {
     });
   }
 
-  
+  async setAvatar(intra: string, picture: string) {
+    const updateUser = await this.prisma.users.update({
+        where: {intra_name: intra},
+        data:  {profile_picture: picture},
+    });
+  }
 }

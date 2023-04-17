@@ -29,7 +29,7 @@
   
   <script setup lang="ts">
 	import { ref, onMounted, watch } from 'vue';
-	import axios from 'axios';
+	import axios, { HttpStatusCode } from 'axios';
 	import { useUserStore } from '../stores/UserStore';
 	import { storeToRefs } from 'pinia';
 
@@ -113,6 +113,13 @@
 		const reader = new FileReader();
 		reader.onload = function (event) {
 			store.setProfilePicture(event.target!.result as string);
+			axios.post('http://localhost:3000/users/setAvatar', { intra: store.intra, picture: store.profile_picture });
+			// .then(function (response) {
+			// 	alert(response);
+			// })
+			// .catch(function (error) {
+			// 	alert(error);
+			// })
 		};
 		reader.readAsDataURL(file);
 	  } else {
