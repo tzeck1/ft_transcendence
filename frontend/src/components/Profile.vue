@@ -80,10 +80,11 @@
   
   onMounted(async () => {
 	try {
-		if (!store.username)
-			store.setUsername(getUsernameFromCookie());
-		const response = await axios.get(`http://localhost:3000/auth/getUserData?username=${store.username}`);
+		if (!store.intra)
+			store.setIntra(getUsernameFromCookie());
+		const response = await axios.get(`http://localhost:3000/auth/getUserData?intra=${store.intra}`);
 		const data = response.data;
+		store.setUsername(data.username);
 		store.setProfilePicture(data.avatarUrl);
     } catch (error) {
       console.error('Error fetching user data:', error);
@@ -112,7 +113,6 @@
 		const reader = new FileReader();
 		reader.onload = function (event) {
 			store.setProfilePicture(event.target!.result as string);
-		//   profile_picture.value = event.target!.result as string;
 		};
 		reader.readAsDataURL(file);
 	  } else {

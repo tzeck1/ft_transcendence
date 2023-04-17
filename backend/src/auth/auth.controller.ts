@@ -18,10 +18,10 @@ export class AuthController {
   }
 
   @Get('getUserData')
-    async getUserData(@Query('username') username: string): Promise<any> {
+    async getUserData(@Query('intra') intra: string): Promise<any> {
       const userData = {
-        name: await this.users.getUsernameByIntra(username),
-        avatarUrl: await this.users.getAvatarByIntra(username),
+        username: await this.users.getUsernameByIntra(intra),
+        avatarUrl: await this.users.getAvatarByIntra(intra),
       }
       return userData;
 }

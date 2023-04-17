@@ -26,10 +26,10 @@ let AuthController = class AuthController {
         res.cookie('username', JSON.stringify(username), { httpOnly: false });
         res.redirect(frontendUrl);
     }
-    async getUserData(username) {
+    async getUserData(intra) {
         const userData = {
-            name: await this.users.getUsernameByIntra(username),
-            avatarUrl: await this.users.getAvatarByIntra(username),
+            username: await this.users.getUsernameByIntra(intra),
+            avatarUrl: await this.users.getAvatarByIntra(intra),
         };
         return userData;
     }
@@ -50,7 +50,7 @@ __decorate([
 ], AuthController.prototype, "api42Callback", null);
 __decorate([
     (0, common_1.Get)('getUserData'),
-    __param(0, (0, common_1.Query)('username')),
+    __param(0, (0, common_1.Query)('intra')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
