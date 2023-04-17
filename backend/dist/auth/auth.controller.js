@@ -27,7 +27,7 @@ let AuthController = class AuthController {
             name: user.displayName,
             avatarUrl: user.photos && user.photos.length > 0 && user.photos[0].value,
         };
-        const username = await this.users.getUsernameByIntra(req.user.displayName);
+        const username = req.user.displayName;
         const frontendUrl = `http://localhost:8080/profile?${username}`;
         res.cookie('username', JSON.stringify(username), { httpOnly: false });
         res.redirect(frontendUrl);

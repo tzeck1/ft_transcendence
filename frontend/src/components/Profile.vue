@@ -47,11 +47,11 @@
 	});
 
 	function startEditing() {
-	isEditing.value = true;
+		isEditing.value = true;
 	}
 
 	function stopEditing() {
-	isEditing.value = false;
+		isEditing.value = false;
   	}
   
 	function toggleEditing() {
@@ -64,20 +64,27 @@
 
 	function resizeInput() {
 	if (usernameInput.value) {
-		usernameInput.value.style.width =
-		(username.value.length + 1) + "ch";
+		usernameInput.value.style.width = (username.value.length + 1) + "ch";
 	}
 	}
+
+	const getUsernameFromCookie = () => {
+        const cookie = document.cookie.split(';').find(cookie => cookie.trim().startsWith('username='));
+        if (cookie) {
+          const usernameJson = cookie.split('=')[1];
+          const username = JSON.parse(decodeURIComponent(usernameJson));
+          return username;
+        }
+        return null;
+      };
   
   onMounted(async () => {
 	try {
     const response = await axios.get('http://localhost:3000/auth/getUserData');
       const data = response.data;
-	//   store.setUsername(data.name);
+	  if (!store.username)
+	  store.setUsername(getUsernameFromCookie());
 	  store.setProfilePicture(data.avatarUrl);
-	//   alert(data.name);
-    //   username.value = data.name;
-    //   profile_picture.value = data.avatarUrl;
     } catch (error) {
       console.error('Error fetching user data:', error);
     }

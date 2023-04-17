@@ -17,52 +17,42 @@
 </template>
 
 <script lang="ts">
-	import { defineComponent } from 'vue'
-	import IntroGame from "./IntroGame.vue"
-	import axios from 'axios';
-	import { useUserStore } from '../stores/UserStore';
+  import { defineComponent } from 'vue';
+  import IntroGame from './IntroGame.vue';
+  import axios from 'axios';
+  import { useUserStore } from '../stores/UserStore'
+  import { useRouter } from 'vue-router';;
 
-	const store = useUserStore();
+  export default defineComponent({
+    name: 'Intro',
+    components: {
+      IntroGame,
+    },
+    setup() {
+      const store = useUserStore();
+	  const router = useRouter();
 
-	export default defineComponent({
-		name: 'Intro',
-		components: {
-			IntroGame,
-		},
-		setup() {
-			// Your intro.js code goes here
-		},
-		methods: {
-			async auth_intra() {
-				try {
-					const res = await axios.get('http://localhost:3000/auth/api42');
-					if (res && res.data && res.data.url) {
-						window.location.href = res.data.url;
-						const username = this.getUsernameFromCookie();
-						store.setUsername(username);
-					} 
-					else {
-						console.error('Error: URL not received from the backend');
-					}
-				} catch (error) {
-					console.error('Error in auth_intra function:', error);
-				}
-			},
+      const auth_intra = async () => {
+        try {
+          const res = await axios.get('http://localhost:3000/auth/api42');
+          if (res && res.data && res.data.url) {
+            window.location.href = res.data.url;
+          } else {
+            console.error('Error: URL not received from the backend');
+          }
+        } catch (error) {
+          console.error('Error in auth_intra function:', error);
+        }
+      };
 
-			getUsernameFromCookie() {
-				const cookie = document.cookie.split(';').find(cookie => cookie.trim().startsWith('username='));
-				if (cookie) {
-					const usernameJson = cookie.split('=')[1];
-					const username = JSON.parse(decodeURIComponent(usernameJson));
-					return username;
-				}
-				// else
-				// 	alert('Cookie is empty');
-				return null;
-			}
-		},
-	})
+      // Return the methods so they can be used in the template
+      return {
+        auth_intra,
+      };
+    },
+  });
 </script>
+
 
 <style scoped>
 	.auth-intra {
