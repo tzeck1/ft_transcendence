@@ -1,10 +1,9 @@
-import { Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
 import { CustomRequest } from './custom-request.interface';
 import { Users } from '../user/user.service';
 
-let userData;
 
 @Controller('auth')
 export class AuthController {
@@ -12,12 +11,6 @@ export class AuthController {
   @Get('api42/callback')
   @UseGuards(AuthGuard('api42'))
   async api42Callback(@Req() req: CustomRequest, @Res() res: Response) {
-    // console.log("User data in api42/callback controller:", userData);
-    const user = req.user;
-    userData = {
-      name: user.displayName,
-      avatarUrl: user.photos && user.photos.length > 0 && user.photos[0].value,
-    };
     const username = req.user.displayName;
     const frontendUrl = `http://localhost:8080/profile?${username}`;
     res.cookie('username', JSON.stringify(username), { httpOnly: false });
@@ -25,8 +18,12 @@ export class AuthController {
   }
 
   @Get('getUserData')
-    async getUserData(@Req() req: CustomRequest): Promise<any> {
-  return userData;
+    async getUserData(@Query('username') username: string): Promise<any> {
+      const userData = {
+        name: await this.users.getUsernameByIntra(username),
+        avatarUrl: await this.users.getAvatarByIntra(username),
+      }
+      return userData;
 }
 
   @Get('api42')

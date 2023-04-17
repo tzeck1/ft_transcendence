@@ -15,12 +15,13 @@ export class Users {
    * if user does not exist yet, creates database entries in users and stats tables
    * @param name username and intra_name to register
    */
-  async createNewUser(name: string) {
+  async createNewUser(name: string, photo: string) {
     if (await this.prisma.users.findUnique( {where: {intra_name: name}} ) != null) return;
     const newUsersEntry = await this.prisma.users.create( {
         data: {
             username:   name,
             intra_name: name,
+            profile_picture: photo,
         }
     })
     const newStatsEntry = await this.prisma.stats.create( {
@@ -37,6 +38,11 @@ export class Users {
   async getUsernameByIntra(intra_name: string): Promise<string> {
     const usersEntry = await this.prisma.users.findUnique( {where: {intra_name: intra_name}} );
     return usersEntry.username;
+  }
+
+  async getAvatarByIntra(intra_name: string): Promise<string> {
+    const usersEntry = await this.prisma.users.findUnique( {where: {intra_name: intra_name}} );
+    return usersEntry.profile_picture;
   }
 
   async getIntraName(id: number): Promise<string> {

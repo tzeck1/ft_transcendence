@@ -19,13 +19,14 @@ let Users = class Users {
             },
         });
     }
-    async createNewUser(name) {
+    async createNewUser(name, photo) {
         if (await this.prisma.users.findUnique({ where: { intra_name: name } }) != null)
             return;
         const newUsersEntry = await this.prisma.users.create({
             data: {
                 username: name,
                 intra_name: name,
+                profile_picture: photo,
             }
         });
         const newStatsEntry = await this.prisma.stats.create({
@@ -40,6 +41,10 @@ let Users = class Users {
     async getUsernameByIntra(intra_name) {
         const usersEntry = await this.prisma.users.findUnique({ where: { intra_name: intra_name } });
         return usersEntry.username;
+    }
+    async getAvatarByIntra(intra_name) {
+        const usersEntry = await this.prisma.users.findUnique({ where: { intra_name: intra_name } });
+        return usersEntry.profile_picture;
     }
     async getIntraName(id) {
         const usersEntry = await this.prisma.users.findUnique({ where: { id: id } });

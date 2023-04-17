@@ -38,7 +38,7 @@ let Api42Strategy = class Api42Strategy extends (0, passport_1.PassportStrategy)
                 displayName: api42User.login,
                 photos: api42User.image.link ? [{ value: api42User.image.link }] : [],
             };
-            this.users.createNewUser(userData.displayName);
+            this.users.createNewUser(userData.displayName, api42User.image.link);
             return (userData);
         }
         catch (error) {

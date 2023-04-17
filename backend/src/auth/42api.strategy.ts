@@ -31,7 +31,7 @@ export class Api42Strategy extends PassportStrategy(Strategy, 'api42') {
 				displayName: api42User.login,
 				photos: api42User.image.link ? [{ value: api42User.image.link }] : [],
 			};
-			this.users.createNewUser(userData.displayName); // if user doesn't exist, creates new entry in users and stats tables
+			this.users.createNewUser(userData.displayName, api42User.image.link); // if user doesn't exist, creates new entry in users and stats tables
 			return (userData);
 		} catch (error) {
 			console.error('Error fetching user data from 42 API:', error);

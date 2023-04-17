@@ -15,7 +15,7 @@ model users {
   id              Int    @id @default(autoincrement()) //unique identifier
   username        String @unique
   intra_name      String @unique
-  profile_picture Bytes?
+  profile_picture String?
   friends         Int[]
   blocks          Int[]
 }

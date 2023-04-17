@@ -5,6 +5,6 @@ export declare class AuthController {
     private readonly users;
     constructor(users: Users);
     api42Callback(req: CustomRequest, res: Response): Promise<void>;
-    getUserData(req: CustomRequest): Promise<any>;
+    getUserData(username: string): Promise<any>;
     api42Login(res: Response): void;
 }

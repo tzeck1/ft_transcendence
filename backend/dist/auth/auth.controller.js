@@ -16,23 +16,21 @@ exports.AuthController = void 0;
 const common_1 = require("@nestjs/common");
 const passport_1 = require("@nestjs/passport");
 const user_service_1 = require("../user/user.service");
-let userData;
 let AuthController = class AuthController {
     constructor(users) {
         this.users = users;
     }
     async api42Callback(req, res) {
-        const user = req.user;
-        userData = {
-            name: user.displayName,
-            avatarUrl: user.photos && user.photos.length > 0 && user.photos[0].value,
-        };
         const username = req.user.displayName;
         const frontendUrl = `http://localhost:8080/profile?${username}`;
         res.cookie('username', JSON.stringify(username), { httpOnly: false });
         res.redirect(frontendUrl);
     }
-    async getUserData(req) {
+    async getUserData(username) {
+        const userData = {
+            name: await this.users.getUsernameByIntra(username),
+            avatarUrl: await this.users.getAvatarByIntra(username),
+        };
         return userData;
     }
     api42Login(res) {
@@ -52,9 +50,9 @@ __decorate([
 ], AuthController.prototype, "api42Callback", null);
 __decorate([
     (0, common_1.Get)('getUserData'),
-    __param(0, (0, common_1.Req)()),
+    __param(0, (0, common_1.Query)('username')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "getUserData", null);
 __decorate([

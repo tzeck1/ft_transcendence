@@ -72,19 +72,19 @@
         const cookie = document.cookie.split(';').find(cookie => cookie.trim().startsWith('username='));
         if (cookie) {
           const usernameJson = cookie.split('=')[1];
-          const username = JSON.parse(decodeURIComponent(usernameJson));
-          return username;
+          const user_name = JSON.parse(decodeURIComponent(usernameJson));
+          return user_name;
         }
         return null;
       };
   
   onMounted(async () => {
 	try {
-    const response = await axios.get('http://localhost:3000/auth/getUserData');
-      const data = response.data;
-	  if (!store.username)
-	  store.setUsername(getUsernameFromCookie());
-	  store.setProfilePicture(data.avatarUrl);
+		if (!store.username)
+			store.setUsername(getUsernameFromCookie());
+		const response = await axios.get(`http://localhost:3000/auth/getUserData?username=${store.username}`);
+		const data = response.data;
+		store.setProfilePicture(data.avatarUrl);
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
