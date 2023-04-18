@@ -54,6 +54,13 @@ let Users = class Users {
         const usersEntry = await this.prisma.users.findUnique({ where: { intra_name: intra_name } });
         return usersEntry.intra_name;
     }
+    async get2FASecret(userId) {
+        const user = await this.prisma.users.findUnique({
+            where: { id: userId },
+            select: { twoFactorSecret: true },
+        });
+        return user.twoFactorSecret;
+    }
     async setUsername(intra, new_username) {
         const existingUser = await this.prisma.users.findFirst({
             where: {
@@ -76,6 +83,12 @@ let Users = class Users {
         const updateUser = await this.prisma.users.update({
             where: { intra_name: intra },
             data: { profile_picture: picture },
+        });
+    }
+    async set2FASecret(intra, secret) {
+        return await this.prisma.users.update({
+            where: { intra_name: intra },
+            data: { twoFactorSecret: secret },
         });
     }
 };

@@ -58,6 +58,14 @@ export class Users {
 		const usersEntry = await this.prisma.users.findUnique( {where: {intra_name: intra_name}} );
 		return usersEntry.intra_name;
 	}
+	
+	async get2FASecret(userId: number): Promise<string> {
+		const user = await this.prisma.users.findUnique({
+			where: { id: userId },
+			select: { twoFactorSecret: true },
+		});
+		return user.twoFactorSecret;
+	}
 
 	/*	========== SETTER ==========	*/
 
@@ -87,6 +95,13 @@ export class Users {
 		const updateUser = await this.prisma.users.update({
 			where: {intra_name: intra},
 			data:  {profile_picture: picture},
+		});
+	}
+
+	async set2FASecret(intra: string, secret: string) {
+		return await this.prisma.users.update({
+			where: { intra_name: intra },
+			data: { twoFactorSecret: secret },
 		});
 	}
 }

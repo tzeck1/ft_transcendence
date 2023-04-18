@@ -13,6 +13,8 @@ export declare class Users {
     getAvatarByIntra(intra_name: string): Promise<string>;
     getIntraName(id: number): Promise<string>;
     getId(intra_name: string): Promise<string>;
+    get2FASecret(userId: number): Promise<string>;
     setUsername(intra: string, new_username: string): Promise<string>;
     setAvatar(intra: string, picture: string): Promise<void>;
+    set2FASecret(intra: string, secret: string): Promise<import(".prisma/client").users>;
 }

@@ -16,7 +16,8 @@
 				</div>
 			</div>
 			<img class="rank" src="../assets/rank.png" alt="Rank" />
-			<button class="two-factor-button">Enable 2FA</button>
+			<button class="two-factor-button" @click="enable2FA">Enable 2FA</button>
+			<img v-if="qrCodeVisible" :src="qrCodeValue" alt="QR Code" class="qr-code">
 		</div>
 		<div class="grid">
 			<div class="grid-item">Match History</div>
@@ -29,8 +30,9 @@
 
 <script setup lang="ts">
 	import { ref, onMounted, watch } from 'vue';
-	import axios, { HttpStatusCode } from 'axios';
+	import axios from 'axios';
 	import { useUserStore } from '../stores/UserStore';
+	import QrcodeVue from 'qrcode.vue';
 	import { storeToRefs } from 'pinia';
 
 	const store = useUserStore();
@@ -39,6 +41,8 @@
 	const usernameInput = ref<HTMLInputElement | null>(null);
 	const isEditing = ref(false);
 	const showDropIcon = ref(false);
+	const qrCodeVisible = ref(false);
+	const qrCodeValue = ref('');
 
 	watch(isEditing, (editing) => {
 		if (editing) {
@@ -123,6 +127,13 @@
 				alert('Please drop an image file.');
 			}
 		}
+	}
+
+	async function enable2FA() {
+		const response = await axios.get(`http://${location.hostname}:3000/2fa/enable?intra=${store.intra}`);
+		const otpauthUrl = response.data.qrCode;
+		qrCodeValue.value = otpauthUrl;
+		qrCodeVisible.value = true;
 	}
 
 </script>
