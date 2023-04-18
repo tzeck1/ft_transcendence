@@ -18,7 +18,7 @@ const axios_1 = require("axios");
 let Api42Strategy = class Api42Strategy extends (0, passport_1.PassportStrategy)(passport_oauth2_1.Strategy, 'api42') {
     constructor(users) {
         const options = {
-            authorizationURL: 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-8b9da2df9f37fabf5fe6330ad83da6cf15f65455a8add2bc5d0ebda92eaf4b88&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fapi42%2Fcallback&response_type=code',
+            authorizationURL: 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-8b9da2df9f37fabf5fe6330ad83da6cf15f65455a8add2bc5d0ebda92eaf4b88&redirect_uri=http%3A%2F%2F10.13.3.7%3A3000%2Fauth%2Fapi42%2Fcallback&response_type=code',
             tokenURL: 'https://api.intra.42.fr/oauth/token',
             clientID: process.env.API_42_CLIENT_ID,
             clientSecret: process.env.API_42_CLIENT_SECRET,

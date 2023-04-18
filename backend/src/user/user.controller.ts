@@ -17,4 +17,14 @@ export class UserController {
 		console.log("Avatar changed to:", picture);
 		this.users.setAvatar(intra, picture);
 	}
+
+	@Post('setUsername')
+	async setUsername(@Body('intra') intra: string, @Body('username') username: string) {
+		const response: string = await this.users.setUsername(intra, username);
+		if (response)
+			console.log(response);
+		else
+			console.log("Username already in use.");
+		return (response);
+	}
 }

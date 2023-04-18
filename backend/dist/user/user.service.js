@@ -54,11 +54,23 @@ let Users = class Users {
         const usersEntry = await this.prisma.users.findUnique({ where: { intra_name: intra_name } });
         return usersEntry.intra_name;
     }
-    async setUsername(id, new_username) {
+    async setUsername(intra, new_username) {
+        const existingUser = await this.prisma.users.findFirst({
+            where: {
+                AND: [
+                    { intra_name: { not: { equals: intra } } },
+                    { username: new_username },
+                ],
+            },
+        });
+        if (existingUser) {
+            return (null);
+        }
         const updateUser = await this.prisma.users.update({
-            where: { id: id },
+            where: { intra_name: intra },
             data: { username: new_username },
         });
+        return (new_username);
     }
     async setAvatar(intra, picture) {
         const updateUser = await this.prisma.users.update({

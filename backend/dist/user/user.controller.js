@@ -26,6 +26,14 @@ let UserController = class UserController {
         console.log("Avatar changed to:", picture);
         this.users.setAvatar(intra, picture);
     }
+    async setUsername(intra, username) {
+        const response = await this.users.setUsername(intra, username);
+        if (response)
+            console.log(response);
+        else
+            console.log("Username already in use.");
+        return (response);
+    }
 };
 __decorate([
     (0, common_1.Get)('getUsername'),
@@ -41,6 +49,14 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "setAvatar", null);
+__decorate([
+    (0, common_1.Post)('setUsername'),
+    __param(0, (0, common_1.Body)('intra')),
+    __param(1, (0, common_1.Body)('username')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "setUsername", null);
 UserController = __decorate([
     (0, common_1.Controller)('users'),
     __metadata("design:paramtypes", [user_service_1.Users])

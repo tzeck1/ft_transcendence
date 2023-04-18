@@ -22,7 +22,7 @@ let AuthController = class AuthController {
     }
     async api42Callback(req, res) {
         const username = req.user.displayName;
-        const frontendUrl = `http://localhost:8080/profile?${username}`;
+        const frontendUrl = `http://10.13.3.7:8080/profile?${username}`;
         res.cookie('username', JSON.stringify(username), { httpOnly: false });
         res.redirect(frontendUrl);
     }
@@ -35,7 +35,7 @@ let AuthController = class AuthController {
     }
     api42Login(res) {
         console.log('Api42Login called');
-        const authorizationURL = 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-8b9da2df9f37fabf5fe6330ad83da6cf15f65455a8add2bc5d0ebda92eaf4b88&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fauth%2Fapi42%2Fcallback&response_type=code';
+        const authorizationURL = 'https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-8b9da2df9f37fabf5fe6330ad83da6cf15f65455a8add2bc5d0ebda92eaf4b88&redirect_uri=http%3A%2F%2F10.13.3.7%3A3000%2Fauth%2Fapi42%2Fcallback&response_type=code';
         res.json({ url: authorizationURL });
     }
 };

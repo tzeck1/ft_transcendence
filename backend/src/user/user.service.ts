@@ -61,12 +61,27 @@ export class Users {
 
 	/*	========== SETTER ==========	*/
 
-	async setUsername(id: number, new_username: string) {
-		const updateUser = await this.prisma.users.update({
-			where: {id:id},
-			data:  {username: new_username},
+	async setUsername(intra: string, new_username: string) {
+		const existingUser = await this.prisma.users.findFirst({
+		  where: {
+			AND: [
+			  { intra_name: { not: { equals: intra } } },
+			  { username: new_username },
+			],
+		  },
 		});
-	}
+
+		if (existingUser) {
+		  return (null);
+		}
+
+		const updateUser = await this.prisma.users.update({
+		  where: { intra_name: intra },
+		  data: { username: new_username },
+		});
+
+		return (new_username);
+	  }
 
 	async setAvatar(intra: string, picture: string) {
 		const updateUser = await this.prisma.users.update({

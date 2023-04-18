@@ -50,8 +50,11 @@
 		isEditing.value = true;
 	}
 
-	function stopEditing() {
-		isEditing.value = false;
+	async function stopEditing() {
+		// alert(usernameInput.value);
+		const response = await axios.post('http://10.13.3.7:3000/users/setUsername', { intra: store.intra, username: username.value });
+		if (response.data)
+			isEditing.value = false;
 	}
   
 	function toggleEditing() {
@@ -82,7 +85,7 @@
 		try {
 			if (!store.intra)
 				store.setIntra(getUsernameFromCookie());
-			const response = await axios.get(`http://localhost:3000/auth/getUserData?intra=${store.intra}`);
+			const response = await axios.get(`http://10.13.3.7:3000/auth/getUserData?intra=${store.intra}`);
 			const data = response.data;
 			store.setUsername(data.username);
 			store.setProfilePicture(data.avatarUrl);
@@ -113,7 +116,7 @@
 				const reader = new FileReader();
 				reader.onload = function (event) {
 					store.setProfilePicture(event.target!.result as string);
-					axios.post('http://localhost:3000/users/setAvatar', { intra: store.intra, picture: store.profile_picture });
+					axios.post('http://10.13.3.7:3000/users/setAvatar', { intra: store.intra, picture: store.profile_picture });
 				};
 				reader.readAsDataURL(file);
 			} else {
