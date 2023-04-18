@@ -5,11 +5,13 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 
 @Module({
-  imports: [
-    AuthModule,
-    UserModule,
-  ],
-  controllers: [AppController],
-  providers: [AppService],
+
+	imports: [
+		AuthModule,
+		UserModule,
+	],
+	controllers: [AppController],
+	providers: [AppService],
 })
+
 export class AppModule {}

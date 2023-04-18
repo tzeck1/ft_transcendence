@@ -6,8 +6,8 @@ import { Users } from '../user/user.service';
 import { AppService } from '../app.service';
 
 @Module({
-  imports: [PassportModule],
-  providers: [Api42Strategy, Users],
-  controllers: [AuthController],
+	imports: [PassportModule],
+	providers: [Api42Strategy, Users],
+	controllers: [AuthController],
 })
 export class AuthModule {}
