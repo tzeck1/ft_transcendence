@@ -35,7 +35,7 @@
 
 			const auth_intra = async () => {
 				try {
-					const res = await axios.get('http://10.13.3.7:3000/auth/api42');
+					const res = await axios.get(`http://${location.hostname}:3000/auth/api42`);
 					if (res && res.data && res.data.url) {
 						window.location.href = res.data.url;
 					} else {

@@ -12,11 +12,15 @@ const passport_1 = require("@nestjs/passport");
 const _42api_strategy_1 = require("./42api.strategy");
 const auth_controller_1 = require("./auth.controller");
 const user_service_1 = require("../user/user.service");
+const config_1 = require("@nestjs/config");
 let AuthModule = class AuthModule {
 };
 AuthModule = __decorate([
     (0, common_1.Module)({
-        imports: [passport_1.PassportModule],
+        imports: [
+            passport_1.PassportModule,
+            config_1.ConfigModule.forRoot(),
+        ],
         providers: [_42api_strategy_1.Api42Strategy, user_service_1.Users],
         controllers: [auth_controller_1.AuthController],
     })
