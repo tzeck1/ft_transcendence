@@ -11,7 +11,6 @@
 		name: "IntroGame",
 		setup() {
 			const asciiFrames = [
-		// Frame 1
 		`             ,----------------,              ,---------,
         ,-----------------------,          ,"        ,"|
       ,"                      ,"|        ,"        ,"  |
@@ -556,24 +555,22 @@
 \`-----------------------------'                         `
 	];
 
-	const currentFrame = ref(0);
+			const currentFrame = ref(0);
+			const animate = () => {
+				if (currentFrame.value === asciiFrames.length - 1) {
+					setTimeout(() => { currentFrame.value = 0; }, 1000); // 1-second pause before restarting the animation
+				}
+				else {
+					currentFrame.value = (currentFrame.value + 1) % asciiFrames.length;
+				}
+			};
+			const startAnimation = () => { setInterval(animate, 250); };
+			return { asciiFrames, currentFrame, startAnimation };
+		},
 
-	const animate = () => {
-		if (currentFrame.value === asciiFrames.length - 1) {
-			setTimeout(() => { currentFrame.value = 0; }, 1000); // 1-second pause before restarting the animation
-		}
-		else {
-			currentFrame.value = (currentFrame.value + 1) % asciiFrames.length;
-		}
-	};
-
-	const startAnimation = () => { setInterval(animate, 250); };
-
-	return { asciiFrames, currentFrame, startAnimation };
-	},
-	mounted() {
-		this.startAnimation();
-	},
+		mounted() {
+			this.startAnimation();
+		},
 	});
 </script>
 
@@ -587,7 +584,8 @@
 	}
 
 	.intro-ascii {
-    margin-top: 7vh;
+		margin-top: 7vh;
 		font-size: 1vh;
 	}
+
 </style>

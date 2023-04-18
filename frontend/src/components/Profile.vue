@@ -2,32 +2,32 @@
 	<div class="profile">
 		<div class="sidebar">
 			<div class="profile-picture-drop-area" @dragenter.prevent.stop="highlight" @dragover.prevent.stop="highlight" @dragleave.prevent.stop="unhighlight" @drop.prevent.stop="handleDrop">
-			<img id="profile-picture" class="profile-picture" :src="profile_picture" alt="Profile picture" />
-			<div class="drop-icon" v-show="showDropIcon">&#x21E3;</div>
+				<img id="profile-picture" class="profile-picture" :src="profile_picture" alt="Profile picture" />
+				<div class="drop-icon" v-show="showDropIcon">&#x21E3;</div>
+			</div>
+			<div class="name-container">
+				<div class="username-wrapper">
+					<h1 v-show="!isEditing">{{ username }}</h1>
+					<input ref="usernameInput" v-show="isEditing" v-model="username" @input="resizeInput" type="text" id="edit-username"/>
+					<button @click="toggleEditing" id="toggle-username">
+						<span v-show="!isEditing">&#x270E;</span>
+						<span v-show="isEditing">&#x2713;</span>
+					</button>
+				</div>
+			</div>
+			<img class="rank" src="../assets/rank.png" alt="Rank" />
+			<button class="two-factor-button">Enable 2FA</button>
 		</div>
-		<div class="name-container">
-		  <div class="username-wrapper">
-			<h1 v-show="!isEditing">{{ username }}</h1>
-			<input ref="usernameInput" v-show="isEditing" v-model="username" @input="resizeInput" type="text" id="edit-username"/>
-			<button @click="toggleEditing" id="toggle-username">
-		  		<span v-show="!isEditing">&#x270E;</span>
-		  		<span v-show="isEditing">&#x2713;</span>
-			</button>
-		  </div>
+		<div class="grid">
+			<div class="grid-item">Match History</div>
+			<div class="grid-item">Friends</div>
+			<div class="grid-item">Achievements</div>
+			<div class="grid-item">Statistics</div>
 		</div>
-		<img class="rank" src="../assets/rank.png" alt="Rank" />
-		<button class="two-factor-button">Enable 2FA</button>
-	  </div>
-	  <div class="grid">
-		<div class="grid-item">Match History</div>
-		<div class="grid-item">Friends</div>
-		<div class="grid-item">Achievements</div>
-		<div class="grid-item">Statistics</div>
-	  </div>
 	</div>
-  </template>
-  
-  <script setup lang="ts">
+</template>
+
+<script setup lang="ts">
 	import { ref, onMounted, watch } from 'vue';
 	import axios, { HttpStatusCode } from 'axios';
 	import { useUserStore } from '../stores/UserStore';
@@ -41,9 +41,9 @@
 	const showDropIcon = ref(false);
 
 	watch(isEditing, (editing) => {
-	if (editing) {
-		resizeInput();
-	}
+		if (editing) {
+			resizeInput();
+		}
 	});
 
 	function startEditing() {
@@ -52,82 +52,77 @@
 
 	function stopEditing() {
 		isEditing.value = false;
-  	}
+	}
   
 	function toggleEditing() {
 		if (isEditing.value) {
-		stopEditing();
+			stopEditing();
 		} else {
-		startEditing();
+			startEditing();
 		}
 	}
 
 	function resizeInput() {
-	if (usernameInput.value) {
-		usernameInput.value.style.width = (username.value.length + 1) + "ch";
-	}
+		if (usernameInput.value) {
+			usernameInput.value.style.width = (username.value.length + 1) + "ch";
+		}
 	}
 
 	const getUsernameFromCookie = () => {
-        const cookie = document.cookie.split(';').find(cookie => cookie.trim().startsWith('username='));
-        if (cookie) {
-          const usernameJson = cookie.split('=')[1];
-          const user_name = JSON.parse(decodeURIComponent(usernameJson));
-          return user_name;
-        }
-        return null;
-      };
-  
-  onMounted(async () => {
-	try {
-		if (!store.intra)
-			store.setIntra(getUsernameFromCookie());
-		const response = await axios.get(`http://localhost:3000/auth/getUserData?intra=${store.intra}`);
-		const data = response.data;
-		store.setUsername(data.username);
-		store.setProfilePicture(data.avatarUrl);
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-    }
-  });
+		const cookie = document.cookie.split(';').find(cookie => cookie.trim().startsWith('username='));
+		if (cookie) {
+			const usernameJson = cookie.split('=')[1];
+			const user_name = JSON.parse(decodeURIComponent(usernameJson));
+			return user_name;
+		}
+		return null;
+	};
 
-  function highlight() {
-    const dropArea = document.querySelector(".profile-picture-drop-area");
-    dropArea?.classList.add("highlight");
-    showDropIcon.value = true;
-  }
+	onMounted(async () => {
+		try {
+			if (!store.intra)
+				store.setIntra(getUsernameFromCookie());
+			const response = await axios.get(`http://localhost:3000/auth/getUserData?intra=${store.intra}`);
+			const data = response.data;
+			store.setUsername(data.username);
+			store.setProfilePicture(data.avatarUrl);
+		} catch (error) {
+			console.error('Error fetching user data:', error);
+		}
+	});
 
-  function unhighlight() {
-    const dropArea = document.querySelector(".profile-picture-drop-area");
-    dropArea?.classList.remove("highlight");
-    showDropIcon.value = false;
-  }
-  
-  function handleDrop(e: DragEvent) {
-	unhighlight();
-  
-	const dt = e.dataTransfer;
-	if (dt && dt.files && dt.files.length > 0) {
-	  const file = dt.files[0];
-	  if (file && file.type.startsWith('image/')) {
-		const reader = new FileReader();
-		reader.onload = function (event) {
-			store.setProfilePicture(event.target!.result as string);
-			axios.post('http://localhost:3000/users/setAvatar', { intra: store.intra, picture: store.profile_picture });
-			// .then(function (response) {
-			// 	alert(response);
-			// })
-			// .catch(function (error) {
-			// 	alert(error);
-			// })
-		};
-		reader.readAsDataURL(file);
-	  } else {
-		alert('Please drop an image file.');
-	  }
+	function highlight() {
+		const dropArea = document.querySelector(".profile-picture-drop-area");
+		dropArea?.classList.add("highlight");
+		showDropIcon.value = true;
 	}
-  }
-  </script>
+
+	function unhighlight() {
+		const dropArea = document.querySelector(".profile-picture-drop-area");
+		dropArea?.classList.remove("highlight");
+		showDropIcon.value = false;
+	}
+
+	function handleDrop(e: DragEvent) {
+		unhighlight();
+
+		const dt = e.dataTransfer;
+		if (dt && dt.files && dt.files.length > 0) {
+			const file = dt.files[0];
+			if (file && file.type.startsWith('image/')) {
+				const reader = new FileReader();
+				reader.onload = function (event) {
+					store.setProfilePicture(event.target!.result as string);
+					axios.post('http://localhost:3000/users/setAvatar', { intra: store.intra, picture: store.profile_picture });
+				};
+				reader.readAsDataURL(file);
+			} else {
+				alert('Please drop an image file.');
+			}
+		}
+	}
+
+</script>
 
 <style scoped>
 	.sidebar {
@@ -220,7 +215,6 @@
 		margin-left: 1vw;
 	}
 
-
 	#toggle-username:hover {
 		background-color: rgba(255, 255, 255, 0.1);
 	}
@@ -260,4 +254,5 @@
 	.profile-picture-drop-area.highlight .drop-icon {
 		display: block;
 	}
+
 </style>

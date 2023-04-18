@@ -15,7 +15,6 @@
 <template>
 	<header>
 		<span class="logo">PONG</span>
-		<!-- <img src="./assets/logo.png" alt="Logo" class="logo" /> -->
 		<nav>
 				<div class="nav-buttons">
 						<router-link to="/profile" v-slot="{ navigate, isActive }">
@@ -63,6 +62,22 @@
 		flex-direction: column;
 		font-size: 1vh;
 	}
+
+	body, body * {
+		animation: glowing 3s infinite;
+	}
+
+	button {
+		background-color: transparent;
+		color: rgb(255, 255, 255);
+		border: 1px solid rgba(255, 255, 255, 0);
+		border-radius: 25px;
+		padding: 2vh 5vh;
+		cursor: pointer;
+		outline: none;
+		font-size: 2vh;
+		font-family: 'ibm-3270', monospace;
+	}
 	
 	header {
 		display: flex;
@@ -70,6 +85,13 @@
 		align-items: center;
 		padding: 1rem;
 		flex-shrink: 0;
+	}
+
+	nav {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		width: 100%;
 	}
 	
 	.logo {
@@ -84,18 +106,6 @@
 		justify-content: center;
 		align-items: center;
 		flex-grow: 1;
-	}
-	
-	button {
-		background-color: transparent;
-		color: rgb(255, 255, 255);
-		border: 1px solid rgba(255, 255, 255, 0);
-		border-radius: 25px;
-		padding: 2vh 5vh;
-		cursor: pointer;
-		outline: none;
-		font-size: 2vh;
-		font-family: 'ibm-3270', monospace;
 	}
 	
 	button:hover {
@@ -134,13 +144,6 @@
 		transform: scale(1.1);
 		cursor: pointer;
 	}
-	
-	nav {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		width: 100%;
-	}
 
 	@keyframes glowing {
 		0% {
@@ -152,10 +155,6 @@
 		100% {
 			text-shadow: 0 0 25px rgb(255, 255, 255);
 		}
-	}
-	
-	body, body * {
-		animation: glowing 3s infinite;
 	}
 
 	.icon {

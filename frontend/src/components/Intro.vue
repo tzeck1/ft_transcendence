@@ -17,40 +17,37 @@
 </template>
 
 <script lang="ts">
-  import { defineComponent } from 'vue';
-  import IntroGame from './IntroGame.vue';
-  import axios from 'axios';
-  import { useUserStore } from '../stores/UserStore'
-  import { useRouter } from 'vue-router';;
+	import { defineComponent } from 'vue';
+	import { useRouter } from 'vue-router';
+	import { useUserStore } from '../stores/UserStore';
+	import axios from 'axios';
+	import IntroGame from './IntroGame.vue';
 
-  export default defineComponent({
-    name: 'Intro',
-    components: {
-      IntroGame,
-    },
-    setup() {
-      const store = useUserStore();
-	  const router = useRouter();
+	export default defineComponent({
+		name: 'Intro',
+		components: {
+			IntroGame,
+		},
 
-      const auth_intra = async () => {
-        try {
-          const res = await axios.get('http://localhost:3000/auth/api42');
-          if (res && res.data && res.data.url) {
-            window.location.href = res.data.url;
-          } else {
-            console.error('Error: URL not received from the backend');
-          }
-        } catch (error) {
-          console.error('Error in auth_intra function:', error);
-        }
-      };
+		setup() {
+			const store = useUserStore();
+			const router = useRouter();
 
-      // Return the methods so they can be used in the template
-      return {
-        auth_intra,
-      };
-    },
-  });
+			const auth_intra = async () => {
+				try {
+					const res = await axios.get('http://localhost:3000/auth/api42');
+					if (res && res.data && res.data.url) {
+						window.location.href = res.data.url;
+					} else {
+						console.error('Error: URL not received from the backend');
+					}
+				} catch (error) {
+					console.error('Error in auth_intra function:', error);
+				}
+			};
+			return { auth_intra };
+		},
+	});
 </script>
 
 
@@ -85,4 +82,5 @@
 		color: white;
 		text-decoration: none;
 	}
+
 </style>
