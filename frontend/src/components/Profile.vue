@@ -1,29 +1,33 @@
 <template>
 	<div class="profile">
-		<div class="sidebar">
-			<div class="profile-picture-drop-area" @dragenter.prevent.stop="highlight" @dragover.prevent.stop="highlight" @dragleave.prevent.stop="unhighlight" @drop.prevent.stop="handleDrop">
-				<img id="profile-picture" class="profile-picture" :src="profile_picture" alt="Profile picture" />
-				<div class="drop-icon" v-show="showDropIcon">&#x21E3;</div>
-			</div>
-			<div class="name-container">
-				<div class="username-wrapper">
-					<h1 v-show="!isEditing">{{ username }}</h1>
-					<input ref="usernameInput" v-show="isEditing" v-model="username" @input="resizeInput" type="text" id="edit-username"/>
-					<button @click="toggleEditing" id="toggle-username">
-						<span v-show="!isEditing">&#x270E;</span>
-						<span v-show="isEditing">&#x2713;</span>
-					</button>
+		<div class="content-wrapper" :class="{ blur: qrCodeVisible }">
+			<div class="sidebar">
+				<div class="profile-picture-drop-area" @dragenter.prevent.stop="highlight" @dragover.prevent.stop="highlight" @dragleave.prevent.stop="unhighlight" @drop.prevent.stop="handleDrop">
+					<img id="profile-picture" class="profile-picture" :src="profile_picture" alt="Profile picture" />
+					<div class="drop-icon" v-show="showDropIcon">&#x21E3;</div>
 				</div>
+				<div class="name-container">
+					<div class="username-wrapper">
+						<h1 v-show="!isEditing">{{ username }}</h1>
+						<input ref="usernameInput" v-show="isEditing" v-model="username" @input="resizeInput" type="text" id="edit-username"/>
+						<button @click="toggleEditing" id="toggle-username">
+							<span v-show="!isEditing">&#x270E;</span>
+							<span v-show="isEditing">&#x2713;</span>
+						</button>
+					</div>
+				</div>
+				<img class="rank" src="../assets/rank.png" alt="Rank" />
+				<button class="two-factor-button" @click="enable2FA">Enable 2FA</button>
 			</div>
-			<img class="rank" src="../assets/rank.png" alt="Rank" />
-			<button class="two-factor-button" @click="enable2FA">Enable 2FA</button>
-			<img v-if="qrCodeVisible" :src="qrCodeValue" alt="QR Code" class="qr-code">
+			<div class="grid">
+				<div class="grid-item">Match History</div>
+				<div class="grid-item">Friends</div>
+				<div class="grid-item">Achievements</div>
+				<div class="grid-item">Statistics</div>
+			</div>
 		</div>
-		<div class="grid">
-			<div class="grid-item">Match History</div>
-			<div class="grid-item">Friends</div>
-			<div class="grid-item">Achievements</div>
-			<div class="grid-item">Statistics</div>
+		<div  v-if="qrCodeVisible" class="qr-code-overlay" @click="hideQRCode">
+			<img v-if="qrCodeVisible" :src="qrCodeValue" alt="QR Code" class="qr-code">
 		</div>
 	</div>
 </template>
@@ -136,6 +140,10 @@
 		qrCodeVisible.value = true;
 	}
 
+	function hideQRCode() {
+		qrCodeVisible.value = false;
+	}
+
 </script>
 
 <style scoped>
@@ -206,6 +214,7 @@
 	.username-wrapper {
 		display: inline-flex;
 		position: relative;
+		font-size: 1.25vw;
 	}
 
 	#username span {
@@ -222,7 +231,7 @@
 		background-color: transparent;
 		color: white;
 		border: none;
-		font-size: 2.5vw;
+		font-size: 3vw;
 		cursor: pointer;
 		outline: none;
 		padding: 5px;
@@ -235,7 +244,7 @@
 
 	#edit-username {
 		font-family: 'ibm-3270', monospace;
-		font-size: 2vw;
+		font-size: 2.5vw;
 		background-color: transparent;
 		border: none;
 		color: white;
@@ -267,6 +276,36 @@
 
 	.profile-picture-drop-area.highlight .drop-icon {
 		display: block;
+	}
+
+	.content-wrapper {
+		display: flex;
+		flex-grow: 1;
+		flex-shrink: 0;
+		overflow: hidden;
+	}
+
+	.blur {
+		filter: blur(5px);
+	}
+
+	.qr-code-overlay {
+		position: fixed;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background-color: rgba(0, 0, 0, 0.5);
+		z-index: 1000;
+	}
+
+	.qr-code {
+		width: 30vw;
+		height: 30vw;
+		object-fit: contain;
 	}
 
 </style>

@@ -1,15 +1,17 @@
 <script setup lang="ts">
-	import { ref } from 'vue';
-	import { useRouter } from 'vue-router';
+	import { ref, computed } from 'vue';
+	import { useRouter, useRoute } from 'vue-router';
 	import { useUserStore } from './stores/UserStore';
 
 	const router = useRouter();
+	const route = useRoute();
 
 	function loadIntro() {
 		router.push('/');
 	}
 
 	const store = useUserStore();
+	const isIntro = computed(() => route.path === '/');
 </script>
 
 <template>
@@ -18,12 +20,12 @@
 		<nav>
 				<div class="nav-buttons">
 						<router-link to="/profile" v-slot="{ navigate, isActive }">
-							<button id="profileButton" @click="navigate" :class="{'active-button': isActive}">Profile</button>
+							<button id="profileButton" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro">Profile</button>
 						</router-link>
-						<button class="game-button">Game</button>
-						<button>Leaderboard</button>
+						<button class="game-button" :disabled="isIntro">Game</button>
+						<button :disabled="isIntro">Leaderboard</button>
 				</div>
-				<div class="logout-button" @click="loadIntro">
+				<div class="logout-button" @click="loadIntro" :disabled="isIntro">
 					<img src="./assets/logout.png" alt="Logout">
 				</div>
 		</nav>
@@ -77,6 +79,10 @@
 		outline: none;
 		font-size: 2vh;
 		font-family: 'ibm-3270', monospace;
+	}
+
+	button:disabled:hover {
+		background-color: transparent;
 	}
 	
 	header {
