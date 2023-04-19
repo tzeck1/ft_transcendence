@@ -4,11 +4,13 @@ services:
   backend:
     container_name: backend
     build: ./backend
+    depends_on:
+      - db
     ports:
       - '3000:3000'
     volumes:
-      - 'v_backend:/app'
-      - '/app/node_modules'
+      - './backend:/app'
+    #   - '/app/node_modules'
     command: npm run start:dev
 
   frontend:
@@ -16,6 +18,10 @@ services:
     build: ./frontend
     ports:
       - '8080:8080'
+    volumes:
+      - './frontend/src:/app/src'
+      - './frontend/public:/app/public'
+      - './frontend/vite.config.ts:/app/vite.config.ts'
     command: npm run dev
 
   db:
@@ -27,8 +33,9 @@ services:
       POSTGRES_DB: mydatabase
     volumes:
       - 'v_database:/var/lib/postgresql/data'
+    ports:
+      - "5432:5432"
 
 volumes:
   v_database:
-  v_backend:
   v_frontend:
