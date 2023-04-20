@@ -110,6 +110,7 @@
 			const data = response.data;
 			store.setUsername(data.username);
 			store.setProfilePicture(data.avatarUrl);
+			store.setTFA(data.tfa_enabled);
 		} catch (error) {
 			console.error('Error fetching user data:', error);
 		}
@@ -161,8 +162,10 @@
 				(document.querySelector(`.input-2fa:nth-child(${index + 2})`) as HTMLElement).focus();
 			} else {
 				const response = await axios.post(`http://${location.hostname}:3000/2fa/verify`, { intra: store.intra, token: twoFactorCode.value.join('') });
-				if (response.data.message)
+				if (response.data.message) {
 					hideQRCode();
+					store.setTFA(true);
+				}
 				else
 					alert("2FA token is invalid!")
 					twoFactorCode.value = Array(6).fill('');

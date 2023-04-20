@@ -15,7 +15,7 @@ export class AuthController {
 	@UseGuards(AuthGuard('api42'))
 	async api42Callback(@Req() req: CustomRequest, @Res() res: Response) {
 		const username = req.user.displayName;
-		const frontendUrl = `http://${process.env.HOST_IP}:8080/profile?${username}`;
+		const frontendUrl = `http://${process.env.HOST_IP}:8080`;
 		res.cookie('username', JSON.stringify(username), { httpOnly: false });
 		res.redirect(frontendUrl);
 	}
@@ -25,6 +25,7 @@ export class AuthController {
 		const userData = {
 			username: await this.users.getUsernameByIntra(intra),
 			avatarUrl: await this.users.getAvatarByIntra(intra),
+			tfa_enabled: await this.users.getTFA(intra),
 		}
 		return userData;
 	}

@@ -7,6 +7,7 @@ export const useUserStore = defineStore({
 		intra: '',
 		username: '',
 		profile_picture: '',
+		tfa_enabled: false,
 	}),
 	actions: {
 		setIntra(newIntra: string) {
@@ -18,6 +19,9 @@ export const useUserStore = defineStore({
 		setProfilePicture(newProfilePicture: string) {
 			this.profile_picture = newProfilePicture;
 		},
+		setTFA(state: boolean) {
+			this.tfa_enabled = state;
+		},
 	},
 });
 
@@ -26,4 +30,5 @@ interface State {
 	intra: string,
 	username: string;
 	profile_picture: string;
+	tfa_enabled: boolean;
 }

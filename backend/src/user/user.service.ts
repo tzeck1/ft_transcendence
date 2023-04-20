@@ -67,6 +67,11 @@ export class Users {
 		return user.twoFactorSecret;
 	}
 
+	async getTFA(intra_name: string): Promise<boolean> {
+		const usersEntry = await this.prisma.users.findUnique( {where: {intra_name: intra_name}} );
+		return usersEntry.tfa_enabled;
+	}
+
 	/*	========== SETTER ==========	*/
 
 	async setUsername(intra: string, new_username: string) {
@@ -102,6 +107,13 @@ export class Users {
 		return await this.prisma.users.update({
 			where: { intra_name: intra },
 			data: { twoFactorSecret: secret },
+		});
+	}
+
+	async setTFA(intra: string, state: boolean) {
+		return await this.prisma.users.update({
+			where: { intra_name: intra },
+			data: { tfa_enabled: state },
 		});
 	}
 }

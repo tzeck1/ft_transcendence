@@ -38,6 +38,7 @@ let TwoFactorAuthController = class TwoFactorAuthController {
         const isVerified = this.twoFactorAuthService.verify2FAToken(secret, token);
         if (!isVerified)
             return { message: '' };
+        this.userService.setTFA(intra, true);
         return { message: '2FA token verified successfully' };
     }
     async disable2FA(req) {

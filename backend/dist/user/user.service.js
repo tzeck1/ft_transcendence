@@ -61,6 +61,10 @@ let Users = class Users {
         });
         return user.twoFactorSecret;
     }
+    async getTFA(intra_name) {
+        const usersEntry = await this.prisma.users.findUnique({ where: { intra_name: intra_name } });
+        return usersEntry.tfa_enabled;
+    }
     async setUsername(intra, new_username) {
         const existingUser = await this.prisma.users.findFirst({
             where: {
@@ -89,6 +93,12 @@ let Users = class Users {
         return await this.prisma.users.update({
             where: { intra_name: intra },
             data: { twoFactorSecret: secret },
+        });
+    }
+    async setTFA(intra, state) {
+        return await this.prisma.users.update({
+            where: { intra_name: intra },
+            data: { tfa_enabled: state },
         });
     }
 };

@@ -17,6 +17,7 @@ model users {
 	username		String	@unique
 	intra_name		String	@unique
 	profile_picture	String?
+	tfa_enabled		Boolean	@default(false)
 	twoFactorSecret	String?
 	friends			Int[]
 	blocks			Int[]
