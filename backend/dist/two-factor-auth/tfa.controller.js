@@ -31,11 +31,13 @@ let TwoFactorAuthController = class TwoFactorAuthController {
         await this.userService.set2FASecret(intra, secret);
         return { qrCode };
     }
-    async verify2FA(req, token) {
-        const secret = await this.userService.get2FASecret(req.user.id);
+    async verify2FA(intra, token) {
+        console.log(token);
+        console.log(intra);
+        const secret = await this.userService.get2FASecret(intra);
         const isVerified = this.twoFactorAuthService.verify2FAToken(secret, token);
         if (!isVerified)
-            throw new Error('Invalid 2FA token');
+            return { message: '' };
         return { message: '2FA token verified successfully' };
     }
     async disable2FA(req) {
@@ -51,12 +53,11 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], TwoFactorAuthController.prototype, "enable2FA", null);
 __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Post)('verify'),
-    __param(0, (0, common_1.Request)()),
-    __param(1, (0, common_1.Query)('token')),
+    __param(0, (0, common_1.Body)('intra')),
+    __param(1, (0, common_1.Body)('token')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], TwoFactorAuthController.prototype, "verify2FA", null);
 __decorate([

@@ -54,9 +54,9 @@ let Users = class Users {
         const usersEntry = await this.prisma.users.findUnique({ where: { intra_name: intra_name } });
         return usersEntry.intra_name;
     }
-    async get2FASecret(userId) {
-        const user = await this.prisma.users.findUnique({
-            where: { id: userId },
+    async get2FASecret(intra) {
+        const user = await this.prisma.users.findFirst({
+            where: { intra_name: intra },
             select: { twoFactorSecret: true },
         });
         return user.twoFactorSecret;

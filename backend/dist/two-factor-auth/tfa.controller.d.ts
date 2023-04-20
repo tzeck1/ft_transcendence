@@ -7,7 +7,7 @@ export declare class TwoFactorAuthController {
     enable2FA(intra: string): Promise<{
         qrCode: string;
     }>;
-    verify2FA(req: any, token: string): Promise<{
+    verify2FA(intra: string, token: string): Promise<{
         message: string;
     }>;
     disable2FA(req: any): Promise<{

@@ -26,14 +26,25 @@
 				<div class="grid-item">Statistics</div>
 			</div>
 		</div>
-		<div  v-if="qrCodeVisible" class="qr-code-overlay" @click="hideQRCode">
+		<div v-if="qrCodeVisible" class="qr-code-overlay" @click="hideQRCode">
+		<div class="qr-code-container">
 			<img v-if="qrCodeVisible" :src="qrCodeValue" alt="QR Code" class="qr-code">
+			<div class="input-container">
+				<input ref="inputField1" v-model="twoFactorCode[0]" maxlength="1" class="input-2fa" @input="handleInput(0)" @keydown="handleBackspace(0, $event)" type="text">
+				<input v-model="twoFactorCode[1]" maxlength="1" class="input-2fa" @input="handleInput(1)" @keydown="handleBackspace(1, $event)" type="text">
+				<input v-model="twoFactorCode[2]" maxlength="1" class="input-2fa" @input="handleInput(2)" @keydown="handleBackspace(2, $event)" type="text">
+				<input v-model="twoFactorCode[3]" maxlength="1" class="input-2fa" @input="handleInput(3)" @keydown="handleBackspace(3, $event)" type="text">
+				<input v-model="twoFactorCode[4]" maxlength="1" class="input-2fa" @input="handleInput(4)" @keydown="handleBackspace(4, $event)" type="text">
+				<input v-model="twoFactorCode[5]" maxlength="1" class="input-2fa" @input="handleInput(5)" @keydown="handleBackspace(5, $event)" type="text">
+			</div>
 		</div>
+</div>
+
 	</div>
 </template>
 
 <script setup lang="ts">
-	import { ref, onMounted, watch } from 'vue';
+	import { ref, onMounted, watch, nextTick } from 'vue';
 	import axios from 'axios';
 	import { useUserStore } from '../stores/UserStore';
 	import QrcodeVue from 'qrcode.vue';
@@ -43,10 +54,12 @@
 	const { username } = storeToRefs(store);
 	const { profile_picture } = storeToRefs(store);
 	const usernameInput = ref<HTMLInputElement | null>(null);
+	const inputField1 = ref<HTMLInputElement | null>(null);
 	const isEditing = ref(false);
 	const showDropIcon = ref(false);
 	const qrCodeVisible = ref(false);
 	const qrCodeValue = ref('');
+	const twoFactorCode = ref(["", "", "", "", "", ""]);
 
 	watch(isEditing, (editing) => {
 		if (editing) {
@@ -138,6 +151,35 @@
 		const otpauthUrl = response.data.qrCode;
 		qrCodeValue.value = otpauthUrl;
 		qrCodeVisible.value = true;
+		await nextTick();
+		inputField1.value?.focus();
+	}
+
+	async function handleInput(index: number) {
+		if (twoFactorCode.value[index].length === 1) {
+			if (index < 5) {
+				(document.querySelector(`.input-2fa:nth-child(${index + 2})`) as HTMLElement).focus();
+			} else {
+				const response = await axios.post(`http://${location.hostname}:3000/2fa/verify`, { intra: store.intra, token: twoFactorCode.value.join('') });
+				if (response.data.message)
+					hideQRCode();
+				else
+					alert("2FA token is invalid!")
+					twoFactorCode.value = Array(6).fill('');
+  					inputField1.value?.focus();
+			}
+		}
+	}
+
+	function handleBackspace(index: number, event: KeyboardEvent) {
+		if (event.key === 'Backspace') {
+			const previousInput = index - 1;
+			if (previousInput >= 0) {
+				twoFactorCode[previousInput] = '';
+				const inputFields = document.querySelectorAll<HTMLInputElement>('.input-2fa');
+				inputFields[previousInput]?.focus();
+			}
+		}
 	}
 
 	function hideQRCode() {
@@ -302,10 +344,37 @@
 		z-index: 1000;
 	}
 
+	.qr-code-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+
 	.qr-code {
 		width: 30vw;
 		height: 30vw;
 		object-fit: contain;
+	}
+
+	.input-container {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: 1.5vw;
+		padding: 1rem;
+	}
+
+
+	.input-2fa {
+		font-family: 'ibm-3270';
+		width: 2ch;
+		background-color: transparent;
+		color: white;
+		border: 0.5px solid rgb(255, 255, 255);
+		text-align: center;
+		font-size: 3.5vw;
+		outline: none;
+		margin-top: 1vh;
 	}
 
 </style>
