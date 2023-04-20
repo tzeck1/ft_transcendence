@@ -72,13 +72,14 @@
 
 			onMounted(async () => {
 				try {
-					if (!store.intra)
+					if (getUsernameFromCookie()) {
 						store.setIntra(getUsernameFromCookie());
-					const response = await axios.get(`http://${location.hostname}:3000/auth/getUserData?intra=${store.intra}`);
-					const data = response.data;
-					store.setUsername(data.username);
-					store.setProfilePicture(data.avatarUrl);
-					store.setTFA(data.tfa_enabled);
+						const response = await axios.get(`http://${location.hostname}:3000/auth/getUserData?intra=${store.intra}`);
+						const data = response.data;
+						store.setUsername(data.username);
+						store.setProfilePicture(data.avatarUrl);
+						store.setTFA(data.tfa_enabled);
+					}
 				} catch (error) {
 					console.error('Error fetching user data:', error);
 				}

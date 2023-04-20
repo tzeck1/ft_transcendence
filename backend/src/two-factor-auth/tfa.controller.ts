@@ -36,10 +36,11 @@ export class TwoFactorAuthController {
 		return { message: '2FA token verified successfully' };
 	}
 
-	@UseGuards(JwtAuthGuard)
+	// @UseGuards(JwtAuthGuard)
 	@Get('disable')
-	async disable2FA(@Request() req) {
-		await this.userService.set2FASecret(req.user.id, null);
+	async disable2FA(@Query('intra') intra: string) {
+		await this.userService.set2FASecret(intra, null);
+		await this.userService.setTFA(intra, false);
 		return { message: '2FA disabled successfully' };
 	}
 }

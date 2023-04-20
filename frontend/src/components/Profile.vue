@@ -1,6 +1,6 @@
 <template>
 	<div class="profile">
-		<div class="content-wrapper" :class="{ blur: qrCodeVisible }">
+		<div class="content-wrapper" :class="{ blur: qrCodeVisible || showTFA }">
 			<div class="sidebar">
 				<div class="profile-picture-drop-area" @dragenter.prevent.stop="highlight" @dragover.prevent.stop="highlight" @dragleave.prevent.stop="unhighlight" @drop.prevent.stop="handleDrop">
 					<img id="profile-picture" class="profile-picture" :src="profile_picture" alt="Profile picture" />
@@ -17,7 +17,7 @@
 					</div>
 				</div>
 				<img class="rank" src="../assets/rank.png" alt="Rank" />
-				<button class="two-factor-button" @click="enable2FA">Enable 2FA</button>
+				<button class="two-factor-button" @click="toggle2FA">{{ twoFactorButtonText }}</button>
 			</div>
 			<div class="grid">
 				<div class="grid-item">Match History</div>
@@ -26,10 +26,11 @@
 				<div class="grid-item">Statistics</div>
 			</div>
 		</div>
-		<div v-if="qrCodeVisible" class="qr-code-overlay" @click="hideQRCode">
+		<div v-if="qrCodeVisible || showTFA" class="qr-code-overlay" @click="hideQRCode">
 		<div class="qr-code-container">
 			<img v-if="qrCodeVisible" :src="qrCodeValue" alt="QR Code" class="qr-code">
-			<div class="input-container">
+			<span v-if="showTFA" class="tfa-text" >Please enter your 2FA code</span>
+			<div v-if="showTFA" class="input-container">
 				<input ref="inputField1" v-model="twoFactorCode[0]" maxlength="1" class="input-2fa" @input="handleInput(0)" @keydown="handleBackspace(0, $event)" type="text">
 				<input v-model="twoFactorCode[1]" maxlength="1" class="input-2fa" @input="handleInput(1)" @keydown="handleBackspace(1, $event)" type="text">
 				<input v-model="twoFactorCode[2]" maxlength="1" class="input-2fa" @input="handleInput(2)" @keydown="handleBackspace(2, $event)" type="text">
@@ -44,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-	import { ref, onMounted, watch, nextTick } from 'vue';
+	import { ref, onMounted, watch, nextTick, computed } from 'vue';
 	import axios from 'axios';
 	import { useUserStore } from '../stores/UserStore';
 	import QrcodeVue from 'qrcode.vue';
@@ -58,8 +59,10 @@
 	const isEditing = ref(false);
 	const showDropIcon = ref(false);
 	const qrCodeVisible = ref(false);
+	const showTFA = ref(false);
 	const qrCodeValue = ref('');
 	const twoFactorCode = ref(["", "", "", "", "", ""]);
+	const twoFactorButtonText = computed(() => store.tfa_enabled ? "Disable 2FA" : "Enable 2FA");
 
 	watch(isEditing, (editing) => {
 		if (editing) {
@@ -147,11 +150,26 @@
 		}
 	}
 
+	async function toggle2FA() {
+		if (store.tfa_enabled) {
+			await disable2FA();
+		} else {
+			await enable2FA();
+		}
+	}
+
 	async function enable2FA() {
 		const response = await axios.get(`http://${location.hostname}:3000/2fa/enable?intra=${store.intra}`);
 		const otpauthUrl = response.data.qrCode;
 		qrCodeValue.value = otpauthUrl;
 		qrCodeVisible.value = true;
+		showTFA.value = true;
+		await nextTick();
+		inputField1.value?.focus();
+	}
+
+	async function disable2FA() {
+		showTFA.value = true;
 		await nextTick();
 		inputField1.value?.focus();
 	}
@@ -164,7 +182,12 @@
 				const response = await axios.post(`http://${location.hostname}:3000/2fa/verify`, { intra: store.intra, token: twoFactorCode.value.join('') });
 				if (response.data.message) {
 					hideQRCode();
-					store.setTFA(true);
+					if (!store.tfa_enabled)
+						store.setTFA(true);
+					else {
+						await axios.get(`http://${location.hostname}:3000/2fa/disable?intra=${store.intra}`);
+						store.setTFA(false);
+					}
 				}
 				else
 					alert("2FA token is invalid!")
@@ -187,6 +210,7 @@
 
 	function hideQRCode() {
 		qrCodeVisible.value = false;
+		showTFA.value = false;
 	}
 
 </script>
@@ -378,6 +402,14 @@
 		font-size: 3.5vw;
 		outline: none;
 		margin-top: 1vh;
+	}
+
+	.tfa-text{
+		display: inline-flex;
+		align-items: center; 
+		margin-top: 8vh;
+		margin-bottom: 2vh;
+		font-size: 2.5vh;
 	}
 
 </style>

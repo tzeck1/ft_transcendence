@@ -10,7 +10,7 @@ export declare class TwoFactorAuthController {
     verify2FA(intra: string, token: string): Promise<{
         message: string;
     }>;
-    disable2FA(req: any): Promise<{
+    disable2FA(intra: string): Promise<{
         message: string;
     }>;
 }
