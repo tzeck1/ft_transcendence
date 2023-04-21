@@ -21,6 +21,7 @@
 				<input v-model="twoFactorCode[4]" maxlength="1" class="input-2fa" @input="handleInput(4)" @keydown="handleBackspace(4, $event)" type="text">
 				<input v-model="twoFactorCode[5]" maxlength="1" class="input-2fa" @input="handleInput(5)" @keydown="handleBackspace(5, $event)" type="text">
 		</div>
+		<span v-if="showTFAerror" class="tfa-error" >The 2fa token you entered is invalid!</span>
 		<IntroGame></IntroGame>
 	</div>
 </template>
@@ -45,6 +46,7 @@
 			const inputField1 = ref<HTMLInputElement | null>(null);
 			const showInput = ref(false);
 			const showTFA = ref(false);
+			const showTFAerror = ref(false);
 			const showAuth = ref(true);
 
 			const auth_intra = async () => {
@@ -106,7 +108,7 @@
 							router.push('/profile');
 						}
 						else
-							alert("2FA token is invalid!")
+							showTFAerror.value = true;
 							twoFactorCode.value = Array(6).fill('');
 							inputField1.value?.focus();
 					}
@@ -124,7 +126,7 @@
 				}
 			};
 
-			return { auth_intra, onMounted, handleInput, handleBackspace, twoFactorCode, inputField1, showInput, showTFA, showAuth };
+			return { auth_intra, onMounted, handleInput, handleBackspace, twoFactorCode, inputField1, showInput, showTFA, showTFAerror, showAuth };
 		},
 	});
 </script>
@@ -168,6 +170,15 @@
 		margin-top: 8vh;
 		margin-bottom: 2vh;
 		font-size: 2.5vh;
+	}
+
+	.tfa-error {
+		display: inline-flex;
+		align-items: center; 
+		margin-top: 1vh;
+		font-size: 1.5vh;
+		color: rgb(247, 65, 65);
+		animation: glowing-error 3s infinite;
 	}
 
 	.input-container {

@@ -16,6 +16,7 @@
 						</button>
 					</div>
 				</div>
+				<span v-if="showUsernameError" class="username-error" >Username already in use!</span>
 				<img class="rank" src="../assets/rank.png" alt="Rank" />
 				<button class="two-factor-button" @click="toggle2FA">{{ twoFactorButtonText }}</button>
 			</div>
@@ -38,6 +39,7 @@
 				<input v-model="twoFactorCode[4]" maxlength="1" class="input-2fa" @input="handleInput(4)" @keydown="handleBackspace(4, $event)" type="text">
 				<input v-model="twoFactorCode[5]" maxlength="1" class="input-2fa" @input="handleInput(5)" @keydown="handleBackspace(5, $event)" type="text">
 			</div>
+			<span v-if="showTFAerror" class="tfa-error" >The 2fa token you entered is invalid!</span>
 		</div>
 </div>
 
@@ -60,6 +62,8 @@
 	const showDropIcon = ref(false);
 	const qrCodeVisible = ref(false);
 	const showTFA = ref(false);
+	const showTFAerror = ref(false);
+	const showUsernameError = ref(false);
 	const qrCodeValue = ref('');
 	const twoFactorCode = ref(["", "", "", "", "", ""]);
 	const twoFactorButtonText = computed(() => store.tfa_enabled ? "Disable 2FA" : "Enable 2FA");
@@ -78,7 +82,12 @@
 		// alert(usernameInput.value);
 		const response = await axios.post(`http://${location.hostname}:3000/users/setUsername`, { intra: store.intra, username: username.value });
 		if (response.data)
+		{
 			isEditing.value = false;
+			showUsernameError.value = false;
+		}
+		else
+			showUsernameError.value = true;
 	}
   
 	function toggleEditing() {
@@ -158,6 +167,12 @@
 		}
 	}
 
+	function hideQRCode() {
+		qrCodeVisible.value = false;
+		showTFA.value = false;
+		showTFAerror.value = false;
+	}
+
 	async function enable2FA() {
 		const response = await axios.get(`http://${location.hostname}:3000/2fa/enable?intra=${store.intra}`);
 		const otpauthUrl = response.data.qrCode;
@@ -174,26 +189,30 @@
 		inputField1.value?.focus();
 	}
 
+	async function verify2FA() {
+		const response = await axios.post(`http://${location.hostname}:3000/2fa/verify`, { intra: store.intra, token: twoFactorCode.value.join('') });
+		if (response.data.message) {
+			hideQRCode();
+			if (!store.tfa_enabled)
+				store.setTFA(true);
+			else {
+				await axios.get(`http://${location.hostname}:3000/2fa/disable?intra=${store.intra}`);
+				store.setTFA(false);
+			}
+		}
+		else
+			showTFAerror.value = true;
+
+		twoFactorCode.value = Array(6).fill('');
+		inputField1.value?.focus();
+	}
+
 	async function handleInput(index: number) {
 		if (twoFactorCode.value[index].length === 1) {
 			if (index < 5) {
 				(document.querySelector(`.input-2fa:nth-child(${index + 2})`) as HTMLElement).focus();
-			} else {
-				const response = await axios.post(`http://${location.hostname}:3000/2fa/verify`, { intra: store.intra, token: twoFactorCode.value.join('') });
-				if (response.data.message) {
-					hideQRCode();
-					if (!store.tfa_enabled)
-						store.setTFA(true);
-					else {
-						await axios.get(`http://${location.hostname}:3000/2fa/disable?intra=${store.intra}`);
-						store.setTFA(false);
-					}
-				}
-				else
-					alert("2FA token is invalid!")
-					twoFactorCode.value = Array(6).fill('');
-  					inputField1.value?.focus();
-			}
+			} else
+				verify2FA();
 		}
 	}
 
@@ -206,11 +225,6 @@
 				inputFields[previousInput]?.focus();
 			}
 		}
-	}
-
-	function hideQRCode() {
-		qrCodeVisible.value = false;
-		showTFA.value = false;
 	}
 
 </script>
@@ -404,12 +418,29 @@
 		margin-top: 1vh;
 	}
 
-	.tfa-text{
+	.tfa-text {
 		display: inline-flex;
 		align-items: center; 
 		margin-top: 8vh;
 		margin-bottom: 2vh;
 		font-size: 2.5vh;
+	}
+
+	.tfa-error {
+		display: inline-flex;
+		align-items: center; 
+		margin-top: 1vh;
+		font-size: 1.5vh;
+		color: rgb(247, 65, 65);
+		animation: glowing-error 3s infinite;
+	}
+	.username-error {
+		display: inline-flex;
+		align-items: center; 
+		margin-top: 1.5vh;
+		font-size: 1.19vh;
+		color: rgb(247, 65, 65);
+		animation: glowing-error 3s infinite;
 	}
 
 </style>

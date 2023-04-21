@@ -165,6 +165,18 @@
 		}
 	}
 
+	@keyframes glowing-error {
+		0% {
+			text-shadow: 0 0 25px rgb(255, 65, 65);
+		}
+		50% {
+			text-shadow: 0 0 25px rgb(255, 65, 65);
+		}
+		100% {
+			text-shadow: 0 0 25px rgb(255, 65, 65);
+		}
+	}
+
 	.icon {
 		width: 40px;
 		height: 100%;
