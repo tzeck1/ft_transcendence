@@ -31,7 +31,7 @@
 	import { useRouter } from 'vue-router';
 	import { useUserStore } from '../stores/UserStore';
 	import axios from 'axios';
-	import IntroGame from './IntroGame.vue';
+	import IntroGame from '../components/IntroArt.vue';
 
 	export default defineComponent({
 		name: 'Intro',

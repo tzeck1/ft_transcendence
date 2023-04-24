@@ -1,10 +1,8 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import type { RouteRecordRaw } from 'vue-router';
-import Intro from '../components/Intro.vue';
-import Profile from '../components/Profile.vue';
-import Game from '../components/Game.vue';
-import StartGame from '../components/StartGame.vue';
-import EndGame from '../components/EndGame.vue';
+import Intro from '../views/Intro.vue';
+import Profile from '../views/Profile.vue';
+import Game from '../views/Game.vue';
 
 const routes: Array<RouteRecordRaw> = [
 	{
@@ -21,16 +19,6 @@ const routes: Array<RouteRecordRaw> = [
 		path: '/game',
 		name: 'Game',
 		component: Game,
-	},
-	{
-		path: '/start',
-		name: 'StartGame',
-		component: StartGame,
-	},
-	{
-		path: '/end',
-		name: 'EndGame',
-		component: EndGame,
 	},
 ];
 
