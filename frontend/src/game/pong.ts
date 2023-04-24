@@ -26,7 +26,7 @@ export default class Pong extends Phaser.Scene {
 	}
 
 	preload() {
-		const assetsUrl = new URL('../assets/', import.meta.url);
+		const assetsUrl = new URL('../assets/game', import.meta.url);
 
 		this.load.image("back", assetsUrl + "/back.png");
 		this.load.image("player", assetsUrl + "/paddle.png");

@@ -17,7 +17,7 @@
 					</div>
 				</div>
 				<span v-if="showUsernameError" class="username-error" >Username already in use!</span>
-				<img class="rank" src="../assets/rank.png" alt="Rank" />
+				<img class="rank" src="../assets/ranks/floppy_2.png" alt="Rank" />
 				<button class="two-factor-button" @click="toggle2FA">{{ twoFactorButtonText }}</button>
 			</div>
 			<div class="grid">
@@ -252,7 +252,7 @@
 
 	.rank {
 		width: 5vw;
-		height: 5vw;
+		height: auto;
 		margin-top: 2vw;
 		margin-bottom: 1vw;
 	}
