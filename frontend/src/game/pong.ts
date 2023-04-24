@@ -1,4 +1,5 @@
 import Phaser, {Game } from 'phaser';
+import router from '@/router';
 
 export default class Pong extends Phaser.Scene {
 	private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -141,8 +142,12 @@ export default class Pong extends Phaser.Scene {
 			this.enemy_scored = true;
 		}
 		if (this.score1 == 11 || this.score2 == 11)
-			this.scene.start("end");
-		this.spawn_ball();
+		{
+			this.scene.stop();
+			router.push('/end');
+		}
+		else
+			this.spawn_ball();
 	}
 
 	spawn_ball() {

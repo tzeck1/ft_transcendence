@@ -22,8 +22,9 @@
 						<router-link to="/profile" v-slot="{ navigate, isActive }">
 							<button id="profileButton" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro">Profile</button>
 						</router-link>
-						<router-link to="/game" v-slot="{ navigate, isActive }">
-							<button id="game-button" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro">Game</button>
+						<router-link to="/start" v-slot="{ navigate, isActive }">
+							<!-- <button id="game-button" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro">Game</button> -->
+							<button id="game-button" @click="navigate" :class="{'active-button': isActive}" >Game</button>
 						</router-link>
 						<button :disabled="isIntro">Leaderboard</button>
 				</div>
