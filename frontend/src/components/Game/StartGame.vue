@@ -72,8 +72,14 @@ const compSetClass = computed(() => {
 
 <style scoped>
 
+	/* @font-face {
+		font-family: ibm-3270;
+		src: url('./assets/3270-Regular.ttf') format('truetype');
+	} */
+
 	.slideshow {
 		@apply w-screen flex items-center justify-center;
+		/* font-family: 'ibm-3270', monospace; */
 		height: 100%;
 		/* top: 50%; */
   		-ms-transform: translateY(25%);
@@ -94,7 +100,7 @@ const compSetClass = computed(() => {
 	}
 
 	.block-title {
-		@apply block text-center mt-4;
+		@apply block text-center mt-4 text-xl;
 	}
 
 	.fun-block-visible {

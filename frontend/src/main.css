@@ -1,3 +1,32 @@
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
+
+
+@layer base {
+
+	@font-face {
+		font-family: ibm-3270;
+		src: url('./assets/3270-Regular.ttf') format('truetype');
+	}
+
+	* {
+		font-family: 'ibm-3270', monospace;
+		text-shadow: 0 0 25px rgb(255, 255, 255);
+	}
+	
+	html, body {
+		@apply bg-no-repeat bg-cover text-white h-full;
+		background-image: url("./assets/bg.gif");
+	}
+
+	button {
+		@apply bg-transparent text-white rounded-2xl px-16 py-8;
+		font-family: 'ibm-3270', monospace;
+	}
+
+	button:hover {
+		@apply bg-white bg-opacity-10;
+	}
+
+}

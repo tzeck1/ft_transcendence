@@ -230,8 +230,18 @@
 </script>
 
 <style scoped>
+
+	/* @font-face {
+		font-family: ibm-3270;
+		src: url('./assets/3270-Regular.ttf') format('truetype');
+	}
+
+	* {
+		font-family: 'ibm-3270', monospace;
+	} */
 	.sidebar {
-		display: flex;
+		@apply flex flex-col items-center justify-center p-8 w-1/5 min-h-full;
+		/* display: flex;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
@@ -239,15 +249,17 @@
 		width: 20%;
 		min-height: 100%;
 		overflow-y: auto;
-		overflow-x: hidden;
+		overflow-x: hidden; */
 	}
 
 	.profile-picture {
+		@apply rounded-full object-cover w-48 h-48 my-10;
+		/* object-fit: cover;
 		width: 15vw;
 		height: 15vw;
 		border-radius: 50%;
 		margin-top: 2vw;
-		margin-bottom: 2vw;
+		margin-bottom: 2vw; */
 	}
 
 	.rank {
@@ -258,13 +270,15 @@
 	}
 
 	.grid {
+		@apply grid-cols-2 gap-4 w-4/5 h-full p-8 overflow-y-auto;
 		display: grid;
+		/* display: grid;
 		grid-template-columns: repeat(2, 1fr);
 		grid-gap: 1rem;
 		width: 80%;
 		padding: 2rem;
 		overflow-y: auto;
-		height: 100%;
+		height: 100%; */
 	}
 
 	.grid-item {
