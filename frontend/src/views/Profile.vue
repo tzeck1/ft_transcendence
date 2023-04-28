@@ -8,7 +8,7 @@
 				</div>
 				<div class="name-container">
 					<div class="username-wrapper">
-						<h1 v-show="!isEditing">{{ username }}</h1>
+						<h1 class="username-text" v-show="!isEditing">{{ username }}</h1>
 						<input ref="usernameInput" v-show="isEditing" v-model="username" @input="resizeInput" type="text" id="edit-username"/>
 						<button @click="toggleEditing" id="toggle-username">
 							<span v-show="!isEditing">&#x270E;</span>
@@ -231,96 +231,50 @@
 
 <style scoped>
 
-	/* @font-face {
-		font-family: ibm-3270;
-		src: url('./assets/3270-Regular.ttf') format('truetype');
-	}
-
-	* {
-		font-family: 'ibm-3270', monospace;
-	} */
 	.sidebar {
 		@apply flex flex-col items-center justify-center p-8 w-1/5 min-h-full;
-		/* display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		padding: 2rem;
-		width: 20%;
-		min-height: 100%;
-		overflow-y: auto;
-		overflow-x: hidden; */
 	}
 
 	.profile-picture {
 		@apply rounded-full object-cover w-48 h-48 my-10;
-		/* object-fit: cover;
-		width: 15vw;
-		height: 15vw;
-		border-radius: 50%;
-		margin-top: 2vw;
-		margin-bottom: 2vw; */
 	}
 
 	.rank {
-		width: 5vw;
-		height: auto;
-		margin-top: 2vw;
-		margin-bottom: 1vw;
+		@apply w-16 h-full mt-8;
 	}
 
 	.grid {
 		@apply grid-cols-2 gap-4 w-4/5 h-full p-8 overflow-y-auto;
 		display: grid;
-		/* display: grid;
-		grid-template-columns: repeat(2, 1fr);
-		grid-gap: 1rem;
-		width: 80%;
-		padding: 2rem;
-		overflow-y: auto;
-		height: 100%; */
 	}
 
 	.grid-item {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		background-color: rgba(0, 0, 0, 0.5);
-		border-radius: 25px;
-		padding: 1rem;
-		font-size: 1.5vw;
+		@apply flex justify-center items-center bg-black bg-opacity-50 rounded-2xl text-3xl;
 	}
 
 	.profile {
-		display: flex;
-		flex-grow: 1;
-		flex-shrink: 0;
-		overflow: hidden;
+		@apply flex overflow-hidden;
 	}
 
 	.two-factor-button {
-		margin-top: auto;
+		@apply mt-4 text-2xl;
 	}
 	
-	.name-container {
-		display: flex;
-		justify-content: center;
-		width: 100%;
-	}
+	/* .name-container {
+		@apply flex justify-center w-full;
+	} */
 
 	.username-wrapper {
-		display: inline-flex;
-		position: relative;
-		font-size: 1.25vw;
+		@apply justify-center inline-flex items-center relative text-4xl;
 	}
 
-	#username span {
-		position: relative;
-		z-index: 1;
+	.username-text {
+		@apply border justify-center items-center;
 	}
 
 	#toggle-username {
-		font-family: 'ibm-3270', monospace;
+		@apply align-middle justify-center items-center p-3 ;
+		/* font-family: 'ibm-3270', monospace;
 		position: absolute;
 		left: 110%;
 		top: 50%;
@@ -332,7 +286,7 @@
 		cursor: pointer;
 		outline: none;
 		padding: 5px;
-		margin-left: 1vw;
+		margin-left: 1vw; */
 	}
 
 	#toggle-username:hover {
@@ -354,32 +308,23 @@
 	}
 
 	.profile-picture-drop-area {
-		position: relative;
+		@apply relative;
 	}
 
 	.profile-picture-drop-area.highlight .profile-picture {
-		opacity: 0.5;
+		@apply opacity-50;
 	}
 
 	.drop-icon {
-		display: none;
-		font-size: 15rem;
-		position: absolute;
-		top: 50%;
-		left: 50%;
-		transform: translate(-50%, -50%);
-		color: white;
+		@apply text-9xl absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2;
 	}
 
 	.profile-picture-drop-area.highlight .drop-icon {
-		display: block;
+		@apply block;
 	}
 
 	.content-wrapper {
-		display: flex;
-		flex-grow: 1;
-		flex-shrink: 0;
-		overflow: hidden;
+		@apply flex flex-grow flex-shrink-0 overflow-hidden
 	}
 
 	.blur {
@@ -387,74 +332,35 @@
 	}
 
 	.qr-code-overlay {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		background-color: rgba(0, 0, 0, 0.5);
-		z-index: 1000;
+		@apply fixed w-full h-full flex items-center justify-center z-50 top-0 bg-black bg-opacity-50;
 	}
 
 	.qr-code-container {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
+		@apply flex flex-col items-center;
 	}
 
 	.qr-code {
-		width: 30vw;
-		height: 30vw;
-		object-fit: contain;
+		@apply w-full h-full;
 	}
 
 	.input-container {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		gap: 1.5vw;
-		padding: 1rem;
+		@apply flex gap-6;
 	}
 
-
 	.input-2fa {
-		font-family: 'ibm-3270';
-		width: 2ch;
-		background-color: transparent;
-		color: white;
-		border: 0.5px solid rgb(255, 255, 255);
-		text-align: center;
-		font-size: 3.5vw;
-		outline: none;
-		margin-top: 1vh;
+		@apply w-16 h-16 bg-transparent border border-white text-center text-4xl;
 	}
 
 	.tfa-text {
-		display: inline-flex;
-		align-items: center; 
-		margin-top: 8vh;
-		margin-bottom: 2vh;
-		font-size: 2.5vh;
+		@apply inline-flex text-4xl mt-36 mb-10;
 	}
 
 	.tfa-error {
-		display: inline-flex;
-		align-items: center; 
-		margin-top: 1vh;
-		font-size: 1.5vh;
-		color: rgb(247, 65, 65);
-		animation: glowing-error 3s infinite;
+		@apply inline-flex text-2xl text-red-500 mt-6;
 	}
 	.username-error {
-		display: inline-flex;
-		align-items: center; 
-		margin-top: 1.5vh;
-		font-size: 1.19vh;
-		color: rgb(247, 65, 65);
-		animation: glowing-error 3s infinite;
+		@apply inline-flex items-center mt-2 text-xl text-red-500 ;
+		text-shadow: 0 0 25px rgb(255, 65, 65);
 	}
 
 </style>
