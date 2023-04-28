@@ -39,12 +39,7 @@
 </template>
 
 <style global>
-	* {
-		margin: 0;
-		padding: 0;
-		box-sizing: border-box;
-	}
-	
+
 	@font-face {
 		font-family: ibm-3270;
 		src: url('./assets/3270-Regular.ttf') format('truetype');
@@ -56,15 +51,9 @@
 	}
 
 	html, body {
+		@apply flex flex-col bg-no-repeat bg-cover text-white h-full;
 		font-family: 'ibm-3270', monospace;
 		background-image: url("./assets/bg.gif");
-		background-size: cover;
-		background-repeat: no-repeat;
-		color: white;
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-		font-size: 1vh;
 	}
 
 	body, body * {
@@ -72,85 +61,77 @@
 	}
 
 	button {
-		background-color: transparent;
-		color: rgb(255, 255, 255);
-		border: 1px solid rgba(255, 255, 255, 0);
-		border-radius: 25px;
-		padding: 2vh 5vh;
-		cursor: pointer;
-		outline: none;
-		font-size: 2vh;
+		@apply bg-transparent text-4xl text-white rounded-2xl px-16 py-8;
 		font-family: 'ibm-3270', monospace;
 	}
 
+	button:hover {
+		@apply bg-white bg-opacity-10;
+	}
+
 	button:disabled:hover {
-		background-color: transparent;
+		@apply bg-transparent;
 	}
 	
 	header {
-		display: flex;
+		@apply flex justify-between align-middle p-4 ;
+		/* display: flex;
 		justify-content: space-between;
 		align-items: center;
 		padding: 1rem;
-		flex-shrink: 0;
+		flex-shrink: 0; */
 	}
 
 	nav {
-		display: flex;
+		@apply flex flex-row justify-between align-middle w-full;
+		/* display: flex;
 		justify-content: space-between;
 		align-items: center;
-		width: 100%;
+		width: 100%; */
 	}
 	
 	.logo {
-		display: flex;
-		font-family: ibm-logo;
-		font-size: 3rem;
-		margin-left: 3vw;
+		@apply justify-center align-middle text-white text-5xl ml-2 mt-2;
+		font-family: 'ibm-logo';
 	}
 
 	.nav-buttons {
-		display: flex;
+		@apply inline-flex justify-center align-middle flex-grow gap-6 text-2xl rounded-2xl px-8 py-8;
+		 /* text-4xl text-white  */
+		font-family: 'ibm-3270', monospace;
+		/* display: flex;
 		justify-content: center;
 		align-items: center;
-		flex-grow: 1;
-	}
-	
-	button:hover {
-		background-color: rgba(255, 255, 255, 0.1);
+		flex-grow: 1; */
 	}
 	
 	.active-button {
-		background-color: rgba(255, 255, 255, 0.1);
+		@apply bg-white bg-opacity-10;
+		/* background-color: rgba(255, 255, 255, 0.1); */
 	}
 
 	.game-button {
-		margin-left: 2vw;
+		@apply text-4xl;
+		/* margin-left: 2vw;
 		margin-right: 2vw;
-		font-size: 3.5vh;
+		font-size: 3.5vh; */
 	}
 
 	.logout-button {
-		display: flex;
+		@apply inline-flex justify-center align-middle w-24 h-full;
+		/* display: flex;
 		justify-content: center;
 		align-items: center;
 		width: 100px;
-		height: 100%;
+		height: 100%; */
 	}
 
 	.logout-button img {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		width: 100px;
-		height: auto;
-		transition: transform 0.3s;
-		margin-right: 2vw;
+		@apply inline-flex justify-center align-middle w-24 h-full;
 	}
 
 	.logout-button:hover {
 		transform: scale(1.1);
-		cursor: pointer;
 	}
 
 	@keyframes glowing {
@@ -175,12 +156,6 @@
 		100% {
 			text-shadow: 0 0 25px rgb(255, 65, 65);
 		}
-	}
-
-	.icon {
-		width: 40px;
-		height: 100%;
-		margin-left: 1vh;
 	}
 
 	@media (max-width: 768px) {

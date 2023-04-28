@@ -133,72 +133,56 @@
 
 
 <style scoped>
-	.auth-intra {
-		display: inline-flex;
-		align-items: center; 
-		margin-top: 8vh;
-		margin-bottom: 2vh;
+
+	@font-face {
+		font-family: ibm-3270;
+		src: url('./assets/3270-Regular.ttf') format('truetype');
 	}
 
 	.intro {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		height: 100%;
-		margin-top: 5vh;
+		@apply w-full flex flex-col justify-center items-center mt-32 transition-all duration-300 ease-in-out;
+		font-family: 'ibm-3270', monospace;
+	}
+
+	button {
+		@apply bg-transparent text-4xl text-white rounded-2xl px-16 py-8;
+		font-family: 'ibm-3270', monospace;
+	}
+
+	button:hover {
+		@apply bg-white bg-opacity-10;
+	}
+
+	.auth-intra {
+		@apply inline-flex items-center mt-16;
+	}
+
+	.icon {
+		@apply justify-center align-middle w-10 h-full ml-6;
 	}
 
 	.intro h1 {
-		font-size: 4vh;
-		/* margin-top: 1vh; */
+		@apply text-7xl;
 	}
 
 	.intro p {
-		font-size: 1.5vh;
-		margin-top: 2vh;
-	}
-	
-	.intro a {
-		color: white;
-		text-decoration: none;
+		@apply text-2xl mt-8;
 	}
 
 	.tfa-text{
-		display: inline-flex;
-		align-items: center; 
-		margin-top: 8vh;
-		margin-bottom: 2vh;
-		font-size: 2.5vh;
+		@apply inline-flex text-4xl mt-36 mb-10;
 	}
 
 	.tfa-error {
-		display: inline-flex;
-		align-items: center; 
-		margin-top: 1vh;
-		font-size: 1.5vh;
-		color: rgb(247, 65, 65);
-		animation: glowing-error 3s infinite;
+		@apply inline-flex text-2xl text-red-500 mt-6;
 	}
 
 	.input-container {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		gap: 1.5vw;
-		padding: 1rem;
+		@apply flex gap-6;
 	}
 
 	.input-2fa {
-		font-family: 'ibm-3270';
-		width: 2ch;
-		background-color: transparent;
-		color: white;
-		border: 0.5px solid rgb(255, 255, 255);
-		text-align: center;
-		font-size: 3.5vw;
-		outline: none;
-		margin-top: 1vh;
+		@apply w-16 h-16 bg-transparent border border-white text-center text-4xl;
 	}
 
 </style>
