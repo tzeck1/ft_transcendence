@@ -140,7 +140,7 @@
 	}
 
 	.intro {
-		@apply container w-full flex flex-col justify-center items-center mt-32 transition-all duration-300 ease-in-out;
+		@apply flex flex-col justify-center items-center mt-32 transition-all duration-300 ease-in-out;
 		font-family: 'ibm-3270', monospace;
 	}
 
@@ -154,7 +154,7 @@
 	}
 
 	.auth-intra {
-		@apply inline-flex items-center mt-16;
+		@apply animate-pulse text-3vh inline-flex items-center mt-16;
 	}
 
 	.icon {
@@ -162,11 +162,11 @@
 	}
 
 	.intro h1 {
-		@apply text-7xl;
+		@apply text-5vh;
 	}
 
 	.intro p {
-		@apply text-2xl mt-8;
+		@apply text-2vh mt-8;
 	}
 
 	.tfa-text{

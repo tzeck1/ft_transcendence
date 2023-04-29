@@ -49,7 +49,7 @@
 		@apply container mx-auto flex items-center justify-between  transition-all duration-300 ease-in-out;
 	}
 	.nav-buttons {
-		@apply hidden md:flex items-center space-x-4;
+		@apply hidden md:flex items-center text-2xl space-x-4;
 	}
 
 	.logo {
@@ -67,6 +67,7 @@
 
 	.game-button {
 		@apply text-4xl;
+		/* font-weight: bold; */
 	}
 
 	.logout-button {

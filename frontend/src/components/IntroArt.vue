@@ -575,17 +575,8 @@
 </script>
 
 <style scoped>
-	intro_game {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		width: 30rem;
-		height: 100%;
-	}
-
-	.intro-ascii {
-		margin-top: 7vh;
-		font-size: 1vh;
+	.intro_game {
+    @apply flex flex-col items-center mt-24 text-1vh;
 	}
 
 </style>
