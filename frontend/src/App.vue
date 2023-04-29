@@ -45,21 +45,16 @@
 		src: url('./assets/mib.ttf') format('truetype');
 	}
 
-	header {
-		@apply flex justify-between items-center p-4;
-	}
-
 	nav {
-		@apply flex flex-row justify-between items-center w-full;
+		@apply container mx-auto flex items-center justify-between  transition-all duration-300 ease-in-out;
+	}
+	.nav-buttons {
+		@apply hidden md:flex items-center space-x-4;
 	}
 
 	.logo {
-		@apply inline-flex justify-center align-middle text-white text-5xl;
+		@apply text-white text-5xl flex items-center;
 		font-family: 'ibm-logo';
-	}
-
-	.nav-buttons {
-		@apply flex justify-center items-center flex-grow gap-6 text-2xl rounded-2xl py-6;
 	}
 
 	.active-button {
@@ -75,11 +70,7 @@
 	}
 
 	.logout-button {
-		@apply inline-flex justify-center align-middle w-24 h-auto;
-	}
-
-	.logout-button img {
-		@apply inline-flex justify-center align-middle w-24 h-full;
+		@apply flex items-center w-24 h-auto;
 	}
 
 	.logout-button:hover {

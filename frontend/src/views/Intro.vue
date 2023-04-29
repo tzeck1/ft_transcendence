@@ -140,7 +140,7 @@
 	}
 
 	.intro {
-		@apply w-full flex flex-col justify-center items-center mt-32 transition-all duration-300 ease-in-out;
+		@apply container w-full flex flex-col justify-center items-center mt-32 transition-all duration-300 ease-in-out;
 		font-family: 'ibm-3270', monospace;
 	}
 
