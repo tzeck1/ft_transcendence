@@ -3,20 +3,20 @@
 		<div class="content-wrapper" :class="{ blur: qrCodeVisible || showTFA }">
 			<div class="sidebar">
 				<div class="profile-picture-drop-area" @dragenter.prevent.stop="highlight" @dragover.prevent.stop="highlight" @dragleave.prevent.stop="unhighlight" @drop.prevent.stop="handleDrop">
-					<img id="profile-picture" class="profile-picture" :src="profile_picture" alt="Profile picture" />
+					<img id="profile-picture" class="profile-picture" :src="profile_picture"/>
 					<div class="drop-icon" v-show="showDropIcon">&#x21E3;</div>
 				</div>
 				<div class="name-container">
 					<div class="username-wrapper">
 						<h1 class="username-text" v-show="!isEditing">{{ username }}</h1>
-						<input ref="usernameInput" v-show="isEditing" v-model="username" @input="resizeInput" type="text" id="edit-username"/>
+						<input ref="usernameInput" @keyup.enter="toggleEditing" v-show="isEditing" v-model="username" @input="resizeInput" type="text" id="edit-username" maxlength="8"/>
 						<button @click="toggleEditing" id="toggle-username">
 							<span v-show="!isEditing">&#x270E;</span>
 							<span v-show="isEditing">&#x2713;</span>
 						</button>
 					</div>
 				</div>
-				<span v-if="showUsernameError" class="username-error" >Username already in use!</span>
+				<span v-if="showUsernameError" class="username-error" >{{ error_text }}</span>
 				<img class="rank" src="../assets/ranks/floppy_2.png" alt="Rank" />
 				<button class="two-factor-button" @click="toggle2FA">{{ twoFactorButtonText }}</button>
 			</div>
@@ -52,6 +52,7 @@
 	import { useUserStore } from '../stores/UserStore';
 	import QrcodeVue from 'qrcode.vue';
 	import { storeToRefs } from 'pinia';
+	import router from '@/router';
 
 	const store = useUserStore();
 	const { username } = storeToRefs(store);
@@ -59,6 +60,8 @@
 	const usernameInput = ref<HTMLInputElement | null>(null);
 	const inputField1 = ref<HTMLInputElement | null>(null);
 	const isEditing = ref(false);
+	const input = document.getElementById("edit-username")!;
+	const error_text = ref("");
 	const showDropIcon = ref(false);
 	const qrCodeVisible = ref(false);
 	const showTFA = ref(false);
@@ -76,20 +79,33 @@
 
 	function startEditing() {
 		isEditing.value = true;
+		nextTick(() => {
+			if (usernameInput.value) {
+				usernameInput.value.focus();
+				usernameInput.value.selectionStart = usernameInput.value.selectionEnd = username.value.length;
+			}
+		});
 	}
 
 	async function stopEditing() {
-		// alert(usernameInput.value);
 		const response = await axios.post(`http://${location.hostname}:3000/users/setUsername`, { intra: store.intra, username: username.value });
-		if (response.data)
+		if (response.data == 1)
+		{
+			error_text.value = "Username has to contain 2+ chars!";
+			showUsernameError.value = true;
+		}
+		else if (response.data == 2)
+		{
+			error_text.value = "Username already in use!";
+			showUsernameError.value = true;
+		}
+		else
 		{
 			isEditing.value = false;
 			showUsernameError.value = false;
 		}
-		else
-			showUsernameError.value = true;
 	}
-  
+
 	function toggleEditing() {
 		if (isEditing.value) {
 			stopEditing();
@@ -116,8 +132,11 @@
 
 	onMounted(async () => {
 		try {
+			const cookie_username = getUsernameFromCookie();
+			if (!cookie_username)
+				router.push('/');
 			if (!store.intra)
-				store.setIntra(getUsernameFromCookie());
+				store.setIntra(cookie_username);
 			const response = await axios.get(`http://${location.hostname}:3000/auth/getUserData?intra=${store.intra}`);
 			const data = response.data;
 			store.setUsername(data.username);
@@ -147,6 +166,11 @@
 		if (dt && dt.files && dt.files.length > 0) {
 			const file = dt.files[0];
 			if (file && file.type.startsWith('image/')) {
+				if (file.size > 70000)
+				{
+					alert('image too large');
+					return ;
+				}
 				const reader = new FileReader();
 				reader.onload = function (event) {
 					store.setProfilePicture(event.target!.result as string);
@@ -265,15 +289,15 @@
 	} */
 
 	.username-wrapper {
-		@apply ml-11 justify-center inline-flex items-center relative text-4xl;
+		@apply ml-14 justify-center inline-flex items-center relative text-4xl;
 	}
 
 	.username-text {
-		@apply border justify-center items-center;
+		@apply justify-center items-center;
 	}
 
 	#toggle-username {
-		@apply p-3 ;
+		@apply p-3 ml-4;
 		/* font-family: 'ibm-3270', monospace;
 		position: absolute;
 		left: 110%;
@@ -295,7 +319,6 @@
 
 	#edit-username {
 		font-family: 'ibm-3270', monospace;
-		font-size: 2.5vw;
 		background-color: transparent;
 		border: none;
 		color: white;

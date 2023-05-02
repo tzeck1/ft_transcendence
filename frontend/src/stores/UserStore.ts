@@ -22,6 +22,13 @@ export const useUserStore = defineStore({
 		setTFA(state: boolean) {
 			this.tfa_enabled = state;
 		},
+		delContent() {
+			this.id = -1;
+			this.intra = '';
+			this.username = '';
+			this.profile_picture = '';
+			this.tfa_enabled = false;
+		}
 	},
 });
 

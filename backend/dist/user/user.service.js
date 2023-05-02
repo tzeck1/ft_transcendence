@@ -66,16 +66,18 @@ let Users = class Users {
         return usersEntry.tfa_enabled;
     }
     async setUsername(intra, new_username) {
+        if (new_username.length < 2)
+            return ("1");
         const existingUser = await this.prisma.users.findFirst({
             where: {
                 AND: [
                     { intra_name: { not: { equals: intra } } },
-                    { username: new_username },
+                    { username: { equals: new_username, mode: 'insensitive' } },
                 ],
             },
         });
         if (existingUser) {
-            return (null);
+            return ("2");
         }
         const updateUser = await this.prisma.users.update({
             where: { intra_name: intra },

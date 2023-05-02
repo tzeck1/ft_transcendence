@@ -82,10 +82,12 @@
 						store.setProfilePicture(data.avatarUrl);
 						store.setTFA(data.tfa_enabled);
 					}
+					else
+						alert("cookie dead");
 				} catch (error) {
 					console.error('Error fetching user data:', error);
 				}
-
+				
 				if (store.tfa_enabled)
 				{
 					showTFA.value = true;

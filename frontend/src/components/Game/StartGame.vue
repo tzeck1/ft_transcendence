@@ -1,7 +1,10 @@
 <template>
 		<div class="slideshow">
 			<div :class="['block-style', compSetClass]">
-				<button class="block-image"> Start Game </button>
+				<button class="block-image" @click="search_game" id="toggle-game-btn">
+							<span v-show="!isLooking">Queue</span>
+							<span v-show="isLooking">Cancel</span>
+				</button>
 				<span class="block-title">Settings</span>
 			</div>
 			<div :class="['comp-block', 'block-style', compBlockClass]" @click="selectCompBlock">
@@ -20,54 +23,91 @@
 
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+	import { ref, computed } from 'vue'
+	import { useUserStore } from '../../stores/UserStore';
+	import { io } from 'socket.io-client';
 
-const funBlockVisible = ref(true);
-const compBlockVisible = ref(true);
-const compBlockSelected = ref(false);
-const funBlockSelected = ref(false);
+	const store = useUserStore();
+	const funBlockVisible = ref(true);
+	const compBlockVisible = ref(true);
+	const compBlockSelected = ref(false);
+	const funBlockSelected = ref(false);
+	const isLooking = ref(false);
 
-function selectCompBlock() {
-	if (funBlockSelected.value)
-		return ;
-	funBlockVisible.value = !funBlockVisible.value
-	compBlockSelected.value = !compBlockSelected.value;
-}
+	function search_game()
+	{
+		if (!isLooking.value)
+			establishCon();
+		else
+			cancelCon();
+	}
 
-function selectFunBlock() {
-	if (compBlockSelected.value)
-		return ;
-	compBlockVisible.value = !compBlockVisible.value;
-	funBlockSelected.value = !funBlockSelected.value;
-}
+	function establishCon()
+	{
+		const socket = io('http://10.13.3.9:3000');
+		socket.on('connect', function() {
+			console.log('Connected');
+		});
+		socket.on('disconnect', function() {
+			console.log('Disconnected');
+		});
+		socket.on('foundOpponent', function(username: String, pic: String) {
+			console.log("Username:", username);
+		});
+		socket.on('noOpponent', function() {
+			console.log("No fitting opponent in matchmaking, waiting...");
+		});
+		socket.emit("createOrJoin", store.intra);
 
-const compBlockClass = computed(() => {
-	if (funBlockSelected.value)
-		return ('comp-block-hidden');
-	else if (funBlockVisible.value)
-		return ('comp-block-visible');
-	return ('comp-block-selected');
-})
+		isLooking.value = true;
+	}
 
-const funBlockClass = computed(() => {
-	if (compBlockSelected.value)
-		return ('fun-block-hidden');
-	else if (compBlockVisible.value)
-		return ('fun-block-visible');
-	return ('fun-block-selected');
-})
+	function cancelCon()
+	{
+		isLooking.value = false;
+	}
 
-const funSetClass = computed(() => {
-	if (funBlockSelected.value)
-		return ('fun-set-visible');
-	return ('fun-set-hidden');
-})
+	function selectCompBlock() {
+		if (funBlockSelected.value)
+			return ;
+		funBlockVisible.value = !funBlockVisible.value
+		compBlockSelected.value = !compBlockSelected.value;
+	}
 
-const compSetClass = computed(() => {
-	if (compBlockSelected.value)
-		return ('comp-set-visible');
-	return ('comp-set-hidden');
-})
+	function selectFunBlock() {
+		if (compBlockSelected.value)
+			return ;
+		compBlockVisible.value = !compBlockVisible.value;
+		funBlockSelected.value = !funBlockSelected.value;
+	}
+
+	const compBlockClass = computed(() => {
+		if (funBlockSelected.value)
+			return ('comp-block-hidden');
+		else if (funBlockVisible.value)
+			return ('comp-block-visible');
+		return ('comp-block-selected');
+	})
+
+	const funBlockClass = computed(() => {
+		if (compBlockSelected.value)
+			return ('fun-block-hidden');
+		else if (compBlockVisible.value)
+			return ('fun-block-visible');
+		return ('fun-block-selected');
+	})
+
+	const funSetClass = computed(() => {
+		if (funBlockSelected.value)
+			return ('fun-set-visible');
+		return ('fun-set-hidden');
+	})
+
+	const compSetClass = computed(() => {
+		if (compBlockSelected.value)
+			return ('comp-set-visible');
+		return ('comp-set-hidden');
+	})
 </script>
 
 <style scoped>
