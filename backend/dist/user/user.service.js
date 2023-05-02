@@ -52,7 +52,7 @@ let Users = class Users {
     }
     async getId(intra_name) {
         const usersEntry = await this.prisma.users.findUnique({ where: { intra_name: intra_name } });
-        return usersEntry.intra_name;
+        return usersEntry.id;
     }
     async get2FASecret(intra) {
         const user = await this.prisma.users.findFirst({
@@ -64,6 +64,11 @@ let Users = class Users {
     async getTFA(intra_name) {
         const usersEntry = await this.prisma.users.findUnique({ where: { intra_name: intra_name } });
         return usersEntry.tfa_enabled;
+    }
+    async getScore(intra_name) {
+        const id = await this.getId(intra_name);
+        const statsEntry = await this.prisma.stats.findUnique({ where: { id: id } });
+        return statsEntry.score;
     }
     async setUsername(intra, new_username) {
         if (new_username.length < 2)

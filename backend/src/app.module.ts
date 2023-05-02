@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
+import { GameModule } from './game/game.module';
 import { TwoFactorAuthModule } from './two-factor-auth/tfa.module'
 
 @Module({
@@ -11,6 +12,7 @@ import { TwoFactorAuthModule } from './two-factor-auth/tfa.module'
 		AuthModule,
 		UserModule,
 		TwoFactorAuthModule,
+		GameModule,
 	],
 	controllers: [AppController],
 	providers: [AppService],

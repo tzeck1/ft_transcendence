@@ -44,7 +44,7 @@
 
 	function establishCon()
 	{
-		const socket = io('http://10.13.3.9:3000');
+		const socket = io(`${location.hostname}:3000`);
 		socket.on('connect', function() {
 			console.log('Connected');
 		});

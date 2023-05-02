@@ -54,9 +54,9 @@ export class Users {
 		return usersEntry.intra_name;
 	}
 
-	async getId(intra_name: string): Promise<string> {
+	async getId(intra_name: string): Promise<number> {
 		const usersEntry = await this.prisma.users.findUnique( {where: {intra_name: intra_name}} );
-		return usersEntry.intra_name;
+		return usersEntry.id;
 	}
 	
 	async get2FASecret(intra: string): Promise<string> {
@@ -70,6 +70,12 @@ export class Users {
 	async getTFA(intra_name: string): Promise<boolean> {
 		const usersEntry = await this.prisma.users.findUnique( {where: {intra_name: intra_name}} );
 		return usersEntry.tfa_enabled;
+	}
+
+	async getScore(intra_name: string): Promise<number> {
+		const id = await this.getId(intra_name);
+		const statsEntry = await this.prisma.stats.findUnique( {where: {id: id}} );
+		return statsEntry.score;
 	}
 
 	/*	========== SETTER ==========	*/
