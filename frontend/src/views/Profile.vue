@@ -265,7 +265,7 @@
 	} */
 
 	.username-wrapper {
-		@apply justify-center inline-flex items-center relative text-4xl;
+		@apply ml-11 justify-center inline-flex items-center relative text-4xl;
 	}
 
 	.username-text {
@@ -273,7 +273,7 @@
 	}
 
 	#toggle-username {
-		@apply align-middle justify-center items-center p-3 ;
+		@apply p-3 ;
 		/* font-family: 'ibm-3270', monospace;
 		position: absolute;
 		left: 110%;
