@@ -54,14 +54,14 @@
 	}
 
 	nav {
-		@apply container mx-auto flex items-center justify-between  transition-all duration-300 ease-in-out;
+		@apply container mx-auto flex items-center justify-between transition-all duration-300 ease-in-out;
 	}
 	.nav-buttons {
-		@apply hidden md:flex items-center text-2xl space-x-4;
+		@apply hidden mt-2 md:flex items-center text-2xl space-x-4;
 	}
 
 	.logo {
-		@apply text-white text-5xl flex items-center;
+		@apply mt-2 text-white text-5xl flex items-center;
 		font-family: 'ibm-logo';
 	}
 
@@ -79,7 +79,7 @@
 	}
 
 	.logout-button {
-		@apply flex items-center w-24 h-auto;
+		@apply flex items-center mt-2 w-24 h-auto;
 	}
 
 	.logout-button:hover {

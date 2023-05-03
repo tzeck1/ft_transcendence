@@ -1,11 +1,10 @@
 <template>
-		<div class="slideshow">
+		<div class="slideshow" :class="{ blur: showCount }">
 			<div :class="['block-style', compSetClass]">
 				<button class="block-image" @click="search_game" id="toggle-game-btn">
 							<span v-show="!isLooking">Queue</span>
 							<span v-show="isLooking">Cancel</span>
 				</button>
-				<span class="block-title">Settings</span>
 			</div>
 			<div :class="['comp-block', 'block-style', compBlockClass]" @click="selectCompBlock">
 				<img src="../../assets/pong.gif" class="block-image">
@@ -19,6 +18,21 @@
 				<span class="block-title">Settings</span>
 			</div>
 		</div>
+		<div class="countdown-overlay" v-if="showCount">
+			<div class="grid">
+				<div class="player">
+					<img id="player-picture" class="profile-picture" :src="profile_picture"/>
+					<h1 class="username-text">{{ username }}</h1>
+				</div>
+				<div id="countdown" class="countdown">
+					<span id="seconds">{{ timeLeft }}</span>
+				</div>
+				<div class="enemy">
+					<img id="enemy-picture" class="profile-picture" :src="enmey_picture"/>
+					<h1 class="username-text">{{ enemy_name }}</h1>
+				</div>
+			</div>
+		</div>
 </template>
 
 
@@ -26,6 +40,7 @@
 	import { ref, computed } from 'vue'
 	import { useUserStore } from '../../stores/UserStore';
 	import { io } from 'socket.io-client';
+	import { storeToRefs } from 'pinia';
 
 	const store = useUserStore();
 	const funBlockVisible = ref(true);
@@ -33,6 +48,24 @@
 	const compBlockSelected = ref(false);
 	const funBlockSelected = ref(false);
 	const isLooking = ref(false);
+	const showCount = ref(false);
+	const timeLeft = ref(4);
+	const { username } = storeToRefs(store);
+	const { profile_picture } = storeToRefs(store);
+	const enemy_name = ref("");
+	const enmey_picture = ref("");
+	// const enemy_picture = null;
+
+	function countdown() {
+		timeLeft.value--;
+		if (timeLeft.value > 0)
+			setTimeout(countdown, 1000);
+		else
+		{
+			showCount.value = false;
+			timeLeft.value = 4;
+		}
+	}
 
 	function search_game()
 	{
@@ -51,8 +84,11 @@
 		socket.on('disconnect', function() {
 			console.log('Disconnected');
 		});
-		socket.on('foundOpponent', function(username: String, pic: String) {
-			console.log("Username:", username);
+		socket.on('foundOpponent', function(username: string, pic: string) {
+			enemy_name.value = username;
+			enmey_picture.value = pic;
+			showCount.value = true;
+			countdown();
 		});
 		socket.on('noOpponent', function() {
 			console.log("No fitting opponent in matchmaking, waiting...");
@@ -185,5 +221,34 @@
 
 	.block-style {
 		@apply transition-all duration-1000 ease-in-out;
+	}
+
+	.blur {
+		filter: blur(7px);
+	}
+
+	.countdown-overlay {
+		@apply fixed w-full h-full flex items-center justify-between z-50 top-0 bg-black bg-opacity-60;
+	}
+
+	.grid {
+		@apply inline-flex w-full items-center justify-center gap-40;
+	}
+
+
+	.player, .enemy {
+		@apply flex flex-col items-center;
+	}
+
+	.profile-picture {
+		@apply w-40 h-40 rounded-full object-cover;
+	}
+
+	.username-text {
+		@apply mt-3 text-4xl;
+	}
+
+	.countdown {
+		@apply text-9xl animate-ping;
 	}
 </style>
