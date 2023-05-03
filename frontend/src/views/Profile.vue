@@ -300,7 +300,7 @@
 	}
 
 	#toggle-username {
-		@apply p-3 ml-4;
+		@apply p-3 ml-3;
 		/* font-family: 'ibm-3270', monospace;
 		position: absolute;
 		left: 110%;
@@ -321,7 +321,8 @@
 	}
 
 	#edit-username {
-		font-family: 'ibm-3270', monospace;
+		@apply bg-transparent text-center outline-none;
+		/* font-family: 'ibm-3270', monospace;
 		background-color: transparent;
 		border: none;
 		color: white;
@@ -330,7 +331,7 @@
 		margin: 0;
 		width: 1ch;
 		text-align: center;
-		animation: glowing 3s infinite;
+		animation: glowing 3s infinite; */
 	}
 
 	.profile-picture-drop-area {
