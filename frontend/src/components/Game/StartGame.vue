@@ -171,7 +171,6 @@
 		@apply opacity-100 transform translate-x-full;
 		@apply bg-white bg-opacity-10;
 	}
-
 	.comp-block-hidden {
 		@apply opacity-0 transform -translate-x-full;
 	}

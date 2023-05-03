@@ -26,7 +26,10 @@
 		try {
 			const cookie_username = getUsernameFromCookie();
 			if (!cookie_username)
+			{
 				router.push('/');
+				return ;
+			}
 			if (!store.intra)
 				store.setIntra(cookie_username);
 			const response = await axios.get(`http://${location.hostname}:3000/auth/getUserData?intra=${store.intra}`);
