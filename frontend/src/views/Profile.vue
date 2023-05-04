@@ -258,6 +258,10 @@
 
 <style scoped>
 
+	.profile {
+		@apply h-full;
+	}
+
 	.sidebar {
 		@apply flex flex-col items-center justify-center p-8 w-1/5 min-h-full;
 	}

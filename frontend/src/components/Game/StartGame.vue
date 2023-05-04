@@ -1,4 +1,5 @@
 <template>
+	<div class="startgame">
 		<div class="slideshow" :class="{ blur: showCount }">
 			<div :class="['block-style', compSetClass]">
 				<button class="block-image" @click="search_game" id="toggle-game-btn">
@@ -33,6 +34,7 @@
 				</div>
 			</div>
 		</div>
+	</div>
 </template>
 
 
@@ -152,6 +154,10 @@
 		font-family: ibm-3270;
 		src: url('./assets/3270-Regular.ttf') format('truetype');
 	} */
+
+	.startgame {
+		@apply h-full;
+	}
 
 	.slideshow {
 		@apply w-screen flex items-center justify-center;
