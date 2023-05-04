@@ -1,19 +1,18 @@
 import { OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { GameService } from './game.service';
-import { Users } from '../user/user.service';
+import { GameService, Player } from './game.service';
 export declare class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-    private readonly users;
     private readonly gameService;
-    constructor(users: Users, gameService: GameService);
-    private intra_clients;
+    constructor(gameService: GameService);
     private rooms;
-    private room_id;
+    private lobby;
+    private room_counter;
+    private threshold;
+    private config;
     server: Server;
     afterInit(server: Server): void;
     handleDisconnect(client: Socket): void;
     handleConnection(client: Socket, ...args: any[]): void;
-    handleCreateOrJoin(client: Socket, intra: string): Promise<void>;
-    matchMake(client: Socket, searching_intra: string, intra_clients: Map<string, Socket>): Promise<string>;
-    createRoom(client_id: string): string;
+    handleCreateOrJoin(client: Socket, intra: string): void;
+    createAndJoinRoom(player_one: Player, player_two: Player): void;
 }

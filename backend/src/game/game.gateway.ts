@@ -26,19 +26,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	private room_counter = 0;
 	private threshold = 20;
-	private config: Phaser.Types.Core.GameConfig = {
-		type: Phaser.HEADLESS,
-		width: 1920,
-		height: 1080,
-		parent: 'game',
-		physics: {
-			default: 'arcade',
-			arcade: {
-				gravity: { y: 0 },
-			},
-		},
-		scene: [Server]
-	};
+	private config = undefined;
+//	private config: Phaser.Types.Core.GameConfig = {
+//		type: Phaser.HEADLESS,
+//		width: 1920,
+//		height: 1080,
+//		parent: 'game',
+//		physics: {
+//			default: 'arcade',
+//			arcade: {
+//				gravity: { y: 0 },
+//			},
+//		},
+//		scene: [Server]
+//	};
 
 	@WebSocketServer() server: Server;
 

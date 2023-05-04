@@ -12,7 +12,7 @@ export class Api42Strategy extends PassportStrategy(Strategy, 'api42') {
 
 	constructor(private readonly users: Users) {
 		const options = {
-			authorizationURL: `https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-8b9da2df9f37fabf5fe6330ad83da6cf15f65455a8add2bc5d0ebda92eaf4b88&redirect_uri=http%3A%2F%2F${process.env.HOST_IP}%3A3000%2Fauth%2Fapi42%2Fcallback&response_type=code`,
+			authorizationURL: `https://api.intra.42.fr/oauth/authorize?client_id=${process.env.API_42_CLIENT_ID}&redirect_uri=http%3A%2F%2F${process.env.HOST_IP}%3A3000%2Fauth%2Fapi42%2Fcallback&response_type=code`,
 			tokenURL: 'https://api.intra.42.fr/oauth/token',
 			clientID: process.env.API_42_CLIENT_ID,
 			clientSecret: process.env.API_42_CLIENT_SECRET,
