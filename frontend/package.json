@@ -10,6 +10,7 @@
     "type-check": "vue-tsc --noEmit"
   },
   "dependencies": {
+    "@types/vue-router": "^2.0.0",
     "autoprefixer": "^10.4.14",
     "phaser": "^3.60.0",
     "pinia": "^2.0.0-rc.10",
