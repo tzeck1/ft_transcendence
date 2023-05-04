@@ -263,7 +263,7 @@
 	}
 
 	.sidebar {
-		@apply flex flex-col items-center justify-center p-8 w-1/5 min-h-full;
+		@apply flex flex-col items-center justify-start p-8 w-1/5 min-h-full;
 	}
 
 	.profile-picture {
@@ -271,7 +271,7 @@
 	}
 
 	.rank {
-		@apply w-16 h-full mt-8;
+		@apply w-16 h-auto mt-8;
 	}
 
 	.grid {
