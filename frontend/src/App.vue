@@ -23,27 +23,29 @@
 </script>
 
 <template>
-	<header>
-		<nav>
-			<span class="logo">PONG</span>
-			<div class="nav-buttons">
-						<router-link to="/profile" v-slot="{ navigate, isActive }">
-							<button id="profileButton" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro">Profile</button>
-						</router-link>
-						<router-link to="/game" v-slot="{ navigate, isActive }">
-							<button class="game-button" id="game-button" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro">Game</button>
-						</router-link>
-						<button :disabled="isIntro">Leaderboard</button>
-				</div>
-				<div class="logout-button" @click="loadIntro" :disabled="isIntro">
-					<img src="./assets/logout.png" alt="Logout">
-				</div>
-		</nav>
-	</header>
-	<main>
-		<router-link to="/"></router-link>
-		<router-view/>
-	</main>
+	<div class="h-screen flex flex-col">
+		<header>
+			<nav>
+				<span class="logo">PONG</span>
+				<div class="nav-buttons">
+							<router-link to="/profile" v-slot="{ navigate, isActive }">
+								<button id="profileButton" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro">Profile</button>
+							</router-link>
+							<router-link to="/game" v-slot="{ navigate, isActive }">
+								<button class="game-button" id="game-button" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro">Game</button>
+							</router-link>
+							<button :disabled="isIntro">Leaderboard</button>
+					</div>
+					<div class="logout-button" @click="loadIntro" :disabled="isIntro">
+						<img src="./assets/logout.png" alt="Logout">
+					</div>
+			</nav>
+		</header>
+		<main class="flex-grow">
+			<router-link to="/"></router-link>
+			<router-view/>
+		</main>
+	</div>
 </template>
 
 <style scoped>

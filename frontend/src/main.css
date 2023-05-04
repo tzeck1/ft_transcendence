@@ -16,7 +16,7 @@
 	}
 	
 	html, body {
-		@apply bg-no-repeat bg-cover text-white h-full;
+		@apply bg-no-repeat bg-cover overflow-auto text-white h-full;
 		background-image: url("./assets/bg.gif");
 	}
 

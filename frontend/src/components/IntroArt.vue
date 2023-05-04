@@ -576,7 +576,7 @@
 
 <style scoped>
 	.intro_game {
-    @apply flex flex-col items-center mt-24 text-1vh;
+      @apply flex flex-col items-center mt-24 text-xs lg:text-sm transition-all duration-300 ease-in-out;
 	}
 
 </style>

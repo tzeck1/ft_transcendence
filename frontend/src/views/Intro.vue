@@ -140,12 +140,7 @@
 	}
 
 	.intro {
-		@apply flex flex-col justify-center items-center mt-32 transition-all duration-300 ease-in-out;
-		font-family: 'ibm-3270', monospace;
-	}
-
-	button {
-		@apply bg-transparent text-4xl text-white rounded-2xl px-16 py-8;
+		@apply h-full justify-center flex flex-col items-center transition-all duration-300 ease-in-out;
 		font-family: 'ibm-3270', monospace;
 	}
 
@@ -154,19 +149,19 @@
 	}
 
 	.auth-intra {
-		@apply animate-pulse text-3vh inline-flex items-center mt-16;
+		@apply text-2xl lg:text-4xl animate-pulse inline-flex items-center mt-16 transition-all duration-300 ease-in-out;
 	}
 
 	.icon {
-		@apply justify-center align-middle w-10 h-full ml-6;
+		@apply justify-center align-middle w-11 h-auto ml-4;
 	}
 
 	.intro h1 {
-		@apply text-5vh;
+		@apply text-5xl lg:text-6xl mb-4 transition-all duration-300 ease-in-out;
 	}
 
 	.intro p {
-		@apply text-2vh mt-8;
+		@apply text-base lg:text-2xl mb-6 transition-all duration-300 ease-in-out;
 	}
 
 	.tfa-text{
