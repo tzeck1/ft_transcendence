@@ -13,9 +13,11 @@ exports.GameGateway = void 0;
 const websockets_1 = require("@nestjs/websockets");
 const socket_io_1 = require("socket.io");
 const game_service_1 = require("./game.service");
+const user_service_1 = require("../user/user.service");
 let GameGateway = class GameGateway {
-    constructor(gameService) {
+    constructor(gameService, users) {
         this.gameService = gameService;
+        this.users = users;
         this.rooms = new Map;
         this.lobby = new Map;
         this.room_counter = 0;
@@ -31,12 +33,13 @@ let GameGateway = class GameGateway {
     handleConnection(client, ...args) {
         console.log(`Client Connected: ${client.id}`);
     }
-    handleCreateOrJoin(client, intra) {
+    async handleCreateOrJoin(client, intra) {
         if (intra == '')
             return;
-        let searching_player = new game_service_1.Player(client, intra);
+        let searching_player = new game_service_1.Player(client, intra, this.users);
+        await searching_player.updateUserData();
         for (let [intraname, lobby_player] of this.lobby) {
-            if (searching_player.getScore() > lobby_player.getScore() - this.threshold || searching_player.getScore() < lobby_player.getScore() + this.threshold) {
+            if (lobby_player.getScore() - this.threshold < searching_player.getScore() && searching_player.getScore() < lobby_player.getScore() + this.threshold) {
                 this.createAndJoinRoom(searching_player, lobby_player);
                 return;
             }
@@ -68,7 +71,7 @@ __decorate([
     (0, websockets_1.SubscribeMessage)("createOrJoin"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [socket_io_1.Socket, String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:returntype", Promise)
 ], GameGateway.prototype, "handleCreateOrJoin", null);
 GameGateway = __decorate([
     (0, websockets_1.WebSocketGateway)({
@@ -76,7 +79,7 @@ GameGateway = __decorate([
             origin: '*',
         },
     }),
-    __metadata("design:paramtypes", [game_service_1.GameService])
+    __metadata("design:paramtypes", [game_service_1.GameService, user_service_1.Users])
 ], GameGateway);
 exports.GameGateway = GameGateway;
 //# sourceMappingURL=game.gateway.js.map

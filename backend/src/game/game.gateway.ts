@@ -8,6 +8,7 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { GameService, Room, Player } from './game.service';
+import { Users } from '../user/user.service';
 import Phaser from 'phaser';
 
 @WebSocketGateway({
@@ -16,7 +17,7 @@ import Phaser from 'phaser';
 	},
 })
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-	constructor(private readonly gameService: GameService) {}
+	constructor(private readonly gameService: GameService, private readonly users: Users) {}
 
 	//		key: room_id
 	private rooms: Map<string, Room> = new Map<string, Room>;
@@ -57,13 +58,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	@SubscribeMessage("createOrJoin")
-	handleCreateOrJoin(client: Socket, intra: string) {
+	async handleCreateOrJoin(client: Socket, intra: string) {
 		if (intra == '') //store problem
 			return;
-		
-		let searching_player = new Player(client, intra);
+		let searching_player = new Player(client, intra, this.users);
+		await searching_player.updateUserData();
 		for (let [intraname, lobby_player] of this.lobby) {
-			if (searching_player.getScore() > lobby_player.getScore() - this.threshold || searching_player.getScore() < lobby_player.getScore() + this.threshold) {
+			if (lobby_player.getScore() - this.threshold < searching_player.getScore() && searching_player.getScore() < lobby_player.getScore() + this.threshold) {
 				this.createAndJoinRoom(searching_player, lobby_player);
 				return;
 			}

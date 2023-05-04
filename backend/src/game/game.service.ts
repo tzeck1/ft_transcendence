@@ -11,23 +11,17 @@ export class Player {
 	constructor(
 		private readonly socket: Socket,
 		private readonly intraname: string,
+		private readonly users: Users,
 	){}
 
-	private readonly users: Users;
 	private username: string;
 	private picture: string;
 	private score: number;
 
 	async updateUserData() {
-		this.username = await this.users.getUsername(await this.users.getId(this.intraname));
+		this.username = await this.users.getUsernameByIntra(this.intraname);
 		this.picture = await this.users.getAvatarByIntra(this.intraname);
 		this.score = await this.users.getScore(this.intraname);
-		if (this.username == undefined)
-			throw "Player.username undefined";
-		else if (this.picture == undefined)
-			throw "Player.picture undefined";
-		else if (this.score == undefined)
-			throw "Player.score undefined";
 	}
 
 	getSocket(): Socket { return this.socket; }

@@ -23,20 +23,15 @@ GameService = __decorate([
 ], GameService);
 exports.GameService = GameService;
 class Player {
-    constructor(socket, intraname) {
+    constructor(socket, intraname, users) {
         this.socket = socket;
         this.intraname = intraname;
+        this.users = users;
     }
     async updateUserData() {
-        this.username = await this.users.getUsername(await this.users.getId(this.intraname));
+        this.username = await this.users.getUsernameByIntra(this.intraname);
         this.picture = await this.users.getAvatarByIntra(this.intraname);
         this.score = await this.users.getScore(this.intraname);
-        if (this.username == undefined)
-            throw "Player.username undefined";
-        else if (this.picture == undefined)
-            throw "Player.picture undefined";
-        else if (this.score == undefined)
-            throw "Player.score undefined";
     }
     getSocket() { return this.socket; }
     getIntraname() { return this.intraname; }

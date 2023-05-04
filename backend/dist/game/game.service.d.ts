@@ -7,8 +7,8 @@ export declare class GameService {
 export declare class Player {
     private readonly socket;
     private readonly intraname;
-    constructor(socket: Socket, intraname: string);
     private readonly users;
+    constructor(socket: Socket, intraname: string, users: Users);
     private username;
     private picture;
     private score;
