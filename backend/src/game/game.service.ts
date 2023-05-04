@@ -9,11 +9,11 @@ export class GameService {
 
 export class Player {
 	constructor(
-		private readonly users: Users,
 		private readonly socket: Socket,
 		private readonly intraname: string,
 	){}
 
+	private readonly users: Users;
 	private username: string;
 	private picture: string;
 	private score: number;
@@ -41,16 +41,15 @@ export class Room {
 	constructor(
 		private readonly room_id: string,
 		private readonly phaser_config: Phaser.Types.Core.GameConfig,
-		private readonly phaser_instance: Phaser.Game,
 		private 		 left_player: Player,
 		private 		 right_player: Player,
 	){}
+
+	private phaser_instance: Phaser.Game;
 
 	getRoomId(): string { return this.room_id; }
 	getPhaserConfig(): Phaser.Types.Core.GameConfig { return this.phaser_config; }
 	getPhaserInstance(): Phaser.Game { return this.phaser_instance; }
 	getLeftPlayer(): Player { return this.left_player; }
 	getRightPlayer(): Player { return this.right_player; }
-
-
 }
