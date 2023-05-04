@@ -9,6 +9,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { GameService, type Room, type Player } from './game.service';
 import { Users } from '../user/user.service';
+import Phaser from 'phaser';
   
   @WebSocketGateway({
 	cors: {
