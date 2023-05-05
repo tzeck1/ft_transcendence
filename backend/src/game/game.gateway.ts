@@ -70,6 +70,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			}
 		}
 		searching_player.getSocket().join("lobby");
+		console.log("the intra is ", intra, "and the socket is ", client.id);
 		this.lobby.set(intra, searching_player);
 		searching_player.getSocket().emit("noOpponent");
 	}
@@ -88,5 +89,14 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 		player_one.getSocket().emit("foundOpponent", player_two.getUsername(), player_two.getPicture());
 		player_two.getSocket().emit("foundOpponent", player_one.getUsername(), player_one.getPicture());
+	}
+
+	@SubscribeMessage("cancelQueue")
+	handleCancelQueue(client: Socket, intra: string) {
+		console.log("calling handleCancel");
+		let player = this.lobby.get(intra);
+		client.leave("lobby");
+		this.lobby.delete(player.getIntraname());
+		client.disconnect(true);
 	}
 }
