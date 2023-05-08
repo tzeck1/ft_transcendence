@@ -10,11 +10,12 @@ export declare class GameGateway implements OnGatewayInit, OnGatewayConnection, 
     private lobby;
     private room_counter;
     private threshold;
-    private config;
     server: Server;
     afterInit(server: Server): void;
     handleDisconnect(client: Socket): void;
     handleConnection(client: Socket, ...args: any[]): void;
     handleCreateOrJoin(client: Socket, intra: string): Promise<void>;
     createAndJoinRoom(player_one: Player, player_two: Player): void;
+    handleCancelQueue(client: Socket, intra: string): void;
+    handleIAmReady(client: Socket, room_id: string): void;
 }

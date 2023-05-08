@@ -22,7 +22,6 @@ let GameGateway = class GameGateway {
         this.lobby = new Map;
         this.room_counter = 0;
         this.threshold = 20;
-        this.config = undefined;
     }
     afterInit(server) {
         console.log('Initialized');
@@ -45,6 +44,7 @@ let GameGateway = class GameGateway {
             }
         }
         searching_player.getSocket().join("lobby");
+        console.log("the intra is ", intra, "and the socket is ", client.id);
         this.lobby.set(intra, searching_player);
         searching_player.getSocket().emit("noOpponent");
     }
@@ -55,12 +55,28 @@ let GameGateway = class GameGateway {
         player_two.getSocket().leave("lobby");
         this.lobby.delete(player_one.getIntraname());
         this.lobby.delete(player_two.getIntraname());
-        let new_room = new game_service_1.Room(room_id, this.config, player_one, player_two);
+        let new_room = new game_service_1.Room(room_id, player_one, player_two);
         this.rooms.set(room_id, new_room);
         player_one.getSocket().join(room_id);
         player_two.getSocket().join(room_id);
-        player_one.getSocket().emit("foundOpponent", player_two.getUsername(), player_two.getPicture());
-        player_two.getSocket().emit("foundOpponent", player_one.getUsername(), player_one.getPicture());
+        player_one.getSocket().emit("foundOpponent", player_two.getUsername(), player_two.getPicture(), room_id);
+        player_two.getSocket().emit("foundOpponent", player_one.getUsername(), player_one.getPicture(), room_id);
+    }
+    handleCancelQueue(client, intra) {
+        console.log("calling handleCancel");
+        let player = this.lobby.get(intra);
+        client.leave("lobby");
+        this.lobby.delete(player.getIntraname());
+        client.disconnect(true);
+    }
+    handleIAmReady(client, room_id) {
+        let room = this.rooms.get(room_id);
+        room.setupListeners();
+        room.validatePlayer(client);
+        if (room.isRoomReady() == true) {
+            room.getLeftPlayer().getSocket().emit("startTheGame");
+            room.getRightPlayer().getSocket().emit("startTheGame");
+        }
     }
 };
 __decorate([
@@ -73,6 +89,18 @@ __decorate([
     __metadata("design:paramtypes", [socket_io_1.Socket, String]),
     __metadata("design:returntype", Promise)
 ], GameGateway.prototype, "handleCreateOrJoin", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)("cancelQueue"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, String]),
+    __metadata("design:returntype", void 0)
+], GameGateway.prototype, "handleCancelQueue", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)("iAmReady"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, String]),
+    __metadata("design:returntype", void 0)
+], GameGateway.prototype, "handleIAmReady", null);
 GameGateway = __decorate([
     (0, websockets_1.WebSocketGateway)({
         cors: {

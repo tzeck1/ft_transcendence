@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { Users } from '../user/user.service';
+import { SubscribeMessage } from '@nestjs/websockets';
 
 @Injectable()
 export class GameService {
@@ -34,16 +35,52 @@ export class Player {
 export class Room {
 	constructor(
 		private readonly room_id: string,
-		private readonly phaser_config: Phaser.Types.Core.GameConfig,
 		private 		 left_player: Player,
 		private 		 right_player: Player,
 	){}
 
-	private phaser_instance: Phaser.Game;
+	private left_player_status = false;
+	private right_player_status = false;
+
+	/*  game state  */
+	private left_score: number = 0;
+	private right_score: number = 0;
+	private ball_x: number = 0;
+	private ball_y: number = 0;
+	private left_player_y: number = 0;
+	private right_player_y: number = 0;
 
 	getRoomId(): string { return this.room_id; }
-	getPhaserConfig(): Phaser.Types.Core.GameConfig { return this.phaser_config; }
-	getPhaserInstance(): Phaser.Game { return this.phaser_instance; }
 	getLeftPlayer(): Player { return this.left_player; }
 	getRightPlayer(): Player { return this.right_player; }
+
+	setupListeners() {
+		this.left_player.getSocket().on("paddleUp", (client) => {
+			if (this.left_player.getSocket() == client)
+				this.right_player.getSocket().emit("enemyPaddleUp");
+			else
+				this.left_player.getSocket().emit("enemyPaddleUp");
+		});
+
+		this.left_player.getSocket().on("paddleDown", (client) => {
+			if (this.left_player.getSocket() == client)
+				this.right_player.getSocket().emit("enemyPaddleDown");
+			else
+				this.left_player.getSocket().emit("enemyPaddleDown");
+		});
+	}
+	
+
+	isRoomReady(): boolean {
+		if (this.left_player_status && this.right_player_status)
+			return true;
+		return false;
+	}
+
+	validatePlayer(client: Socket) {
+		if (client == this.left_player.getSocket())
+			this.left_player_status = true;
+		else if (client == this.right_player.getSocket())
+			this.right_player_status = true;
+	}
 }

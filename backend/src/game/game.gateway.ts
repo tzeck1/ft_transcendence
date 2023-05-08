@@ -9,7 +9,6 @@ import {
 import { Server, Socket } from 'socket.io';
 import { GameService, Room, Player } from './game.service';
 import { Users } from '../user/user.service';
-import Phaser from 'phaser';
 
 @WebSocketGateway({
 	cors: {
@@ -27,20 +26,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	private room_counter = 0;
 	private threshold = 20;
-	private config = undefined;
-//	private config: Phaser.Types.Core.GameConfig = {
-//		type: Phaser.HEADLESS,
-//		width: 1920,
-//		height: 1080,
-//		parent: 'game',
-//		physics: {
-//			default: 'arcade',
-//			arcade: {
-//				gravity: { y: 0 },
-//			},
-//		},
-//		scene: [Server]
-//	};
 
 	@WebSocketServer() server: Server;
 
@@ -82,13 +67,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		player_two.getSocket().leave("lobby");
 		this.lobby.delete(player_one.getIntraname());
 		this.lobby.delete(player_two.getIntraname());
-		let new_room = new Room(room_id, this.config, player_one, player_two);
+		let new_room = new Room(room_id, player_one, player_two);
 		this.rooms.set(room_id, new_room);
 		player_one.getSocket().join(room_id);
 		player_two.getSocket().join(room_id);
 
-		player_one.getSocket().emit("foundOpponent", player_two.getUsername(), player_two.getPicture());
-		player_two.getSocket().emit("foundOpponent", player_one.getUsername(), player_one.getPicture());
+		player_one.getSocket().emit("foundOpponent", player_two.getUsername(), player_two.getPicture(), room_id);
+		player_two.getSocket().emit("foundOpponent", player_one.getUsername(), player_one.getPicture(), room_id);
 	}
 
 	@SubscribeMessage("cancelQueue")
@@ -98,5 +83,17 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		client.leave("lobby");
 		this.lobby.delete(player.getIntraname());
 		client.disconnect(true);
+	}
+
+
+	@SubscribeMessage("iAmReady")
+	handleIAmReady(client: Socket, room_id: string) {
+		let room = this.rooms.get(room_id);
+		room.setupListeners();
+		room.validatePlayer(client);
+		if (room.isRoomReady() == true) {
+			room.getLeftPlayer().getSocket().emit("startTheGame");
+			room.getRightPlayer().getSocket().emit("startTheGame");
+		}
 	}
 }

@@ -44,17 +44,47 @@ class Player {
 }
 exports.Player = Player;
 class Room {
-    constructor(room_id, phaser_config, left_player, right_player) {
+    constructor(room_id, left_player, right_player) {
         this.room_id = room_id;
-        this.phaser_config = phaser_config;
         this.left_player = left_player;
         this.right_player = right_player;
+        this.left_player_status = false;
+        this.right_player_status = false;
+        this.left_score = 0;
+        this.right_score = 0;
+        this.ball_x = 0;
+        this.ball_y = 0;
+        this.left_player_y = 0;
+        this.right_player_y = 0;
     }
     getRoomId() { return this.room_id; }
-    getPhaserConfig() { return this.phaser_config; }
-    getPhaserInstance() { return this.phaser_instance; }
     getLeftPlayer() { return this.left_player; }
     getRightPlayer() { return this.right_player; }
+    setupListeners() {
+        this.left_player.getSocket().on("paddleUp", (client) => {
+            if (this.left_player.getSocket() == client)
+                this.right_player.getSocket().emit("enemyPaddleUp");
+            else
+                this.left_player.getSocket().emit("enemyPaddleUp");
+        });
+        this.left_player.getSocket().on("paddleDown", (client) => {
+            if (this.left_player.getSocket() == client)
+                this.right_player.getSocket().emit("enemyPaddleDown");
+            else
+                this.left_player.getSocket().emit("enemyPaddleDown");
+        });
+    }
+    isRoomReady() {
+        if (this.left_player_status && this.right_player_status)
+            return true;
+        return false;
+    }
+    validatePlayer(client) {
+        if (client == this.left_player.getSocket())
+            this.left_player_status = true;
+        else if (client == this.right_player.getSocket())
+            this.right_player_status = true;
+    }
 }
 exports.Room = Room;
 //# sourceMappingURL=game.service.js.map

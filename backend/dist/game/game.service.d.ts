@@ -21,14 +21,21 @@ export declare class Player {
 }
 export declare class Room {
     private readonly room_id;
-    private readonly phaser_config;
     private left_player;
     private right_player;
-    constructor(room_id: string, phaser_config: Phaser.Types.Core.GameConfig, left_player: Player, right_player: Player);
-    private phaser_instance;
+    constructor(room_id: string, left_player: Player, right_player: Player);
+    private left_player_status;
+    private right_player_status;
+    private left_score;
+    private right_score;
+    private ball_x;
+    private ball_y;
+    private left_player_y;
+    private right_player_y;
     getRoomId(): string;
-    getPhaserConfig(): Phaser.Types.Core.GameConfig;
-    getPhaserInstance(): Phaser.Game;
     getLeftPlayer(): Player;
     getRightPlayer(): Player;
+    setupListeners(): void;
+    isRoomReady(): boolean;
+    validatePlayer(client: Socket): void;
 }

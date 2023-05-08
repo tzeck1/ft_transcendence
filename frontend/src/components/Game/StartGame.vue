@@ -43,7 +43,7 @@
 	import { useUserStore } from '../../stores/UserStore';
 	import { io, Socket } from 'socket.io-client';
 	import { storeToRefs } from 'pinia';
-  import { useGameStore } from '../../stores/GameStore';
+	import { useGameStore } from '../../stores/GameStore';
 	import Game from '../../views/Game.vue'
 
 	const userStore = useUserStore();
@@ -79,29 +79,31 @@
 		//establish connection
 		if (!isLooking.value) {
 			socket = io(`${location.hostname}:3000`);
+			gameStore.setSocket(socket);
 			socket.on('connect', function() {
 				console.log('Connected');
 			});
 			socket.on('disconnect', function() {
 				console.log('Disconnected');
 			});
-			socket.on('foundOpponent', function(username: string, pic: string) {
+			socket.on('foundOpponent', function(username: string, pic: string, room_id: string) {
 				gameStore.setIntra(userStore.intra);
-        gameStore.setEnemyName(username);
-        gameStore.setEnemyPicture(pic);
-        showCount.value = true;
-        countdown();
+        		gameStore.setEnemyName(username);
+        		gameStore.setEnemyPicture(pic);
+				gameStore.setRoomId(room_id);
+        		showCount.value = true;
+        		countdown();
 			});
 			socket.on('noOpponent', function() {
 				console.log("No fitting opponent in matchmaking, waiting...");
 			});
-			socket.emit("createOrJoin", store.intra);
+			socket.emit("createOrJoin", userStore.intra);
 
 			isLooking.value = true;
 		}
 		else {
-			console.log("store.intra is: ", store.intra);
-			socket.emit("cancelQueue", store.intra);
+			console.log("store.intra is: ", userStore.intra);
+			socket.emit("cancelQueue", userStore.intra);
 			isLooking.value = false;
 		}
 	}
