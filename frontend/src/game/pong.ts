@@ -52,6 +52,10 @@ export default class Pong extends Phaser.Scene {
 	ball_trail_scale = 1;
 	player_trail_scale = 1;
 	players_ready = false;
+	inputPayload = {
+		up: false,
+		down: false,
+	};
 
 	constructor() {
 		super("pong");
@@ -144,14 +148,13 @@ export default class Pong extends Phaser.Scene {
 			return;
 
 		/*  Movement  */
-		if (this.cursors.up.isDown) {
-			this.socket.to(this.room_id).emit("paddleUp", this.socket);
+		this.inputPayload.up = this.cursors.up.isDown;
+		this.inputPayload.down = this.cursors.down.isDown;
+		this.socket.emit("paddleMovement", this.room_id, this.inputPayload);
+		if (this.inputPayload.up)
 			this.left_player.y -= this.paddle_velocity;
-		}
-		else if (this.cursors.down.isDown) {
-			this.socket.to(this.room_id).emit("paddleDown", this.socket);
+		else if (this.inputPayload.down)
 			this.left_player.y += this.paddle_velocity;
-		}
 
 		/*  Scoring condition  */
 		if (this.ball.body.onWall() && this.left_player.body.touching.none && this.right_player.body.touching.none) {

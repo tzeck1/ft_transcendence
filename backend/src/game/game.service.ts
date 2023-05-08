@@ -55,18 +55,18 @@ export class Room {
 	getRightPlayer(): Player { return this.right_player; }
 
 	setupListeners() {
-		this.left_player.getSocket().on("paddleUp", (client) => {
-			if (this.left_player.getSocket() == client)
-				this.right_player.getSocket().emit("enemyPaddleUp");
-			else
-				this.left_player.getSocket().emit("enemyPaddleUp");
-		});
-
-		this.left_player.getSocket().on("paddleDown", (client) => {
-			if (this.left_player.getSocket() == client)
-				this.right_player.getSocket().emit("enemyPaddleDown");
-			else
-				this.left_player.getSocket().emit("enemyPaddleDown");
+		this.left_player.getSocket().on("enemyPaddleMovement", (client, inputPayload) => {
+			if (client == this.left_player.getSocket()) {
+				if (inputPayload.up == true)
+					this.right_player.getSocket().emit("enemyPaddleUp");
+				else if (inputPayload.down == true)
+					this.right_player.getSocket().emit("enemyPaddleDown");
+			} else {
+				if (inputPayload.up == true)
+					this.left_player.getSocket().emit("enemyPaddleUp");
+				else if (inputPayload.down == true)
+					this.left_player.getSocket().emit("enemyPaddleDown");
+			}
 		});
 	}
 	

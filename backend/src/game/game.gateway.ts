@@ -85,6 +85,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		client.disconnect(true);
 	}
 
+	@SubscribeMessage("paddleMovement")
+	handlePaddleMovement(client: Socket, room_id: string, args: any) {
+		this.server.to(room_id).emit("enemyPaddleMovement", client, args);
+	}
 
 	@SubscribeMessage("iAmReady")
 	handleIAmReady(client: Socket, room_id: string) {
