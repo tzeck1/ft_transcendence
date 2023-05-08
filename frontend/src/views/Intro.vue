@@ -40,7 +40,7 @@
 		},
 
 		setup() {
-			const store = useUserStore();
+			const userStore = useUserStore();
 			const router = useRouter();
 			const twoFactorCode = ref(["", "", "", "", "", ""]);
 			const inputField1 = ref<HTMLInputElement | null>(null);
@@ -75,18 +75,18 @@
 			onMounted(async () => {
 				try {
 					if (getUsernameFromCookie()) {
-						store.setIntra(getUsernameFromCookie());
-						const response = await axios.get(`http://${location.hostname}:3000/auth/getUserData?intra=${store.intra}`);
+						userStore.setIntra(getUsernameFromCookie());
+						const response = await axios.get(`http://${location.hostname}:3000/auth/getUserData?intra=${userStore.intra}`);
 						const data = response.data;
-						store.setUsername(data.username);
-						store.setProfilePicture(data.avatarUrl);
-						store.setTFA(data.tfa_enabled);
+						userStore.setUsername(data.username);
+						userStore.setProfilePicture(data.avatarUrl);
+						userStore.setTFA(data.tfa_enabled);
 					}
 				} catch (error) {
 					console.error('Error fetching user data:', error);
 				}
 				
-				if (store.tfa_enabled)
+				if (userStore.tfa_enabled)
 				{
 					showTFA.value = true;
 					showInput.value = true;
@@ -94,7 +94,7 @@
 					await nextTick();
 					inputField1.value?.focus();
 				}
-				else if (store.username && !store.tfa_enabled)
+				else if (userStore.username && !userStore.tfa_enabled)
 					router.push('/profile');
 			});
 
@@ -103,7 +103,7 @@
 					if (index < 5) {
 						(document.querySelector(`.input-2fa:nth-child(${index + 2})`) as HTMLElement).focus();
 					} else {
-						const response = await axios.post(`http://${location.hostname}:3000/2fa/verify`, { intra: store.intra, token: twoFactorCode.value.join('') });
+						const response = await axios.post(`http://${location.hostname}:3000/2fa/verify`, { intra: userStore.intra, token: twoFactorCode.value.join('') });
 						if (response.data.message) {
 							router.push('/profile');
 						}
@@ -140,12 +140,7 @@
 	}
 
 	.intro {
-		@apply flex flex-col justify-center items-center mt-32 transition-all duration-300 ease-in-out;
-		font-family: 'ibm-3270', monospace;
-	}
-
-	button {
-		@apply bg-transparent text-4xl text-white rounded-2xl px-16 py-8;
+		@apply h-full justify-center flex flex-col items-center transition-all duration-300 ease-in-out;
 		font-family: 'ibm-3270', monospace;
 	}
 
@@ -154,23 +149,23 @@
 	}
 
 	.auth-intra {
-		@apply animate-pulse text-3vh inline-flex items-center mt-16;
+		@apply text-2xl lg:text-4xl animate-pulse inline-flex items-center mt-16 transition-all duration-300 ease-in-out;
 	}
 
 	.icon {
-		@apply justify-center align-middle w-10 h-full ml-6;
+		@apply justify-center align-middle w-11 h-auto ml-4;
 	}
 
 	.intro h1 {
-		@apply text-5vh;
+		@apply text-5xl lg:text-6xl mb-4 transition-all duration-300 ease-in-out;
 	}
 
 	.intro p {
-		@apply text-2vh mt-8;
+		@apply text-base lg:text-2xl mb-6 transition-all duration-300 ease-in-out;
 	}
 
 	.tfa-text{
-		@apply inline-flex text-4xl mt-36 mb-10;
+		@apply inline-flex text-2xl lg:text-4xl mt-36 mb-4 lg:mb-10 transition-all duration-300 ease-in-out;
 	}
 
 	.tfa-error {
@@ -178,11 +173,11 @@
 	}
 
 	.input-container {
-		@apply flex gap-6;
+		@apply flex gap-4 lg:gap-6;
 	}
 
 	.input-2fa {
-		@apply w-16 h-16 bg-transparent border border-white text-center text-4xl;
+		@apply w-12 h-12 lg:w-16 lg:h-16 bg-transparent border border-white text-center text-4xl transition-all duration-300 ease-in-out;
 	}
 
 </style>

@@ -1,16 +1,21 @@
 <template>
-	<StartGame v-if="showStart"></StartGame>
+	<StartGame v-if="showStart" @start-match="startMatch"></StartGame>
+	<Pong v-if="showMatch"></Pong>
 </template>
 
 <script setup lang="ts">
 	import StartGame from '../components/Game/StartGame.vue'
+	import Pong from '../components/Game/Pong.vue'
 	import { onMounted, ref } from 'vue';
 	import { useUserStore } from '../stores/UserStore';
+	import { useGameStore } from '../stores/GameStore';
 	import router from '@/router';
 	import axios from 'axios';
 	
-	const store = useUserStore();
+	const userStore = useUserStore();
+	const gameStore = useGameStore();
 	const showStart = ref(true);
+	const showMatch = ref(false);
 
 	const getUsernameFromCookie = () => {
 		const cookie = document.cookie.split(';').find(cookie => cookie.trim().startsWith('username='));
@@ -30,17 +35,22 @@
 				router.push('/');
 				return ;
 			}
-			if (!store.intra)
-				store.setIntra(cookie_username);
-			const response = await axios.get(`http://${location.hostname}:3000/auth/getUserData?intra=${store.intra}`);
+			if (!userStore.intra)
+				userStore.setIntra(cookie_username);
+			const response = await axios.get(`http://${location.hostname}:3000/auth/getUserData?intra=${userStore.intra}`);
 			const data = response.data;
-			store.setUsername(data.username);
-			store.setProfilePicture(data.avatarUrl);
-			store.setTFA(data.tfa_enabled);
+			userStore.setUsername(data.username);
+			userStore.setProfilePicture(data.avatarUrl);
+			userStore.setTFA(data.tfa_enabled);
 		} catch (error) {
 			console.error('Error fetching user data:', error);
 		}
 	});
+
+	function startMatch() {
+		showStart.value = false;
+		showMatch.value = true;
+	}
 </script>
 
 

@@ -1,10 +1,12 @@
 <template>
+	<div class="startgame">
 		<div class="slideshow" :class="{ blur: showCount }">
 			<div :class="['block-style', compSetClass]">
-				<button class="block-image" @click="search_game" id="toggle-game-btn">
-							<span v-show="!isLooking">Queue</span>
-							<span v-show="isLooking">Cancel</span>
+				<button class="set-button" @click="search_game" v-if="compBlockSelected">
+						<span v-show="!isLooking">Queue</span>
+						<span v-show="isLooking">Cancel</span>
 				</button>
+				<span class="block-title">Settings</span>
 			</div>
 			<div :class="['comp-block', 'block-style', compBlockClass]" @click="selectCompBlock">
 				<img src="../../assets/pong.gif" class="block-image">
@@ -14,7 +16,7 @@
 				<img src="../../assets/pong.gif" class="block-image">
 				<span class="block-title">Fun Mode</span>
 			</div>
-			<div :class="['fun-block-settings', 'block-style', funSetClass]">
+			<div :class="['block-style', funSetClass]">
 				<span class="block-title">Settings</span>
 			</div>
 		</div>
@@ -28,22 +30,24 @@
 					<span id="seconds">{{ timeLeft }}</span>
 				</div>
 				<div class="enemy">
-					<img id="enemy-picture" class="profile-picture" :src="enmey_picture"/>
+					<img id="enemy-picture" class="profile-picture" :src="enemy_picture"/>
 					<h1 class="username-text">{{ enemy_name }}</h1>
 				</div>
 			</div>
 		</div>
+	</div>
 </template>
 
-
 <script setup lang="ts">
-	import { ref, computed } from 'vue'
+	import { ref, computed, defineComponent } from 'vue'
 	import { useUserStore } from '../../stores/UserStore';
 	import { io, Socket } from 'socket.io-client';
 	import { storeToRefs } from 'pinia';
-// import { Socket } from 'dgram';
+  import { useGameStore } from '../../stores/GameStore';
+	import Game from '../../views/Game.vue'
 
-	const store = useUserStore();
+	const userStore = useUserStore();
+	const gameStore = useGameStore();
 	const funBlockVisible = ref(true);
 	const compBlockVisible = ref(true);
 	const compBlockSelected = ref(false);
@@ -51,12 +55,12 @@
 	const isLooking = ref(false);
 	const showCount = ref(false);
 	const timeLeft = ref(4);
-	const { username } = storeToRefs(store);
-	const { profile_picture } = storeToRefs(store);
-	const enemy_name = ref("");
-	const enmey_picture = ref("");
-	// const enemy_picture = null;
 	var socket;
+	const { username } = storeToRefs(userStore);
+	const { profile_picture } = storeToRefs(userStore);
+	const { enemy_name } = storeToRefs(gameStore);
+	const { enemy_picture } = storeToRefs(gameStore);
+	const emit = defineEmits(["start-match"]);
 
 	function countdown() {
 		timeLeft.value--;
@@ -66,6 +70,7 @@
 		{
 			showCount.value = false;
 			timeLeft.value = 4;
+			emit('start-match');
 		}
 	}
 
@@ -81,10 +86,11 @@
 				console.log('Disconnected');
 			});
 			socket.on('foundOpponent', function(username: string, pic: string) {
-				enemy_name.value = username;
-				enmey_picture.value = pic;
-				showCount.value = true;
-				countdown();
+				gameStore.setIntra(userStore.intra);
+        gameStore.setEnemyName(username);
+        gameStore.setEnemyPicture(pic);
+        showCount.value = true;
+        countdown();
 			});
 			socket.on('noOpponent', function() {
 				console.log("No fitting opponent in matchmaking, waiting...");
@@ -93,8 +99,6 @@
 
 			isLooking.value = true;
 		}
-
-		//cancel connection
 		else {
 			console.log("store.intra is: ", store.intra);
 			socket.emit("cancelQueue", store.intra);
@@ -152,22 +156,30 @@
 		src: url('./assets/3270-Regular.ttf') format('truetype');
 	} */
 
+	.startgame {
+		@apply h-full;
+	}
+
 	.slideshow {
-		@apply w-screen flex items-center justify-center;
-		/* font-family: 'ibm-3270', monospace; */
-		height: 100%;
-		/* top: 50%; */
-  		-ms-transform: translateY(25%);
-  		transform: translateY(25%);
+		@apply flex h-full items-center justify-center;
 	}
 
 	.block-style {
-		@apply w-full md:w-1/3 lg:w-1/3 mx-2 px-2 py-60 bg-transparent transition-all duration-300 ease-in-out rounded-lg;
+		/* @apply border w-full md:w-1/3 lg:w-1/3 mx-2 px-2 py-60 bg-transparent transition-all duration-300 ease-in-out rounded-lg; */
+		@apply flex flex-col justify-center items-center w-1/4 h-1/2 transition-all duration-700 ease-in-out rounded-lg;
 	}
 
-	.block-style:hover {
+	.comp-block:hover, .fun-block:hover {
 		/* @apply transform bg-white bg-opacity-10 scale-110; */
 		@apply bg-white bg-opacity-10;
+	}
+
+	.set-button {
+		@apply flex text-2xl bg-white bg-opacity-10 px-6 py-4 mb-2;
+	}
+
+	.set-button:hover {
+		@apply text-3xl transition-all duration-300 ease-in-out;
 	}
 
 	.block-image {
@@ -178,7 +190,7 @@
 		@apply block text-center mt-4 text-xl;
 	}
 
-	.fun-block-visible {
+	.fun-block-visible, .comp-block-visible {
 		@apply opacity-100 translate-x-0;
 	}
 
@@ -198,10 +210,6 @@
 	.fun-set-hidden {
 		@apply opacity-0 transform -translate-x-0;
 	}
-
-	.comp-block-visible {
-		@apply opacity-100 translate-x-0;
-	}
 	.comp-block-selected {
 		@apply opacity-100 transform translate-x-full;
 		@apply bg-white bg-opacity-10;
@@ -216,10 +224,6 @@
 
 	.comp-set-hidden {
 		@apply opacity-0 transform translate-x-0;
-	}
-
-	.block-style {
-		@apply transition-all duration-1000 ease-in-out;
 	}
 
 	.blur {
