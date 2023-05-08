@@ -195,6 +195,7 @@
 	}
 
 	function hideQRCode() {
+		twoFactorCode.value = Array(6).fill('');
 		qrCodeVisible.value = false;
 		showTFA.value = false;
 		showTFAerror.value = false;
@@ -373,8 +374,26 @@
 	.qr-code {
 		@apply w-full h-full;
 	}
-
+	
 	.input-container {
+		@apply flex gap-4 lg:gap-6;
+	}
+
+	.input-2fa {
+		@apply w-12 h-12 lg:w-16 lg:h-16 bg-transparent border border-white text-center text-4xl transition-all duration-300 ease-in-out;
+	}
+
+	.tfa-text{
+		@apply inline-flex text-2xl lg:text-4xl mt-36 mb-4 lg:mb-10 transition-all duration-300 ease-in-out;
+	}
+
+	.tfa-error {
+		@apply inline-flex text-xl lg:text-2xl text-red-500 mt-6 transition-all duration-300 ease-in-out;
+	}
+
+
+
+	/* .input-container {
 		@apply flex gap-6;
 	}
 
@@ -388,7 +407,7 @@
 
 	.tfa-error {
 		@apply inline-flex text-2xl text-red-500 mt-6;
-	}
+	} */
 	.username-error {
 		@apply inline-flex items-center mt-2 text-xl text-red-500 ;
 		text-shadow: 0 0 25px rgb(255, 65, 65);
