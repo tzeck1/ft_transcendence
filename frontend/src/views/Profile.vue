@@ -275,7 +275,7 @@
 	}
 
 	.grid {
-		@apply grid-cols-2 gap-4 w-4/5 h-full p-8 overflow-y-auto;
+		@apply grid-cols-2 gap-4 w-4/5 h-full p-8;
 		display: grid;
 	}
 
@@ -284,7 +284,7 @@
 	}
 
 	.profile {
-		@apply flex overflow-hidden;
+		@apply flex;
 	}
 
 	.two-factor-button {
@@ -300,7 +300,7 @@
 	}
 
 	.username-text {
-		@apply justify-center items-center;
+		@apply justify-center items-center px-2;
 	}
 
 	#toggle-username {

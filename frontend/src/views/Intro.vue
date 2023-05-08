@@ -165,7 +165,7 @@
 	}
 
 	.tfa-text{
-		@apply inline-flex text-4xl mt-36 mb-10;
+		@apply inline-flex text-2xl lg:text-4xl mt-36 mb-4 lg:mb-10 transition-all duration-300 ease-in-out;
 	}
 
 	.tfa-error {
@@ -173,11 +173,11 @@
 	}
 
 	.input-container {
-		@apply flex gap-6;
+		@apply flex gap-4 lg:gap-6;
 	}
 
 	.input-2fa {
-		@apply w-16 h-16 bg-transparent border border-white text-center text-4xl;
+		@apply w-12 h-12 lg:w-16 lg:h-16 bg-transparent border border-white text-center text-4xl transition-all duration-300 ease-in-out;
 	}
 
 </style>
