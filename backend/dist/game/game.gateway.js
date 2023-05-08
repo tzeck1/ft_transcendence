@@ -15,12 +15,14 @@ const socket_io_1 = require("socket.io");
 const game_service_1 = require("./game.service");
 const user_service_1 = require("../user/user.service");
 let GameGateway = class GameGateway {
-    constructor(users, gameService) {
-        this.users = users;
+    constructor(gameService, users) {
         this.gameService = gameService;
-        this.intra_clients = new Map;
+        this.users = users;
         this.rooms = new Map;
-        this.room_id = 0;
+        this.lobby = new Map;
+        this.room_counter = 0;
+        this.threshold = 20;
+        this.config = undefined;
     }
     afterInit(server) {
         console.log('Initialized');
@@ -34,39 +36,31 @@ let GameGateway = class GameGateway {
     async handleCreateOrJoin(client, intra) {
         if (intra == '')
             return;
-        client.join("lobby");
-        this.intra_clients.set(intra, client);
-        const pairedIntra = await this.matchMake(client, intra, this.intra_clients);
-        if (pairedIntra != undefined) {
-            let pairedUser = await this.users.getUsername(await this.users.getId(pairedIntra));
-            let pairedPic = await this.users.getAvatarByIntra(pairedIntra);
-            let searchingUser = await this.users.getUsername(await this.users.getId(intra));
-            let searchingPic = await this.users.getAvatarByIntra(intra);
-            this.server.to(this.intra_clients.get(pairedIntra).id).emit("foundOpponent", searchingUser, searchingPic);
-            this.server.to(client.id).emit("foundOpponent", pairedUser, pairedPic);
-        }
-    }
-    async matchMake(client, searching_intra, intra_clients) {
-        for (let [key, element] of intra_clients) {
-            if (key != searching_intra
-                && (await this.users.getScore(searching_intra) > await this.users.getScore(key) - 20
-                    || await this.users.getScore(searching_intra) < await this.users.getScore(key) + 20)) {
-                client.leave("lobby");
-                element.leave("lobby");
-                let room_name = this.createRoom(element.id);
-                client.join(room_name);
-                element.join(room_name);
-                return key;
+        let searching_player = new game_service_1.Player(client, intra, this.users);
+        await searching_player.updateUserData();
+        for (let [intraname, lobby_player] of this.lobby) {
+            if (lobby_player.getScore() - this.threshold < searching_player.getScore() && searching_player.getScore() < lobby_player.getScore() + this.threshold) {
+                this.createAndJoinRoom(searching_player, lobby_player);
+                return;
             }
         }
-        client.emit("noOpponent");
-        return undefined;
+        searching_player.getSocket().join("lobby");
+        this.lobby.set(intra, searching_player);
+        searching_player.getSocket().emit("noOpponent");
     }
-    createRoom(client_id) {
-        this.room_id += 1;
-        let name = "game" + this.room_id.toString();
-        this.rooms.set(client_id, name);
-        return name;
+    createAndJoinRoom(player_one, player_two) {
+        this.room_counter += 1;
+        let room_id = "game" + this.room_counter.toString();
+        player_one.getSocket().leave("lobby");
+        player_two.getSocket().leave("lobby");
+        this.lobby.delete(player_one.getIntraname());
+        this.lobby.delete(player_two.getIntraname());
+        let new_room = new game_service_1.Room(room_id, this.config, player_one, player_two);
+        this.rooms.set(room_id, new_room);
+        player_one.getSocket().join(room_id);
+        player_two.getSocket().join(room_id);
+        player_one.getSocket().emit("foundOpponent", player_two.getUsername(), player_two.getPicture());
+        player_two.getSocket().emit("foundOpponent", player_one.getUsername(), player_one.getPicture());
     }
 };
 __decorate([
@@ -85,8 +79,7 @@ GameGateway = __decorate([
             origin: '*',
         },
     }),
-    __metadata("design:paramtypes", [user_service_1.Users,
-        game_service_1.GameService])
+    __metadata("design:paramtypes", [game_service_1.GameService, user_service_1.Users])
 ], GameGateway);
 exports.GameGateway = GameGateway;
 //# sourceMappingURL=game.gateway.js.map

@@ -41,9 +41,9 @@
 <script setup lang="ts">
 	import { ref, computed, defineComponent } from 'vue'
 	import { useUserStore } from '../../stores/UserStore';
-	import { useGameStore } from '../../stores/GameStore';
-	import { io } from 'socket.io-client';
+	import { io, Socket } from 'socket.io-client';
 	import { storeToRefs } from 'pinia';
+  import { useGameStore } from '../../stores/GameStore';
 	import Game from '../../views/Game.vue'
 
 	const userStore = useUserStore();
@@ -55,6 +55,7 @@
 	const isLooking = ref(false);
 	const showCount = ref(false);
 	const timeLeft = ref(4);
+	var socket;
 	const { username } = storeToRefs(userStore);
 	const { profile_picture } = storeToRefs(userStore);
 	const { enemy_name } = storeToRefs(gameStore);
@@ -75,40 +76,34 @@
 
 	function search_game()
 	{
-		if (!isLooking.value)
-			establishCon();
-		else
-			cancelCon();
-	}
+		//establish connection
+		if (!isLooking.value) {
+			socket = io(`${location.hostname}:3000`);
+			socket.on('connect', function() {
+				console.log('Connected');
+			});
+			socket.on('disconnect', function() {
+				console.log('Disconnected');
+			});
+			socket.on('foundOpponent', function(username: string, pic: string) {
+				gameStore.setIntra(userStore.intra);
+        gameStore.setEnemyName(username);
+        gameStore.setEnemyPicture(pic);
+        showCount.value = true;
+        countdown();
+			});
+			socket.on('noOpponent', function() {
+				console.log("No fitting opponent in matchmaking, waiting...");
+			});
+			socket.emit("createOrJoin", store.intra);
 
-	function establishCon()
-	{
-		const socket = io(`${location.hostname}:3000`);
-		gameStore.setSocket(socket); // save socket id in store
-		socket.on('connect', function() {
-			console.log('Connected');
-		});
-		socket.on('disconnect', function() {
-			console.log('Disconnected');
-		});
-		socket.on('foundOpponent', function(username: string, pic: string) {
-			gameStore.setIntra(userStore.intra);
-			gameStore.setEnemyName(username);
-			gameStore.setEnemyPicture(pic);
-			showCount.value = true;
-			countdown();
-		});
-		socket.on('noOpponent', function() {
-			console.log("No fitting opponent in matchmaking, waiting...");
-		});
-		socket.emit("createOrJoin", userStore.intra);
-
-		isLooking.value = true;
-	}
-
-	function cancelCon()
-	{
-		isLooking.value = false;
+			isLooking.value = true;
+		}
+		else {
+			console.log("store.intra is: ", store.intra);
+			socket.emit("cancelQueue", store.intra);
+			isLooking.value = false;
+		}
 	}
 
 	function selectCompBlock() {

@@ -9,7 +9,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GameService = void 0;
+exports.Room = exports.Player = exports.GameService = void 0;
 const common_1 = require("@nestjs/common");
 const user_service_1 = require("../user/user.service");
 let GameService = class GameService {
@@ -22,4 +22,39 @@ GameService = __decorate([
     __metadata("design:paramtypes", [user_service_1.Users])
 ], GameService);
 exports.GameService = GameService;
+class Player {
+    constructor(socket, intraname, users) {
+        this.socket = socket;
+        this.intraname = intraname;
+        this.users = users;
+    }
+    async updateUserData() {
+        this.username = await this.users.getUsernameByIntra(this.intraname);
+        this.picture = await this.users.getAvatarByIntra(this.intraname);
+        this.score = await this.users.getScore(this.intraname);
+    }
+    getSocket() { return this.socket; }
+    getIntraname() { return this.intraname; }
+    getUsername() { if (this.username == undefined)
+        this.updateUserData(); return this.username; }
+    getPicture() { if (this.picture == undefined)
+        this.updateUserData(); return this.picture; }
+    getScore() { if (this.score == undefined)
+        this.updateUserData(); return this.score; }
+}
+exports.Player = Player;
+class Room {
+    constructor(room_id, phaser_config, left_player, right_player) {
+        this.room_id = room_id;
+        this.phaser_config = phaser_config;
+        this.left_player = left_player;
+        this.right_player = right_player;
+    }
+    getRoomId() { return this.room_id; }
+    getPhaserConfig() { return this.phaser_config; }
+    getPhaserInstance() { return this.phaser_instance; }
+    getLeftPlayer() { return this.left_player; }
+    getRightPlayer() { return this.right_player; }
+}
+exports.Room = Room;
 //# sourceMappingURL=game.service.js.map
