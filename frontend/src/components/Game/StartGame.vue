@@ -30,7 +30,7 @@
 					<span id="seconds">{{ timeLeft }}</span>
 				</div>
 				<div class="enemy">
-					<img id="enemy-picture" class="profile-picture" :src="enmey_picture"/>
+					<img id="enemy-picture" class="profile-picture" :src="enemy_picture"/>
 					<h1 class="username-text">{{ enemy_name }}</h1>
 				</div>
 			</div>
@@ -38,14 +38,16 @@
 	</div>
 </template>
 
-
 <script setup lang="ts">
-	import { ref, computed } from 'vue'
+	import { ref, computed, defineComponent } from 'vue'
 	import { useUserStore } from '../../stores/UserStore';
+	import { useGameStore } from '../../stores/GameStore';
 	import { io } from 'socket.io-client';
 	import { storeToRefs } from 'pinia';
+	import Game from '../../views/Game.vue'
 
-	const store = useUserStore();
+	const userStore = useUserStore();
+	const gameStore = useGameStore();
 	const funBlockVisible = ref(true);
 	const compBlockVisible = ref(true);
 	const compBlockSelected = ref(false);
@@ -53,11 +55,11 @@
 	const isLooking = ref(false);
 	const showCount = ref(false);
 	const timeLeft = ref(4);
-	const { username } = storeToRefs(store);
-	const { profile_picture } = storeToRefs(store);
-	const enemy_name = ref("");
-	const enmey_picture = ref("");
-	// const enemy_picture = null;
+	const { username } = storeToRefs(userStore);
+	const { profile_picture } = storeToRefs(userStore);
+	const { enemy_name } = storeToRefs(gameStore);
+	const { enemy_picture } = storeToRefs(gameStore);
+	const emit = defineEmits(["start-match"]);
 
 	function countdown() {
 		timeLeft.value--;
@@ -67,6 +69,7 @@
 		{
 			showCount.value = false;
 			timeLeft.value = 4;
+			emit('start-match');
 		}
 	}
 
@@ -81,6 +84,7 @@
 	function establishCon()
 	{
 		const socket = io(`${location.hostname}:3000`);
+		gameStore.setSocket(socket); // save socket id in store
 		socket.on('connect', function() {
 			console.log('Connected');
 		});
@@ -88,15 +92,16 @@
 			console.log('Disconnected');
 		});
 		socket.on('foundOpponent', function(username: string, pic: string) {
-			enemy_name.value = username;
-			enmey_picture.value = pic;
+			gameStore.setIntra(userStore.intra);
+			gameStore.setEnemyName(username);
+			gameStore.setEnemyPicture(pic);
 			showCount.value = true;
 			countdown();
 		});
 		socket.on('noOpponent', function() {
 			console.log("No fitting opponent in matchmaking, waiting...");
 		});
-		socket.emit("createOrJoin", store.intra);
+		socket.emit("createOrJoin", userStore.intra);
 
 		isLooking.value = true;
 	}

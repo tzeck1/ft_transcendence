@@ -54,9 +54,9 @@
 	import { storeToRefs } from 'pinia';
 	import router from '@/router';
 
-	const store = useUserStore();
-	const { username } = storeToRefs(store);
-	const { profile_picture } = storeToRefs(store);
+	const userStore = useUserStore();
+	const { username } = storeToRefs(userStore);
+	const { profile_picture } = storeToRefs(userStore);
 	const usernameInput = ref<HTMLInputElement | null>(null);
 	const inputField1 = ref<HTMLInputElement | null>(null);
 	const isEditing = ref(false);
@@ -69,7 +69,7 @@
 	const showUsernameError = ref(false);
 	const qrCodeValue = ref('');
 	const twoFactorCode = ref(["", "", "", "", "", ""]);
-	const twoFactorButtonText = computed(() => store.tfa_enabled ? "Disable 2FA" : "Enable 2FA");
+	const twoFactorButtonText = computed(() => userStore.tfa_enabled ? "Disable 2FA" : "Enable 2FA");
 
 	watch(isEditing, (editing) => {
 		if (editing) {
@@ -88,7 +88,7 @@
 	}
 
 	async function stopEditing() {
-		const response = await axios.post(`http://${location.hostname}:3000/users/setUsername`, { intra: store.intra, username: username.value });
+		const response = await axios.post(`http://${location.hostname}:3000/users/setUsername`, { intra: userStore.intra, username: username.value });
 		if (response.data == 1)
 		{
 			error_text.value = "Username has to contain 2+ chars!";
@@ -138,13 +138,13 @@
 				router.push('/'); //do we need to return after that?
 				return ;
 			}
-			if (!store.intra)
-				store.setIntra(cookie_username);
-			const response = await axios.get(`http://${location.hostname}:3000/auth/getUserData?intra=${store.intra}`);
+			if (!userStore.intra)
+				userStore.setIntra(cookie_username);
+			const response = await axios.get(`http://${location.hostname}:3000/auth/getUserData?intra=${userStore.intra}`);
 			const data = response.data;
-			store.setUsername(data.username);
-			store.setProfilePicture(data.avatarUrl);
-			store.setTFA(data.tfa_enabled);
+			userStore.setUsername(data.username);
+			userStore.setProfilePicture(data.avatarUrl);
+			userStore.setTFA(data.tfa_enabled);
 		} catch (error) {
 			console.error('Error fetching user data:', error);
 		}
@@ -176,8 +176,8 @@
 				}
 				const reader = new FileReader();
 				reader.onload = function (event) {
-					store.setProfilePicture(event.target!.result as string);
-					axios.post(`http://${location.hostname}:3000/users/setAvatar`, { intra: store.intra, picture: store.profile_picture });
+					userStore.setProfilePicture(event.target!.result as string);
+					axios.post(`http://${location.hostname}:3000/users/setAvatar`, { intra: userStore.intra, picture: userStore.profile_picture });
 				};
 				reader.readAsDataURL(file);
 			} else {
@@ -187,7 +187,7 @@
 	}
 
 	async function toggle2FA() {
-		if (store.tfa_enabled) {
+		if (userStore.tfa_enabled) {
 			await disable2FA();
 		} else {
 			await enable2FA();
@@ -202,7 +202,7 @@
 	}
 
 	async function enable2FA() {
-		const response = await axios.get(`http://${location.hostname}:3000/2fa/enable?intra=${store.intra}`);
+		const response = await axios.get(`http://${location.hostname}:3000/2fa/enable?intra=${userStore.intra}`);
 		const otpauthUrl = response.data.qrCode;
 		qrCodeValue.value = otpauthUrl;
 		qrCodeVisible.value = true;
@@ -218,14 +218,14 @@
 	}
 
 	async function verify2FA() {
-		const response = await axios.post(`http://${location.hostname}:3000/2fa/verify`, { intra: store.intra, token: twoFactorCode.value.join('') });
+		const response = await axios.post(`http://${location.hostname}:3000/2fa/verify`, { intra: userStore.intra, token: twoFactorCode.value.join('') });
 		if (response.data.message) {
 			hideQRCode();
-			if (!store.tfa_enabled)
-				store.setTFA(true);
+			if (!userStore.tfa_enabled)
+				userStore.setTFA(true);
 			else {
-				await axios.get(`http://${location.hostname}:3000/2fa/disable?intra=${store.intra}`);
-				store.setTFA(false);
+				await axios.get(`http://${location.hostname}:3000/2fa/disable?intra=${userStore.intra}`);
+				userStore.setTFA(false);
 			}
 		}
 		else

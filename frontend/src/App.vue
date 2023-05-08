@@ -47,7 +47,7 @@
 	const router = useRouter();
 	const route = useRoute();
 	const dropdownVisible = ref(false);
-	const store = useUserStore();
+	const userStore = useUserStore();
 	const isIntro = computed(() => route.path === '/');
 
 	function loadIntro() {
@@ -58,7 +58,7 @@
 			const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
 			document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
 		}
-		store.delContent();
+		userStore.delContent();
 		router.push('/');
 	}
 
