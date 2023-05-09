@@ -138,6 +138,19 @@ export default class Pong extends Phaser.Scene {
 		this.socket.on("enemyPaddleDown", () => {
 			this.right_player.y += this.paddle_velocity;
 		});
+		this.socket.on("newScore", (left_score, right_score) => {
+			this.left_score = left_score;
+			this.right_score = right_score;
+			this.left_score_txt.text = String(this.left_score);
+			this.right_score_txt.text = String(this.right_score);
+		})
+		this.socket.on("spawnBall", (y_position, x_velocity, y_velocity) => {
+			this.ball.setPosition(this.width / 2, y_position);
+			this.ball.setVelocity(x_velocity, y_velocity);
+			this.ball.alpha = 1;
+			this.ball_trail.start();
+			this.ball_ingame = true;
+		})
 		this.socket.emit("iAmReady", this.room_id);
 	}
 
@@ -168,7 +181,7 @@ export default class Pong extends Phaser.Scene {
 		if (!this.ball_ingame) {
 			if (this.old_time + this.ball_spawn_delay > time)
 				return;
-			this.spawn_ball();
+			this.ball_ingame = true;
 		}
 	}
 
@@ -197,16 +210,11 @@ export default class Pong extends Phaser.Scene {
 	player_scored() {
 		if (this.left_score == this.winning_score || this.right_score == this.winning_score)
 			return;
-		if (this.ball.body.blocked.left) {
-			this.right_score += this.scoring_increment;
-			this.right_score_txt.text = String(this.right_score);
-			this.next_ball_spawn_right = true;
-		}
-		else if (this.ball.body.blocked.right) {
-			this.left_score += this.scoring_increment;
-			this.left_score_txt.text = String(this.left_score);
-			this.next_ball_spawn_left = true;
-		}
+		let left_player_scored = false;
+		if (this.ball.body.blocked.right)
+			left_player_scored = true;
+		this.socket.emit('scoreRequest', {left_player_scored: left_player_scored, room: this.room_id});
+
 		if (this.left_score == this.winning_score || this.right_score == this.winning_score) {
 			this.left_collider.destroy();
 			this.right_collider.destroy();
@@ -216,41 +224,12 @@ export default class Pong extends Phaser.Scene {
 			this.right_player.alpha = 0;
 			// TODO end game here
 		}
+
 		this.ball_ingame = false;
 		this.ball.setVelocity(0);
 		this.ball.setPosition(this.width / 2, this.height / 2);
 		this.ball_trail.stop();
 		this.ball.alpha = 0;
-	}
-
-	spawn_ball() {
-		let x: number, y: number;
-
-		if (Phaser.Math.Between(0, 1) == 0)
-			y = Phaser.Math.Between(0, this.height / this.ball_spawn_distance);
-		else
-			y = Phaser.Math.Between((this.ball_spawn_distance - 1) * this.height / this.ball_spawn_distance, this.height);
-		this.ball.setPosition(this.width / 2, y);
-		if (y > this.height / 2)
-			y = Phaser.Math.Between(-0.5 * this.ball_start_velocity, -1.5 * this.ball_start_velocity);
-		else
-			y = Phaser.Math.Between(0.5 * this.ball_start_velocity, 1.5 * this.ball_start_velocity);
-		if (this.next_ball_spawn_left)
-			x = this.ball_start_velocity;
-		else if (this.next_ball_spawn_right)
-			x = this.ball_start_velocity * -1;
-		else {
-			if (Phaser.Math.Between(0, 1) == 0)
-				x = this.ball_start_velocity * -1;
-			else
-				x = this.ball_start_velocity;
-		}
-		this.ball.setVelocity(x, y);
-		this.next_ball_spawn_left = false;
-		this.next_ball_spawn_right = false;
-		this.ball.alpha = 1;
-		this.ball_trail.start();
-		this.ball_ingame = true;
 	}
 
 	createPlayerTrail(sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, key: string) {

@@ -85,6 +85,23 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		client.disconnect(true);
 	}
 
+	@SubscribeMessage("scoreRequest")
+	handleScoreRequest(client: Socket, data: any) {
+		console.log(client.id, "sends", data.left_player_scored, "and", data.room)
+		let room = this.rooms.get(data.room);
+		let player;
+		if (data.left_player_scored == true)
+			player = room.getLeftPlayer();
+		else
+			player = room.getRightPlayer();
+		room.validateScore(client);
+		if (room.isScoreTrue() == true) {
+			console.log("inside if of isScoreTrue was called");
+			room.playerScored(player);
+			room.spawn_ball();
+		}
+	}
+
 	@SubscribeMessage("paddleMovement")
 	handlePaddleMovement(client: Socket, data: any) {
 		let room = this.rooms.get(data.room);
@@ -103,6 +120,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		if (room.isRoomReady() == true) {
 			room.getLeftPlayer().getSocket().emit("startTheGame");
 			room.getRightPlayer().getSocket().emit("startTheGame");
+			room.spawn_ball();
 		}
 	}
 }

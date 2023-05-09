@@ -26,16 +26,28 @@ export declare class Room {
     constructor(room_id: string, left_player: Player, right_player: Player);
     private left_player_status;
     private right_player_status;
+    private left_score_status;
+    private right_score_status;
     private left_score;
     private right_score;
     private ball_x;
     private ball_y;
     private left_player_y;
     private right_player_y;
+    private height;
+    private width;
+    private ball_start_velocity;
+    private ball_spawn_distance;
+    private next_ball_spawn_left;
+    private next_ball_spawn_right;
     getRoomId(): string;
     getLeftPlayer(): Player;
     getRightPlayer(): Player;
     movePlayer(player: Player, inputPayload: any): void;
     isRoomReady(): boolean;
+    isScoreTrue(): boolean;
     validatePlayer(client: Socket): void;
+    validateScore(client: Socket): void;
+    spawn_ball(): void;
+    playerScored(player: Player): void;
 }

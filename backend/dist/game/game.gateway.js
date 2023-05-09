@@ -69,6 +69,21 @@ let GameGateway = class GameGateway {
         this.lobby.delete(player.getIntraname());
         client.disconnect(true);
     }
+    handleScoreRequest(client, data) {
+        console.log(client.id, "sends", data.left_player_scored, "and", data.room);
+        let room = this.rooms.get(data.room);
+        let player;
+        if (data.left_player_scored == true)
+            player = room.getLeftPlayer();
+        else
+            player = room.getRightPlayer();
+        room.validateScore(client);
+        if (room.isScoreTrue() == true) {
+            console.log("inside if of isScoreTrue was called");
+            room.playerScored(player);
+            room.spawn_ball();
+        }
+    }
     handlePaddleMovement(client, data) {
         let room = this.rooms.get(data.room);
         let player;
@@ -84,6 +99,7 @@ let GameGateway = class GameGateway {
         if (room.isRoomReady() == true) {
             room.getLeftPlayer().getSocket().emit("startTheGame");
             room.getRightPlayer().getSocket().emit("startTheGame");
+            room.spawn_ball();
         }
     }
 };
@@ -103,6 +119,12 @@ __decorate([
     __metadata("design:paramtypes", [socket_io_1.Socket, String]),
     __metadata("design:returntype", void 0)
 ], GameGateway.prototype, "handleCancelQueue", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)("scoreRequest"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
+    __metadata("design:returntype", void 0)
+], GameGateway.prototype, "handleScoreRequest", null);
 __decorate([
     (0, websockets_1.SubscribeMessage)("paddleMovement"),
     __metadata("design:type", Function),
