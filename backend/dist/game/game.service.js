@@ -60,21 +60,11 @@ class Room {
     getRoomId() { return this.room_id; }
     getLeftPlayer() { return this.left_player; }
     getRightPlayer() { return this.right_player; }
-    setupListeners() {
-        this.left_player.getSocket().on("enemyPaddleMovement", (client, inputPayload) => {
-            if (client == this.left_player.getSocket()) {
-                if (inputPayload.up == true)
-                    this.right_player.getSocket().emit("enemyPaddleUp");
-                else if (inputPayload.down == true)
-                    this.right_player.getSocket().emit("enemyPaddleDown");
-            }
-            else {
-                if (inputPayload.up == true)
-                    this.left_player.getSocket().emit("enemyPaddleUp");
-                else if (inputPayload.down == true)
-                    this.left_player.getSocket().emit("enemyPaddleDown");
-            }
-        });
+    movePlayer(player, inputPayload) {
+        if (inputPayload.up == true)
+            player.getSocket().emit('enemyPaddleUp');
+        else if (inputPayload.down == true)
+            player.getSocket().emit('enemyPaddleDown');
     }
     isRoomReady() {
         if (this.left_player_status && this.right_player_status)

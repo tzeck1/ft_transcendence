@@ -54,23 +54,46 @@ export class Room {
 	getLeftPlayer(): Player { return this.left_player; }
 	getRightPlayer(): Player { return this.right_player; }
 
-	setupListeners() {
-		this.left_player.getSocket().on("enemyPaddleMovement", (client, inputPayload) => {
-			if (client == this.left_player.getSocket()) {
-				if (inputPayload.up == true)
-					this.right_player.getSocket().emit("enemyPaddleUp");
-				else if (inputPayload.down == true)
-					this.right_player.getSocket().emit("enemyPaddleDown");
-			} else {
-				if (inputPayload.up == true)
-					this.left_player.getSocket().emit("enemyPaddleUp");
-				else if (inputPayload.down == true)
-					this.left_player.getSocket().emit("enemyPaddleDown");
-			}
-		});
+//	setupListeners() {
+//		console.log("Method setupListeners in room class was called");
+//		this.left_player.getSocket().on("enemyPaddleMovement", () => {
+//			console.log("Room listener 'enemyPaddleMovement' fired");
+//			console.log("Room class listener 'enemyPaddleMovement' was fired with client:", client.id, "and with payload:", inputPayload);
+//			let currentPlayer;
+//			if (client == this.left_player.getSocket())
+//				currentPlayer = this.left_player.getIntraname();
+//			else
+//				currentPlayer = this.right_player.getIntraname();
+//			console.log("Room listener 'enemyPaddleMovement' fired because of", currentPlayer, "with the payload", inputPayload);
+//			if (client == this.left_player.getSocket()) {
+//				if (inputPayload.up == true){
+//					this.right_player.getSocket().emit("enemyPaddleUp");
+//					console.log("Room emitting 'enemyPaddleUp from", currentPlayer, "to", this.right_player.getIntraname(), "with payload:", inputPayload);
+//				}
+//				else if (inputPayload.down == true) {
+//					this.right_player.getSocket().emit("enemyPaddleDown");
+//					console.log("Room emitting 'enemyPaddleDown from", currentPlayer, "to", this.right_player.getIntraname(), "with payload:", inputPayload);
+//				}
+//			} else {
+//				if (inputPayload.up == true) {
+//					this.left_player.getSocket().emit("enemyPaddleUp");
+//					console.log("Room emitting 'enemyPaddleUp from", currentPlayer, "to", this.left_player.getIntraname(), "with payload:", inputPayload);
+//				}
+//				else if (inputPayload.down == true) {
+//					this.left_player.getSocket().emit("enemyPaddleDown");
+//					console.log("Room emitting 'enemyPaddleDown from", currentPlayer, "to", this.left_player.getIntraname(), "with payload:", inputPayload);
+//				}
+//			}
+//		});
+//	}
+
+	movePlayer(player: Player, inputPayload: any) {
+		if (inputPayload.up == true)
+			player.getSocket().emit('enemyPaddleUp');
+		else if (inputPayload.down == true)
+			player.getSocket().emit('enemyPaddleDown');
 	}
 	
-
 	isRoomReady(): boolean {
 		if (this.left_player_status && this.right_player_status)
 			return true;

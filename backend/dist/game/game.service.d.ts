@@ -35,7 +35,7 @@ export declare class Room {
     getRoomId(): string;
     getLeftPlayer(): Player;
     getRightPlayer(): Player;
-    setupListeners(): void;
+    movePlayer(player: Player, inputPayload: any): void;
     isRoomReady(): boolean;
     validatePlayer(client: Socket): void;
 }

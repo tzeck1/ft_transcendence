@@ -86,14 +86,19 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	@SubscribeMessage("paddleMovement")
-	handlePaddleMovement(client: Socket, room_id: string, args: any) {
-		this.server.to(room_id).emit("enemyPaddleMovement", client, args);
+	handlePaddleMovement(client: Socket, data: any) {
+		let room = this.rooms.get(data.room);
+		let player;
+		if (room.getLeftPlayer().getSocket() == client)
+			player = room.getRightPlayer();
+		else
+			player = room.getLeftPlayer();
+		room.movePlayer(player, data);
 	}
 
 	@SubscribeMessage("iAmReady")
 	handleIAmReady(client: Socket, room_id: string) {
 		let room = this.rooms.get(room_id);
-		room.setupListeners();
 		room.validatePlayer(client);
 		if (room.isRoomReady() == true) {
 			room.getLeftPlayer().getSocket().emit("startTheGame");

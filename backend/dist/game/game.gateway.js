@@ -69,12 +69,17 @@ let GameGateway = class GameGateway {
         this.lobby.delete(player.getIntraname());
         client.disconnect(true);
     }
-    handlePaddleMovement(client, room_id, args) {
-        this.server.to(room_id).emit("enemyPaddleMovement", client, args);
+    handlePaddleMovement(client, data) {
+        let room = this.rooms.get(data.room);
+        let player;
+        if (room.getLeftPlayer().getSocket() == client)
+            player = room.getRightPlayer();
+        else
+            player = room.getLeftPlayer();
+        room.movePlayer(player, data);
     }
     handleIAmReady(client, room_id) {
         let room = this.rooms.get(room_id);
-        room.setupListeners();
         room.validatePlayer(client);
         if (room.isRoomReady() == true) {
             room.getLeftPlayer().getSocket().emit("startTheGame");
@@ -101,7 +106,7 @@ __decorate([
 __decorate([
     (0, websockets_1.SubscribeMessage)("paddleMovement"),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [socket_io_1.Socket, String, Object]),
+    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
     __metadata("design:returntype", void 0)
 ], GameGateway.prototype, "handlePaddleMovement", null);
 __decorate([
