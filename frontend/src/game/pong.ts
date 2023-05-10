@@ -30,12 +30,12 @@ export default class Pong extends Phaser.Scene {
 	next_ball_spawn_left = false;
 	next_ball_spawn_right = false;
 	paddle_velocity = 16;
-	ball_start_velocity = 400;
+	ball_start_velocity = 1000;
 	ball_velocity_scale = 1.1;
 	ball_spawn_distance = 6;
-	paddle_trail_frequency = 142;
-	paddle_trail_alpha = { start: 0.4, end: 0.2 };
-	paddle_trail_lifespan = 420;
+	paddle_trail_frequency = 100;
+	paddle_trail_alpha = { start: 0.3, end: 0.1 };
+	paddle_trail_lifespan = 180;
 	ball_trail_frequency = 142;
 	ball_trail_alpha = { start: 0.4, end: 0.2 };
 	ball_trail_lifespan = 420;
@@ -138,6 +138,12 @@ export default class Pong extends Phaser.Scene {
 		this.socket.on("enemyPaddleDown", () => {
 			this.right_player.y += this.paddle_velocity;
 		});
+		this.socket.on("myPaddleUp", () => {
+			this.left_player.y -= this.paddle_velocity;
+		});
+		this.socket.on("myPaddleDown", () => {
+			this.left_player.y += this.paddle_velocity;
+		});
 		this.socket.on("newScore", (left_score, right_score) => {
 			this.left_score = left_score;
 			this.right_score = right_score;
@@ -150,6 +156,11 @@ export default class Pong extends Phaser.Scene {
 			this.ball.alpha = 1;
 			this.ball_trail.start();
 			this.ball_ingame = true;
+		})
+		this.socket.on("newBallData", (x, y, angle, speed) => {
+				x = this.width / 2 - (x - this.width / 2);
+			this.ball.setPosition(x, y);
+			this.physics.velocityFromAngle(angle, speed, this.ball.body.velocity);
 		})
 		this.socket.emit("iAmReady", this.room_id);
 	}
@@ -166,10 +177,6 @@ export default class Pong extends Phaser.Scene {
 		this.inputPayload.down = this.cursors.down.isDown;
 		if (this.inputPayload.up || this.inputPayload.down)
 			this.socket.emit("paddleMovement", this.inputPayload);
-		if (this.inputPayload.up)
-			this.left_player.y -= this.paddle_velocity;
-		else if (this.inputPayload.down)
-			this.left_player.y += this.paddle_velocity;
 
 		/*  Scoring condition  */
 		if (this.ball.body.onWall() && this.left_player.body.touching.none && this.right_player.body.touching.none) {
@@ -180,9 +187,10 @@ export default class Pong extends Phaser.Scene {
 		/*  Spawning in the ball after delay  */
 		if (!this.ball_ingame) {
 			if (this.old_time + this.ball_spawn_delay > time)
-				return;
+			return;
 			this.ball_ingame = true;
 		}
+		this.socket.emit("ballData", {ball_x: this.ball.x, ball_y: this.ball.y, ball_angle: this.ball.body.angle, ball_speed: this.ball.body.speed, room: this.room_id})
 	}
 
 
@@ -253,6 +261,6 @@ export default class Pong extends Phaser.Scene {
 				lifespan: this.ball_trail_lifespan,
 				scale: this.ball_trail_scale,
 			}).setMask(this.pattern.createBitmapMask()).stop()
-		);
-	}
+			);
+		}
 }

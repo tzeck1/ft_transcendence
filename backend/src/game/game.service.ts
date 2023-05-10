@@ -62,13 +62,24 @@ export class Room {
 	getLeftPlayer(): Player { return this.left_player; }
 	getRightPlayer(): Player { return this.right_player; }
 
-	movePlayer(player: Player, inputPayload: any) {
-		if (inputPayload.up == true)
-			player.getSocket().emit('enemyPaddleUp');
-		else if (inputPayload.down == true)
-			player.getSocket().emit('enemyPaddleDown');
+	moveBoth(player: Player, enemy: Player, inputPayload: any) {
+		let player_socket = player.getSocket();
+		let enemy_socket = enemy.getSocket();
+
+		if (inputPayload.up == true) {
+			player_socket.emit('myPaddleUp');
+			enemy_socket.emit("enemyPaddleUp");
+		}
+		else if (inputPayload.down == true) {
+			player_socket.emit('myPaddleDown');
+			enemy_socket.emit("enemyPaddleDown");
+		}
 	}
-	
+
+	setNewBallData(x: number, y: number, angle: number, speed: number) {
+		this.right_player.getSocket().emit('newBallData', x, y, angle, speed);
+	}
+
 	isRoomReady(): boolean {
 		if (this.left_player_status && this.right_player_status)
 			return true;

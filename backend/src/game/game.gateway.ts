@@ -90,28 +90,42 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		console.log(client.id, "sends", data.left_player_scored, "and", data.room)
 		let room = this.rooms.get(data.room);
 		let player;
-		if (data.left_player_scored == true)
+		if (data.left_player_scored == true/*client == room.getLeftPlayer().getSocket()*/)
 			player = room.getLeftPlayer();
 		else
 			player = room.getRightPlayer();
 		room.validateScore(client);
-		if (room.isScoreTrue() == true) {
+		if (/*room.isScoreTrue() == true*/client == room.getLeftPlayer().getSocket()) {
 			console.log("inside if of isScoreTrue was called");
 			room.playerScored(player);
 			room.spawn_ball();
 		}
 	}
 
+	@SubscribeMessage("ballData")
+	handleBallPosition(client: Socket, data: any) {
+		let room = this.rooms.get(data.room);
+		if (client == room.getLeftPlayer().getSocket()) {
+			room.setNewBallData(data.ball_x, data.ball_y, data.ball_angle, data.ball_speed);
+		}
+	}
+
 	@SubscribeMessage("paddleMovement")
 	handlePaddleMovement(client: Socket, data: any) {
 		let room = this.rooms.get(data.room);
+		let enemy;
 		let player;
-		if (room.getLeftPlayer().getSocket() == client)
-			player = room.getRightPlayer();
-		else
+		if (room.getLeftPlayer().getSocket() == client) {
+			enemy = room.getRightPlayer();
 			player = room.getLeftPlayer();
-		room.movePlayer(player, data);
+		}
+		else {
+			enemy = room.getLeftPlayer();
+			player = room.getRightPlayer();
+		}
+		room.moveBoth(player, enemy, data);
 	}
+
 
 	@SubscribeMessage("iAmReady")
 	handleIAmReady(client: Socket, room_id: string) {
