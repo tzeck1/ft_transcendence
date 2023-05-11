@@ -32,14 +32,14 @@
 
 	onMounted(async () => {
 		try {
-			// const cookie_username = getUsernameFromCookie();
-			// if (!cookie_username)
-			// {
-			// 	router.push('/');
-			// 	return ;
-			// }
+			const cookie_username = getUsernameFromCookie();
+			if (!cookie_username)
+			{
+				router.push('/');
+				return ;
+			}
 			if (!userStore.intra)
-				userStore.setIntra('btenzlin');
+				userStore.setIntra(cookie_username);
 			const response = await axios.get(`http://${location.hostname}:3000/auth/getUserData?intra=${userStore.intra}`);
 			const data = response.data;
 			userStore.setUsername(data.username);
