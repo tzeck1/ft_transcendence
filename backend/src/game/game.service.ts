@@ -76,8 +76,8 @@ export class Room {
 		}
 	}
 
-	setNewBallData(x: number, y: number, angle: number, speed: number) {
-		this.right_player.getSocket().emit('newBallData', x, y, angle, speed);
+	setNewBallData(x: number, y: number, velocity: any, speed: number) {
+		this.right_player.getSocket().emit('newBallData', x, y, velocity, speed);
 	}
 
 	isRoomReady(): boolean {
