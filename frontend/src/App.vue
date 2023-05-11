@@ -36,11 +36,23 @@
 			<router-link to="/"></router-link>
 			<router-view/>
 		</main>
+		<div class="chat-box" v-if="!isIntro">
+			<div class="chat-input-container">
+				<div class="chat-history" v-show="inputFocus">
+					<div class="flex-grow"></div>
+					<p v-for="(msg, index) in [...lastMessages].reverse()" :key="index">{{ userStore.username + ': ' + msg }}</p>
+				</div>
+				<div class="chat-input-button-container">
+					<input type="text" v-model="message" class="chat-input" @focus="inputFocus=true" @blur="inputFocus=false" @keyup.enter="sendMessage()" placeholder="Type your message...">
+					<button class="chat-send" @click="sendMessage()">Send</button>
+				</div>
+			</div>
+		</div>
 	</div>
 </template>
 
 <script setup lang="ts">
-	import { ref, computed } from 'vue';
+	import { ref, computed, watch, nextTick } from 'vue';
 	import { useRouter, useRoute } from 'vue-router';
 	import { useUserStore } from './stores/UserStore';
 
@@ -48,6 +60,9 @@
 	const route = useRoute();
 	const dropdownVisible = ref(false);
 	const userStore = useUserStore();
+	const message = ref('');
+	const lastMessages = ref<string[]>([]);
+	const inputFocus = ref(false);
 	const isIntro = computed(() => route.path === '/');
 
 	function loadIntro() {
@@ -69,6 +84,30 @@
 	function hideDropdown() {
 		dropdownVisible.value = false;
 	}
+
+	function sendMessage() {
+		console.log(message.value);
+		lastMessages.value.unshift(message.value);
+		message.value = '';
+	}
+
+	// async function sendMessage() {
+	// 	if (message.value.trim() === '') {
+	// 		return;
+	// 	}
+	// 	const newMessage = message.value.trim();
+	// 	message.value = '';
+	// 	const messageChars = newMessage.split('');
+	// 	let index = 0;
+	// 	const typingInterval = setInterval(() => {
+	// 		if (index < messageChars.length) {
+	// 			lastMessages.value[0] += messageChars[index];
+	// 			index++;
+	// 		} else {
+	// 			clearInterval(typingInterval);
+	// 		}
+	// 	}, 50);
+	// }
 
 </script>
 
@@ -134,6 +173,52 @@
 
 	.dropdown-buttons {
 		@apply w-full p-1;
+	}
+
+	.chat-box {
+		@apply fixed bottom-0 left-0 m-4 flex items-center space-x-2;
+	}
+
+	.chat-input-container {
+		@apply flex flex-col w-60;
+	}
+
+	.chat-input-button-container {
+		@apply flex items-center space-x-2;
+	}
+
+	.chat-input {
+		@apply p-2 bg-transparent rounded border border-white;
+	}
+
+	.chat-input:focus {
+		@apply outline-none;
+	}
+
+	.chat-send {
+		@apply p-2 rounded cursor-pointer;
+	}
+
+	.chat-history {
+		@apply overflow-auto break-words h-60 flex flex-col bg-transparent bg-opacity-10 rounded p-2 mb-2;
+		scrollbar-width: thin;
+		scrollbar-color: transparent transparent;
+	}
+
+	.chat-history::-webkit-scrollbar { /* Chrome, Safari and Edge */
+		width: 8px;
+	}
+
+	.chat-history::-webkit-scrollbar-thumb { /* Chrome, Safari and Edge */
+		background: transparent;
+	}
+
+	.chat-history::-webkit-scrollbar-thumb:hover { /* Chrome, Safari and Edge */
+		background: #fff;
+	}
+
+	.flex-grow {
+		flex-grow: 1;
 	}
 
 </style>

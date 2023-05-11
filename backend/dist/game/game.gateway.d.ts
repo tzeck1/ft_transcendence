@@ -20,4 +20,5 @@ export declare class GameGateway implements OnGatewayInit, OnGatewayConnection, 
     handleScoreRequest(client: Socket, data: any): void;
     handlePaddleMovement(client: Socket, data: any): void;
     handleIAmReady(client: Socket, room_id: string): void;
+
 }

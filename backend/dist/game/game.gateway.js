@@ -102,6 +102,13 @@ let GameGateway = class GameGateway {
             room.spawn_ball();
         }
     }
+    handleCancelQueue(client, intra) {
+        console.log("calling handleCancel");
+        let player = this.lobby.get(intra);
+        client.leave("lobby");
+        this.lobby.delete(player.getIntraname());
+        client.disconnect(true);
+    }
 };
 __decorate([
     (0, websockets_1.WebSocketServer)(),
