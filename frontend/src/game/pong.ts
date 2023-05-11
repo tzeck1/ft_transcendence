@@ -31,7 +31,7 @@ export default class Pong extends Phaser.Scene {
 	next_ball_spawn_left = false;
 	next_ball_spawn_right = false;
 	paddle_velocity = 16;
-	ball_start_velocity = 1000;
+	// ball_start_velocity = 1000;
 	ball_velocity_scale = 1.1;
 	ball_spawn_distance = 6;
 	paddle_trail_frequency = 100;
@@ -112,7 +112,7 @@ export default class Pong extends Phaser.Scene {
 			.setScale(this.ball_scale);
 
 		this.ball.alpha = 0;
-		this.ball.body.setMaxSpeed(2400);
+		this.ball.body.setMaxSpeed(2000);
 		this.ball_trail = this.createBallTrail(this.ball, "ball");
 		this.left_score_txt = this.add.text(this.width / 3, this.height / 4, String(this.left_score), { fontFamily: "ibm-3270", fontSize: "128px",
 			shadow: {
