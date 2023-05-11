@@ -1,11 +1,13 @@
 <template>
 	<StartGame v-if="showStart" @start-match="startMatch"></StartGame>
-	<Pong v-if="showMatch"></Pong>
+	<Pong v-if="showMatch" @show-end="switchToEnd"></Pong>
+	<EndGame v-if="showEnd"> </EndGame>
 </template>
 
 <script setup lang="ts">
 	import StartGame from '../components/Game/StartGame.vue'
 	import Pong from '../components/Game/Pong.vue'
+	import EndGame from '../components/Game/EndGame.vue'
 	import { onMounted, ref } from 'vue';
 	import { useUserStore } from '../stores/UserStore';
 	import { useGameStore } from '../stores/GameStore';
@@ -16,6 +18,7 @@
 	const gameStore = useGameStore();
 	const showStart = ref(true);
 	const showMatch = ref(false);
+	const showEnd = ref(false);
 
 	const getUsernameFromCookie = () => {
 		const cookie = document.cookie.split(';').find(cookie => cookie.trim().startsWith('username='));
@@ -29,14 +32,14 @@
 
 	onMounted(async () => {
 		try {
-			const cookie_username = getUsernameFromCookie();
-			if (!cookie_username)
-			{
-				router.push('/');
-				return ;
-			}
+			// const cookie_username = getUsernameFromCookie();
+			// if (!cookie_username)
+			// {
+			// 	router.push('/');
+			// 	return ;
+			// }
 			if (!userStore.intra)
-				userStore.setIntra(cookie_username);
+				userStore.setIntra('btenzlin');
 			const response = await axios.get(`http://${location.hostname}:3000/auth/getUserData?intra=${userStore.intra}`);
 			const data = response.data;
 			userStore.setUsername(data.username);
@@ -50,6 +53,13 @@
 	function startMatch() {
 		showStart.value = false;
 		showMatch.value = true;
+		showEnd.value = false;
+	}
+
+	function switchToEnd() {
+		showStart.value = false;
+		showMatch.value = false;
+		showEnd.value = true;
 	}
 </script>
 

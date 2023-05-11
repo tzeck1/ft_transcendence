@@ -1,6 +1,7 @@
 import Phaser from 'phaser';
 import { useGameStore } from '@/stores/GameStore';
 import { Socket } from 'socket.io-client';
+import pongComp from '../components/Game/Pong.vue';
 
 export default class Pong extends Phaser.Scene {
 	left_player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -149,6 +150,10 @@ export default class Pong extends Phaser.Scene {
 			this.right_score = right_score;
 			this.left_score_txt.text = String(this.left_score);
 			this.right_score_txt.text = String(this.right_score);
+			if (this.left_score == this.winning_score || this.right_score == this.winning_score) {
+				this.game.destroy(true); //don't know if destroy is the correct way to end instance of pong
+				// TODO end game here
+			}
 		})
 		this.socket.on("spawnBall", (y_position, x_velocity, y_velocity) => {
 			this.ball.setPosition(this.width / 2, y_position);
@@ -222,16 +227,7 @@ export default class Pong extends Phaser.Scene {
 		if (this.ball.body.blocked.right)
 			left_player_scored = true;
 		this.socket.emit('scoreRequest', {left_player_scored: left_player_scored, room: this.room_id});
-
-		if (this.left_score == this.winning_score || this.right_score == this.winning_score) {
-			this.left_collider.destroy();
-			this.right_collider.destroy();
-			this.left_player_trail.destroy();
-			this.right_player_trail.destroy();
-			this.left_player.alpha = 0;
-			this.right_player.alpha = 0;
-			// TODO end game here
-		}
+		/* ending game in 'newScore' listener now */
 
 		this.ball_ingame = false;
 		this.ball.setVelocity(0);

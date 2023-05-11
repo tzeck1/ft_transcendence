@@ -11,6 +11,7 @@
 	import router from '@/router';
 
 	const game = ref<Phaser.Game | null>(null);
+	const emit = defineEmits(["show-end"]);
 
 	onMounted(() => {
 		const config: Phaser.Types.Core.GameConfig = {
@@ -36,6 +37,11 @@
 		};
 
 		game.value = new Phaser.Game(config);
+		game.value.events.on('destroy', () => {
+			console.log('game has ended');
+			game.value = null;
+			emit('show-end');
+		});
 	});
 </script>
 
