@@ -53,6 +53,7 @@ export default class Pong extends Phaser.Scene {
 	ball_trail_scale = 1;
 	player_trail_scale = 1;
 	players_ready = false;
+	frame_count = 0;
 	inputPayload = {
 		room: this.room_id,
 		up: false,
@@ -162,10 +163,11 @@ export default class Pong extends Phaser.Scene {
 			this.ball_trail.start();
 			this.ball_ingame = true;
 		})
-		this.socket.on("newBallData", (x, y, angle, speed) => {
+		this.socket.on("newBallData", (x, y, velocity, speed) => {
 				x = this.width / 2 - (x - this.width / 2);
 			this.ball.setPosition(x, y);
-			this.physics.velocityFromAngle(angle, speed, this.ball.body.velocity);
+			this.ball.body.velocity.x = velocity.x * -1;
+			this.ball.body.velocity.y = velocity.y;
 		})
 		this.socket.emit("iAmReady", this.room_id);
 	}
@@ -195,7 +197,11 @@ export default class Pong extends Phaser.Scene {
 			return;
 			this.ball_ingame = true;
 		}
-		this.socket.emit("ballData", {ball_x: this.ball.x, ball_y: this.ball.y, ball_angle: this.ball.body.angle, ball_speed: this.ball.body.speed, room: this.room_id})
+		// this.frame_count++;
+		// if (this.frame_count > 5) {
+		// 	this.frame_count -= 5;
+			this.socket.emit("ballData", {ball_x: this.ball.x, ball_y: this.ball.y, ball_velocity: this.ball.body.velocity, ball_speed: this.ball.body.speed, room: this.room_id})
+		// }
 	}
 
 

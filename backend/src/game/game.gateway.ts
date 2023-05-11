@@ -106,7 +106,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	handleBallPosition(client: Socket, data: any) {
 		let room = this.rooms.get(data.room);
 		if (client == room.getLeftPlayer().getSocket()) {
-			room.setNewBallData(data.ball_x, data.ball_y, data.ball_angle, data.ball_speed);
+			room.setNewBallData(data.ball_x, data.ball_y, data.ball_velocity, data.ball_speed);
 		}
 	}
 
