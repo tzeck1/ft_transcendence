@@ -36,10 +36,11 @@
 			scene: [Pong]
 		};
 
+		console.log("New game instance!");
 		game.value = new Phaser.Game(config);
 		game.value.events.on('destroy', () => {
-			console.log('game has ended');
 			game.value = null;
+			console.log('Game instance destroyed!');
 			emit('show-end');
 		});
 	});

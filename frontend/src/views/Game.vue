@@ -1,7 +1,7 @@
 <template>
 	<StartGame v-if="showStart" @start-match="startMatch"></StartGame>
 	<Pong v-if="showMatch" @show-end="switchToEnd"></Pong>
-	<EndGame v-if="showEnd"> </EndGame>
+	<EndGame v-if="showEnd" @start-match="startMatch" @show-start="switchToStart"></EndGame>
 </template>
 
 <script setup lang="ts">
@@ -61,6 +61,13 @@
 		showMatch.value = false;
 		showEnd.value = true;
 	}
+
+	function switchToStart() {
+		showStart.value = true;
+		showMatch.value = false;
+		showEnd.value = false;
+	}
+
 </script>
 
 
