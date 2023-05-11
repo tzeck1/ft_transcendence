@@ -44,17 +44,97 @@ class Player {
 }
 exports.Player = Player;
 class Room {
-    constructor(room_id, phaser_config, left_player, right_player) {
+    constructor(room_id, left_player, right_player) {
         this.room_id = room_id;
-        this.phaser_config = phaser_config;
         this.left_player = left_player;
         this.right_player = right_player;
+        this.left_player_status = false;
+        this.right_player_status = false;
+        this.left_score_status = false;
+        this.right_score_status = false;
+        this.left_score = 0;
+        this.right_score = 0;
+        this.ball_x = 0;
+        this.ball_y = 0;
+        this.left_player_y = 0;
+        this.right_player_y = 0;
+        this.height = 1080;
+        this.width = 1920;
+        this.ball_start_velocity = 400;
+        this.ball_spawn_distance = 6;
+        this.next_ball_spawn_left = false;
+        this.next_ball_spawn_right = false;
     }
     getRoomId() { return this.room_id; }
-    getPhaserConfig() { return this.phaser_config; }
-    getPhaserInstance() { return this.phaser_instance; }
     getLeftPlayer() { return this.left_player; }
     getRightPlayer() { return this.right_player; }
+    movePlayer(player, inputPayload) {
+        if (inputPayload.up == true)
+            player.getSocket().emit('enemyPaddleUp');
+        else if (inputPayload.down == true)
+            player.getSocket().emit('enemyPaddleDown');
+    }
+    isRoomReady() {
+        if (this.left_player_status && this.right_player_status)
+            return true;
+        return false;
+    }
+    isScoreTrue() {
+        if (this.left_score_status && this.right_score_status)
+            return true;
+        return false;
+    }
+    validatePlayer(client) {
+        if (client == this.left_player.getSocket())
+            this.left_player_status = true;
+        else if (client == this.right_player.getSocket())
+            this.right_player_status = true;
+    }
+    validateScore(client) {
+        if (client == this.left_player.getSocket())
+            this.left_score_status = true;
+        else if (client == this.right_player.getSocket())
+            this.right_score_status = true;
+    }
+    spawn_ball() {
+        let x, y, p;
+        console.log("spawnball was called");
+        if (Math.random() < 0.5)
+            p = Math.random() * (this.height / this.ball_spawn_distance);
+        else
+            p = Math.random() * (this.height / this.ball_spawn_distance) + ((this.ball_spawn_distance - 1) * this.height / this.ball_spawn_distance);
+        if (p > this.height / 2)
+            y = (Math.random() - 1.5) * this.ball_start_velocity;
+        else
+            y = (Math.random() + 0.5) * this.ball_start_velocity;
+        if (this.next_ball_spawn_left)
+            x = this.ball_start_velocity * -1;
+        else if (this.next_ball_spawn_right)
+            x = this.ball_start_velocity;
+        else {
+            if (Math.random() < 0.5)
+                x = this.ball_start_velocity * -1;
+            else
+                x = this.ball_start_velocity;
+        }
+        this.left_player.getSocket().emit('spawnBall', p, x, y);
+        this.right_player.getSocket().emit('spawnBall', p, x * -1, y);
+    }
+    playerScored(player) {
+        console.log("playerScored was called from", player.getIntraname());
+        if (player == this.left_player)
+            console.log("He was true left player");
+        else
+            console.log("He was NOT the true left player");
+        if (this.left_player == player)
+            this.left_score++;
+        else
+            this.right_score++;
+        this.left_player.getSocket().emit('newScore', this.left_score, this.right_score);
+        this.right_player.getSocket().emit('newScore', this.right_score, this.left_score);
+        this.left_score_status = false;
+        this.right_score_status = false;
+    }
 }
 exports.Room = Room;
 //# sourceMappingURL=game.service.js.map

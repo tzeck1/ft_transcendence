@@ -1,11 +1,13 @@
 <template>
 	<StartGame v-if="showStart" @start-match="startMatch"></StartGame>
-	<Pong v-if="showMatch"></Pong>
+	<Pong v-if="showMatch" @show-end="switchToEnd"></Pong>
+	<EndGame v-if="showEnd" @start-match="startMatch" @show-start="switchToStart"></EndGame>
 </template>
 
 <script setup lang="ts">
 	import StartGame from '../components/Game/StartGame.vue'
 	import Pong from '../components/Game/Pong.vue'
+	import EndGame from '../components/Game/EndGame.vue'
 	import { onMounted, ref } from 'vue';
 	import { useUserStore } from '../stores/UserStore';
 	import { useGameStore } from '../stores/GameStore';
@@ -16,6 +18,7 @@
 	const gameStore = useGameStore();
 	const showStart = ref(true);
 	const showMatch = ref(false);
+	const showEnd = ref(false);
 
 	const getUsernameFromCookie = () => {
 		const cookie = document.cookie.split(';').find(cookie => cookie.trim().startsWith('username='));
@@ -50,7 +53,21 @@
 	function startMatch() {
 		showStart.value = false;
 		showMatch.value = true;
+		showEnd.value = false;
 	}
+
+	function switchToEnd() {
+		showStart.value = false;
+		showMatch.value = false;
+		showEnd.value = true;
+	}
+
+	function switchToStart() {
+		showStart.value = true;
+		showMatch.value = false;
+		showEnd.value = false;
+	}
+
 </script>
 
 

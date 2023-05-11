@@ -22,7 +22,6 @@ let GameGateway = class GameGateway {
         this.lobby = new Map;
         this.room_counter = 0;
         this.threshold = 20;
-        this.config = undefined;
     }
     afterInit(server) {
         console.log('Initialized');
@@ -56,12 +55,52 @@ let GameGateway = class GameGateway {
         player_two.getSocket().leave("lobby");
         this.lobby.delete(player_one.getIntraname());
         this.lobby.delete(player_two.getIntraname());
-        let new_room = new game_service_1.Room(room_id, this.config, player_one, player_two);
+        let new_room = new game_service_1.Room(room_id, player_one, player_two);
         this.rooms.set(room_id, new_room);
         player_one.getSocket().join(room_id);
         player_two.getSocket().join(room_id);
-        player_one.getSocket().emit("foundOpponent", player_two.getUsername(), player_two.getPicture());
-        player_two.getSocket().emit("foundOpponent", player_one.getUsername(), player_one.getPicture());
+        player_one.getSocket().emit("foundOpponent", player_two.getUsername(), player_two.getPicture(), room_id);
+        player_two.getSocket().emit("foundOpponent", player_one.getUsername(), player_one.getPicture(), room_id);
+    }
+    handleCancelQueue(client, intra) {
+        console.log("calling handleCancel");
+        let player = this.lobby.get(intra);
+        client.leave("lobby");
+        this.lobby.delete(player.getIntraname());
+        client.disconnect(true);
+    }
+    handleScoreRequest(client, data) {
+        console.log(client.id, "sends", data.left_player_scored, "and", data.room);
+        let room = this.rooms.get(data.room);
+        let player;
+        if (data.left_player_scored == true)
+            player = room.getLeftPlayer();
+        else
+            player = room.getRightPlayer();
+        room.validateScore(client);
+        if (room.isScoreTrue() == true) {
+            console.log("inside if of isScoreTrue was called");
+            room.playerScored(player);
+            room.spawn_ball();
+        }
+    }
+    handlePaddleMovement(client, data) {
+        let room = this.rooms.get(data.room);
+        let player;
+        if (room.getLeftPlayer().getSocket() == client)
+            player = room.getRightPlayer();
+        else
+            player = room.getLeftPlayer();
+        room.movePlayer(player, data);
+    }
+    handleIAmReady(client, room_id) {
+        let room = this.rooms.get(room_id);
+        room.validatePlayer(client);
+        if (room.isRoomReady() == true) {
+            room.getLeftPlayer().getSocket().emit("startTheGame");
+            room.getRightPlayer().getSocket().emit("startTheGame");
+            room.spawn_ball();
+        }
     }
     handleCancelQueue(client, intra) {
         console.log("calling handleCancel");
@@ -87,6 +126,24 @@ __decorate([
     __metadata("design:paramtypes", [socket_io_1.Socket, String]),
     __metadata("design:returntype", void 0)
 ], GameGateway.prototype, "handleCancelQueue", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)("scoreRequest"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
+    __metadata("design:returntype", void 0)
+], GameGateway.prototype, "handleScoreRequest", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)("paddleMovement"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
+    __metadata("design:returntype", void 0)
+], GameGateway.prototype, "handlePaddleMovement", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)("iAmReady"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, String]),
+    __metadata("design:returntype", void 0)
+], GameGateway.prototype, "handleIAmReady", null);
 GameGateway = __decorate([
     (0, websockets_1.WebSocketGateway)({
         cors: {

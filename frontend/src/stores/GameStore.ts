@@ -8,6 +8,7 @@ export const useGameStore = defineStore({
 		socket: null as (Socket | null),
 		enemy_name: "",
 		enemy_picture: "",
+		room_id: "",
 	}),
 	actions: {
 		setIntra(newIntra: string) {
@@ -22,6 +23,9 @@ export const useGameStore = defineStore({
 		setEnemyPicture(newEnemyPicture: string) {
 			this.enemy_picture = newEnemyPicture;
 		},
+		setRoomId(newRoomId: string) {
+			this.room_id = newRoomId;
+		}
 	},
 });
 
@@ -30,4 +34,5 @@ interface State {
 	socket: Socket;
 	enemy_name: string;
 	enemy_picture: string;
+	room_id: string;
 }

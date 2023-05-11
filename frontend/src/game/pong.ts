@@ -1,25 +1,64 @@
-import Phaser, {Game } from 'phaser';
-import router from '@/router';
+import Phaser from 'phaser';
+import { useGameStore } from '@/stores/GameStore';
+import { Socket } from 'socket.io-client';
+import pongComp from '../components/Game/Pong.vue';
 
 export default class Pong extends Phaser.Scene {
-	private player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-	private enemy!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-	private ball!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
-	private score1_text!: Phaser.GameObjects.Text;
-	private score2_text!: Phaser.GameObjects.Text;
-	private score1 = 0;
-	private score2 = 0;
-	private on_paddle = false;
-	private width = 1920;
-	private height = 1080;
-	private pattern!: Phaser.GameObjects.Image;
-	private maskPattern!: Phaser.GameObjects.Graphics;
-	private field!: Phaser.GameObjects.Image;
-	private player_scored = false;
-	private enemy_scored = false;
-	private ball_trail!: Phaser.GameObjects.Particles.ParticleEmitter;
-	private player_trail!: Phaser.GameObjects.Particles.ParticleEmitter;
-	private enemy_trail!: Phaser.GameObjects.Particles.ParticleEmitter;
+	left_player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+	right_player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+	ball!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+	left_score_txt!: Phaser.GameObjects.Text;
+	right_score_txt!: Phaser.GameObjects.Text;
+	pattern!: Phaser.GameObjects.Image;
+	field!: Phaser.GameObjects.Image;
+	pattern_mask!: Phaser.GameObjects.Graphics;
+	ball_trail!: Phaser.GameObjects.Particles.ParticleEmitter;
+	left_player_trail!: Phaser.GameObjects.Particles.ParticleEmitter;
+	right_player_trail!: Phaser.GameObjects.Particles.ParticleEmitter;
+	cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
+	left_collider!: Phaser.Physics.Arcade.Collider;
+	right_collider!: Phaser.Physics.Arcade.Collider;
+
+	gameStore = useGameStore();
+	socket = <Socket>this.gameStore.socket;
+	room_id = this.gameStore.room_id;
+	old_time = 0;
+	width = 1920;
+	height = 1080;
+	left_score = 0;
+	right_score = 0;
+	winning_score = 11;
+	next_ball_spawn_left = false;
+	next_ball_spawn_right = false;
+	paddle_velocity = 16;
+	// ball_start_velocity = 1000;
+	ball_velocity_scale = 1.1;
+	ball_spawn_distance = 6;
+	paddle_trail_frequency = 100;
+	paddle_trail_alpha = { start: 0.3, end: 0.1 };
+	paddle_trail_lifespan = 180;
+	ball_trail_frequency = 142;
+	ball_trail_alpha = { start: 0.4, end: 0.2 };
+	ball_trail_lifespan = 420;
+	scoring_increment = 1;
+	ball_ingame = false;
+	ball_spawn_delay = 2400;
+	field_scale = 1;
+	left_player_scale = 1;
+	right_player_scale = 1;
+	ball_scale = 1;
+	left_score_scale = 1;
+	right_score_scale = 1;
+	pattern_scale = 1;
+	ball_trail_scale = 1;
+	player_trail_scale = 1;
+	players_ready = false;
+	frame_count = 0;
+	inputPayload = {
+		room: this.room_id,
+		up: false,
+		down: false,
+	};
 
 	constructor() {
 		super("pong");
@@ -27,93 +66,149 @@ export default class Pong extends Phaser.Scene {
 
 	preload() {
 		const assetsUrl = new URL('../assets/game', import.meta.url);
-
-		this.load.image("back", assetsUrl + "/back.png");
-		this.load.image("player", assetsUrl + "/paddle.png");
-		this.load.image("enemy", assetsUrl + "/paddle.png");
+		this.load.image("field", assetsUrl + "/back.png");
+		this.load.image("left_player", assetsUrl + "/paddle.png");
+		this.load.image("right_player", assetsUrl + "/paddle.png");
 		this.load.image("ball", assetsUrl + "/ball.png");
 		this.load.image("pattern", assetsUrl + "/striped_pattern.png");
 	}
 
+
+/********************************** CREATE *************************************/
+
 	create() {
+		if (this.input.keyboard == undefined)
+			console.error("Keyboard is ", this.input.keyboard);
+		this.cursors = this.input.keyboard!.createCursorKeys();
+		this.pattern_mask = this.add.graphics()
+			.fillStyle(0xffffff);
 
-		this.pattern = this.add.image(this.width / 2, this.height / 2, "pattern");
-		this.maskPattern = this.add.graphics();
-		this.maskPattern.fillStyle(0xffffff);
-		this.pattern.setMask(this.maskPattern.createGeometryMask());
-		this.field = this.add.image(this.width / 2, this.height / 2, "back");
-		this.field.setMask(this.pattern.createBitmapMask());
+		this.pattern = this.add.image(this.width / 2, this.height / 2, "pattern")
+			.setMask(this.pattern_mask.createGeometryMask())
+			.setScale(this.pattern_scale);
 
-		this.player = this.physics.add.sprite(this.width * 0.04, this.height / 2, "player").setCollideWorldBounds(true);
-		this.enemy = this.physics.add.sprite(this.width * 0.96, this.height / 2, "enemy").setCollideWorldBounds(true);
-		this.player.setImmovable(true);
-		this.enemy.setImmovable(true);
-		this.player.setMask(this.pattern.createBitmapMask());
-		this.enemy.setMask(this.pattern.createBitmapMask());
+		this.field = this.add.image(this.width / 2, this.height / 2, "field")
+			.setMask(this.pattern.createBitmapMask())
+			.setScale(this.field_scale);
 
-		this.ball = this.physics.add.sprite(this.width / 2, this.height / 2, "ball");
-		this.ball.setBounce(1);
-		this.ball.setCollideWorldBounds(true);
-		this.ball.setMask(this.pattern.createBitmapMask());
-		this.spawn_ball();
+		this.left_player = this.physics.add.sprite(this.width * 0.04, this.height / 2, "left_player")
+			.setCollideWorldBounds(true)
+			.setImmovable(true)
+			.setMask(this.pattern.createBitmapMask())
+			.setScale(this.left_player_scale);
 
-		this.physics.add.collider(this.player, this.ball, this.hit_paddle, undefined, this);
-		this.physics.add.collider(this.enemy, this.ball, this.hit_paddle, undefined, this);
+		this.left_player_trail = this.createPlayerTrail(this.left_player, "left_player");
+		this.right_player = this.physics.add.sprite(this.width * 0.96, this.height / 2, "right_player")
+			.setCollideWorldBounds(true)
+			.setImmovable(true)
+			.setMask(this.pattern.createBitmapMask())
+			.setScale(this.right_player_scale);
 
-		this.score1_text = this.add.text(this.width / 3, this.height / 4, '0', { fontFamily: "ibm-3270", fontSize: "128px" });
-		this.score2_text = this.add.text(2 * this.width / 3 - 64, this.height / 4, '0', { fontFamily: "ibm-3270", fontSize: "128px" });
+		this.right_player_trail = this.createPlayerTrail(this.right_player, "right_player");
+		this.ball = this.physics.add.sprite(this.width / 2, this.height / 2, "ball")
+			.setBounce(1)
+			.setCollideWorldBounds(true)
+			.setMask(this.pattern.createBitmapMask())
+			.setScale(this.ball_scale);
 
-		// this.ball_trail = this.add.particles("ball").createEmitter({
-		// 	follow: this.ball,
-		// 	frequency: 142,
-		// 	alpha: { start: 0.4, end: 0.2 },
-		// 	lifespan: 420
-		// })
-		// this.ball_trail.setMask(this.pattern.createBitmapMask());
-		// this.ball_trail.start();
-		// this.player_trail = this.add.particles("player").createEmitter({
-		// 	follow: this.player,
-		// 	frequency: 142,
-		// 	alpha: { start: 0.4, end: 0.2 },
-		// 	lifespan: 420
-		// })
-		// this.player_trail.setMask(this.pattern.createBitmapMask());
-		// this.player_trail.start();
-		// this.enemy_trail = this.add.particles("enemy").createEmitter({
-		// 	follow: this.enemy,
-		// 	frequency: 142,
-		// 	alpha: { start: 0.4, end: 0.2 },
-		// 	lifespan: 420
-		// })
-		// this.enemy_trail.setMask(this.pattern.createBitmapMask());
-		// this.enemy_trail.start();
+		this.ball.alpha = 0;
+		this.ball.body.setMaxSpeed(2000);
+		this.ball_trail = this.createBallTrail(this.ball, "ball");
+		this.left_score_txt = this.add.text(this.width / 3, this.height / 4, String(this.left_score), { fontFamily: "ibm-3270", fontSize: "128px",
+			shadow: {
+				color: '#999',
+				blur: 12,
+				fill: true,
+		} }).setScale(this.left_score_scale);
+
+		this.right_score_txt = this.add.text(2 * this.width / 3 - 64, this.height / 4, String(this.right_score), { fontFamily: "ibm-3270", fontSize: "128px",
+			shadow: {
+				color: '#999',
+				blur: 12,
+				fill: true,
+		} }).setScale(this.right_score_scale);
+
+		this.left_collider = this.physics.add.collider(this.left_player, this.ball, () => this.calculateRebound(this.left_player), undefined, this);
+		this.right_collider = this.physics.add.collider(this.right_player, this.ball, () => this.calculateRebound(this.right_player), undefined, this);
+
+		this.socket.on("startTheGame", () => {
+			this.players_ready = true;
+		});
+		this.socket.on("enemyPaddleUp", () => {
+			this.right_player.y -= this.paddle_velocity;
+		});
+		this.socket.on("enemyPaddleDown", () => {
+			this.right_player.y += this.paddle_velocity;
+		});
+		this.socket.on("myPaddleUp", () => {
+			this.left_player.y -= this.paddle_velocity;
+		});
+		this.socket.on("myPaddleDown", () => {
+			this.left_player.y += this.paddle_velocity;
+		});
+		this.socket.on("newScore", (left_score, right_score) => {
+			this.left_score = left_score;
+			this.right_score = right_score;
+			this.left_score_txt.text = String(this.left_score);
+			this.right_score_txt.text = String(this.right_score);
+			if (this.left_score == this.winning_score || this.right_score == this.winning_score) {
+				this.game.destroy(true); //don't know if destroy is the correct way to end instance of pong
+				// TODO end game here
+			}
+		})
+		this.socket.on("spawnBall", (y_position, x_velocity, y_velocity) => {
+			this.ball.setPosition(this.width / 2, y_position);
+			this.ball.setVelocity(x_velocity, y_velocity);
+			this.ball.alpha = 1;
+			this.ball_trail.start();
+			this.ball_ingame = true;
+		})
+		this.socket.on("newBallData", (x, y, velocity, speed) => {
+				x = this.width / 2 - (x - this.width / 2);
+			this.ball.setPosition(x, y);
+			this.ball.body.velocity.x = velocity.x * -1;
+			this.ball.body.velocity.y = velocity.y;
+		})
+		this.socket.emit("iAmReady", this.room_id);
 	}
 
-	update() {
-		const cursors = this.input.keyboard.createCursorKeys();
-		const up = this.input.keyboard?.addKey('W');
-		const down = this.input.keyboard?.addKey('S');
 
-		if (up?.isDown)
-			this.player.setVelocityY(-800);
-		else if (down?.isDown)
-			this.player.setVelocityY(800);
-		else
-			this.player.setVelocityY(0);
-		if (cursors.up.isDown)
-			this.enemy.setVelocityY(-800);
-		else if (cursors.down.isDown)
-			this.enemy.setVelocityY(800);
-		else
-			this.enemy.setVelocityY(0);
-		if (this.ball.body.onWall() && !this.on_paddle)
-			this.scored();
-		this.on_paddle = false;
+/********************************** UPDATE *************************************/
+
+	update(time: number, delta: number): void {
+		if (this.players_ready == false)
+			return;
+
+		/*  Movement  */
+		this.inputPayload.up = this.cursors.up.isDown;
+		this.inputPayload.down = this.cursors.down.isDown;
+		if (this.inputPayload.up || this.inputPayload.down)
+			this.socket.emit("paddleMovement", this.inputPayload);
+
+		/*  Scoring condition  */
+		if (this.ball.body.onWall() && this.left_player.body.touching.none && this.right_player.body.touching.none) {
+			this.player_scored();
+			this.old_time = time;
+		}
+
+		/*  Spawning in the ball after delay  */
+		if (!this.ball_ingame) {
+			if (this.old_time + this.ball_spawn_delay > time)
+			return;
+			this.ball_ingame = true;
+		}
+		// this.frame_count++;
+		// if (this.frame_count > 5) {
+		// 	this.frame_count -= 5;
+			this.socket.emit("ballData", {ball_x: this.ball.x, ball_y: this.ball.y, ball_velocity: this.ball.body.velocity, ball_speed: this.ball.body.speed, room: this.room_id})
+		// }
 	}
 
-	hit_paddle() // not the best solution to check if it hits the world borders
-	{
-		let distance = Phaser.Math.Distance.Between(1, this.player.y, 1, this.ball.y);
+
+/********************************* METHODS *************************************/
+
+	calculateRebound(player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) {
+		let distance = Phaser.Math.Distance.Between(1, player.y, 1, this.ball.y);
 		let angle = 0;
 		if (distance > 128)
 			angle = 60;
@@ -123,58 +218,51 @@ export default class Pong extends Phaser.Scene {
 			angle = 30;
 		else if (distance > 32)
 			angle = 15;
-		if ((this.player.y > this.ball.y && this.ball.x < this.width / 2) || this.player.y < this.ball.y && this.ball.x > this.width / 2)
+		if ((player.y > this.ball.y && this.ball.x < this.width / 2) || player.y < this.ball.y && this.ball.x > this.width / 2)
 			angle *= -1;
 		if (this.ball.x > this.width / 2)
 			angle += 180;
 		this.physics.velocityFromAngle(angle, this.ball.body.speed, this.ball.body.velocity);
-		this.ball.body.velocity.scale(1.1);
-		this.on_paddle = true;
+		this.ball.body.velocity.scale(this.ball_velocity_scale);
 	}
 
-	scored() {
-		if (this.ball.body.blocked.right) {
-			this.score1_text.text = String(++this.score1);
-			this.player_scored = true;
-		}
-		else {
-			this.score2_text.text = String(++this.score2);
-			this.enemy_scored = true;
-		}
-		if (this.score1 == 11 || this.score2 == 11)
-		{
-			this.scene.stop();
-			router.push('/end');
-		}
-		else
-			this.spawn_ball();
+	player_scored() {
+		if (this.left_score == this.winning_score || this.right_score == this.winning_score)
+			return;
+		let left_player_scored = false;
+		if (this.ball.body.blocked.right)
+			left_player_scored = true;
+		this.socket.emit('scoreRequest', {left_player_scored: left_player_scored, room: this.room_id});
+		/* ending game in 'newScore' listener now */
+
+		this.ball_ingame = false;
+		this.ball.setVelocity(0);
+		this.ball.setPosition(this.width / 2, this.height / 2);
+		this.ball_trail.stop();
+		this.ball.alpha = 0;
 	}
 
-	spawn_ball() {
-		let x = this.width / 2;
-		let y;
-		if (Phaser.Math.Between(0, 1) == 0)
-			y = Phaser.Math.Between(0, this.height / 6);
-		else
-			y = Phaser.Math.Between(5 * this.height / 6, this.height);
-		this.ball.setPosition(x, y);
-		if (y > this.height / 2)
-			y = Phaser.Math.Between(-200, -600);
-		else
-			y = Phaser.Math.Between(200, 600);
-		if (this.player_scored)
-			x = 400;
-		else if (this.enemy_scored)
-			x = -400;
-		else {
-			if (Phaser.Math.Between(0, 1) == 0)
-				x = -400;
-			else
-				x = 400;
-		}
-		this.ball.setVelocity(x, y);
-		this.ball.body.setMaxSpeed(2400);
-		this.player_scored = false;
-		this.enemy_scored = false;
+	createPlayerTrail(sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, key: string) {
+		return (
+			this.add.particles(0, 0, key, {
+				follow: sprite,
+				frequency: this.paddle_trail_frequency,
+				alpha: this.paddle_trail_alpha,
+				lifespan: this.paddle_trail_lifespan,
+				scale: this.player_trail_scale,
+			}).setMask(this.pattern.createBitmapMask()).start()
+		);
 	}
+
+	createBallTrail(sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, key: string) {
+		return (
+			this.add.particles(0, 0, key, {
+				follow: sprite,
+				frequency: this.ball_trail_frequency,
+				alpha: this.ball_trail_alpha,
+				lifespan: this.ball_trail_lifespan,
+				scale: this.ball_trail_scale,
+			}).setMask(this.pattern.createBitmapMask()).stop()
+			);
+		}
 }

@@ -1,10 +1,28 @@
 <template>
 	<div class="end_game">
-		<router-link to="/start" v-slot="{ navigate, isActive }">
-			<button id="game-button" @click="navigate" :class="{'active-button': isActive}" >Play Again</button>
-		</router-link>
+		<button class="game-button" @click="playAgain" >Play Again</button>
+		<button class="quit-button" @click="quit" >Back To Start</button>
 	</div>
 </template>
+
+<script setup lang="ts">
+
+	import { useGameStore } from '@/stores/GameStore';
+
+	const emit = defineEmits(["start-match", "show-start"]);
+	const gameStore = useGameStore();
+
+
+	function playAgain() {
+		emit("start-match");
+	}
+
+	function quit() {
+		gameStore.socket?.disconnect();
+		emit("show-start");
+	}
+
+</script>
 
 <style scoped>
 
