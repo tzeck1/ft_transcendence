@@ -14,7 +14,6 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.TwoFactorAuthController = void 0;
 const common_1 = require("@nestjs/common");
-const jwt_auth_guard_1 = require("../auth/jwt-auth.guard");
 const tfa_service_1 = require("./tfa.service");
 const user_service_1 = require("../user/user.service");
 let TwoFactorAuthController = class TwoFactorAuthController {
@@ -31,15 +30,19 @@ let TwoFactorAuthController = class TwoFactorAuthController {
         await this.userService.set2FASecret(intra, secret);
         return { qrCode };
     }
-    async verify2FA(req, token) {
-        const secret = await this.userService.get2FASecret(req.user.id);
+    async verify2FA(intra, token) {
+        console.log(token);
+        console.log(intra);
+        const secret = await this.userService.get2FASecret(intra);
         const isVerified = this.twoFactorAuthService.verify2FAToken(secret, token);
         if (!isVerified)
-            throw new Error('Invalid 2FA token');
+            return { message: '' };
+        this.userService.setTFA(intra, true);
         return { message: '2FA token verified successfully' };
     }
-    async disable2FA(req) {
-        await this.userService.set2FASecret(req.user.id, null);
+    async disable2FA(intra) {
+        await this.userService.set2FASecret(intra, null);
+        await this.userService.setTFA(intra, false);
         return { message: '2FA disabled successfully' };
     }
 };
@@ -51,20 +54,18 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], TwoFactorAuthController.prototype, "enable2FA", null);
 __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Post)('verify'),
-    __param(0, (0, common_1.Request)()),
-    __param(1, (0, common_1.Query)('token')),
+    __param(0, (0, common_1.Body)('intra')),
+    __param(1, (0, common_1.Body)('token')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], TwoFactorAuthController.prototype, "verify2FA", null);
 __decorate([
-    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, common_1.Get)('disable'),
-    __param(0, (0, common_1.Request)()),
+    __param(0, (0, common_1.Query)('intra')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], TwoFactorAuthController.prototype, "disable2FA", null);
 TwoFactorAuthController = __decorate([

@@ -2,6 +2,18 @@
   "extends": "@vue/tsconfig/tsconfig.web.json",
   "include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
   "compilerOptions": {
+    "target": "es2016",
+		"module": "ESNext",
+		"strict": true,
+		"noImplicitAny": false,
+		"allowJs": true,
+		"jsx": "preserve",
+		"importHelpers": true,
+		"moduleResolution": "node",
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"outDir": "dist",
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]

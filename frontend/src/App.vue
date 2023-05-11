@@ -1,198 +1,224 @@
+<template>
+	<div class="h-screen flex flex-col">
+		<header>
+			<nav>
+				<span class="logo">PONG</span>
+				<div class="nav-buttons">
+					<router-link to="/profile" v-slot="{ navigate, isActive }">
+						<button id="profileButton" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro">Profile</button>
+					</router-link>
+					<router-link to="/game" v-slot="{ navigate, isActive }">
+						<button class="game-button" id="game-button" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro">Game</button>
+					</router-link>
+					<button :disabled="isIntro">Leaderboard</button>
+				</div>
+				<div class="logout-button" @click="loadIntro" :disabled="isIntro">
+					<img src="./assets/logout.png" alt="Logout">
+				</div>
+				<div class="burger-wrapper">
+					<button class="burger-button" @click="toggleDropdown">
+						<span class="burger-text" :class="{ 'burger-open': dropdownVisible }">&#x2630;</span>
+					</button>
+					<div class="dropdown-menu" v-if="dropdownVisible">
+						<router-link to="/profile" v-slot="{ navigate, isActive }">
+							<button class="dropdown-buttons" @click="hideDropdown(); navigate();" :class="{'active-button': isActive}" :disabled="isIntro">Profile</button>
+						</router-link>
+						<router-link to="/game" v-slot="{ navigate, isActive }">
+							<button class="dropdown-buttons" @click="hideDropdown(); navigate();" :class="{'active-button': isActive}" :disabled="isIntro">Game</button>
+						</router-link>
+						<button class="dropdown-buttons" @click="hideDropdown" :disabled="isIntro">Leaderboard</button>
+						<button class="dropdown-buttons" @click="hideDropdown(); loadIntro();" :disabled="isIntro">Logout</button>
+					</div>
+				</div>
+			</nav>
+		</header>
+		<main class="flex-grow">
+			<router-link to="/"></router-link>
+			<router-view/>
+		</main>
+		<div class="chat-box" v-if="!isIntro">
+			<div class="chat-input-container">
+				<div class="chat-history" v-show="inputFocus">
+					<div class="flex-grow"></div>
+					<p v-for="(msg, index) in [...lastMessages].reverse()" :key="index">{{ userStore.username + ': ' + msg }}</p>
+				</div>
+				<div class="chat-input-button-container">
+					<input type="text" v-model="message" class="chat-input" @focus="inputFocus=true" @blur="inputFocus=false" @keyup.enter="sendMessage()" placeholder="Type your message...">
+					<button class="chat-send" @click="sendMessage()">Send</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</template>
+
 <script setup lang="ts">
-	import { ref, computed } from 'vue';
+	import { ref, computed, watch, nextTick } from 'vue';
 	import { useRouter, useRoute } from 'vue-router';
 	import { useUserStore } from './stores/UserStore';
 
 	const router = useRouter();
 	const route = useRoute();
+	const dropdownVisible = ref(false);
+	const userStore = useUserStore();
+	const message = ref('');
+	const lastMessages = ref<string[]>([]);
+	const inputFocus = ref(false);
+	const isIntro = computed(() => route.path === '/');
 
 	function loadIntro() {
+		const cookies = document.cookie.split(";");
+		for (let i = 0; i < cookies.length; i++) {
+			const cookie = cookies[i];
+			const eqPos = cookie.indexOf("=");
+			const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
+			document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
+		}
+		userStore.delContent();
 		router.push('/');
 	}
 
-	const store = useUserStore();
-	const isIntro = computed(() => route.path === '/');
+	function toggleDropdown() {
+		dropdownVisible.value = !dropdownVisible.value;
+	}
+
+	function hideDropdown() {
+		dropdownVisible.value = false;
+	}
+
+	function sendMessage() {
+		console.log(message.value);
+		lastMessages.value.unshift(message.value);
+		message.value = '';
+	}
+
+	// async function sendMessage() {
+	// 	if (message.value.trim() === '') {
+	// 		return;
+	// 	}
+	// 	const newMessage = message.value.trim();
+	// 	message.value = '';
+	// 	const messageChars = newMessage.split('');
+	// 	let index = 0;
+	// 	const typingInterval = setInterval(() => {
+	// 		if (index < messageChars.length) {
+	// 			lastMessages.value[0] += messageChars[index];
+	// 			index++;
+	// 		} else {
+	// 			clearInterval(typingInterval);
+	// 		}
+	// 	}, 50);
+	// }
+
 </script>
 
-<template>
-	<header>
-		<span class="logo">PONG</span>
-		<nav>
-				<div class="nav-buttons">
-						<router-link to="/profile" v-slot="{ navigate, isActive }">
-							<button id="profileButton" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro">Profile</button>
-						</router-link>
-						<button class="game-button" :disabled="isIntro">Game</button>
-						<button :disabled="isIntro">Leaderboard</button>
-				</div>
-				<div class="logout-button" @click="loadIntro" :disabled="isIntro">
-					<img src="./assets/logout.png" alt="Logout">
-				</div>
-		</nav>
-	</header>
-	<main>
-		<router-link to="/"></router-link>
-		<router-view/>
-	</main>
-</template>
+<style scoped>
 
-<style global>
-	* {
-		margin: 0;
-		padding: 0;
-		box-sizing: border-box;
-	}
-	
-	@font-face {
-		font-family: ibm-3270;
-		src: url('./assets/3270-Regular.ttf') format('truetype');
-	}
-
-	@font-face {
-		font-family: ibm-logo;
-		src: url('./assets/mib.ttf') format('truetype');
-	}
-
-	html, body {
-		font-family: 'ibm-3270', monospace;
-		background-image: url("./assets/bg.gif");
-		background-size: cover;
-		background-repeat: no-repeat;
-		color: white;
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-		font-size: 1vh;
-	}
-
-	body, body * {
-		animation: glowing 3s infinite;
-	}
-
-	button {
-		background-color: transparent;
-		color: rgb(255, 255, 255);
-		border: 1px solid rgba(255, 255, 255, 0);
-		border-radius: 25px;
-		padding: 2vh 5vh;
-		cursor: pointer;
-		outline: none;
-		font-size: 2vh;
-		font-family: 'ibm-3270', monospace;
-	}
-
-	button:disabled:hover {
-		background-color: transparent;
-	}
-	
-	header {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 1rem;
-		flex-shrink: 0;
+@font-face {
+	font-family: ibm-logo;
+	src: url('./assets/mib.ttf') format('truetype');
 	}
 
 	nav {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		width: 100%;
+		@apply container relative mx-auto flex items-center justify-between transition-all duration-300 ease-in-out;
 	}
-	
-	.logo {
-		display: flex;
-		font-family: ibm-logo;
-		font-size: 3rem;
-		margin-left: 3vw;
+	.nav-buttons {
+		@apply hidden lg:flex lg:opacity-100 lg:pointer-events-auto opacity-0 pointer-events-none mt-2 items-center text-2xl space-x-4;
 	}
 
-	.nav-buttons {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		flex-grow: 1;
+	.logo {
+		@apply mt-2 ml-2 text-white text-5xl flex items-center;
+		font-family: 'ibm-logo';
 	}
-	
-	button:hover {
-		background-color: rgba(255, 255, 255, 0.1);
-	}
-	
+
 	.active-button {
-		background-color: rgba(255, 255, 255, 0.1);
+		@apply bg-white bg-opacity-10;
+	}
+
+	button:disabled:hover {
+		@apply bg-transparent;
 	}
 
 	.game-button {
-		margin-left: 2vw;
-		margin-right: 2vw;
-		font-size: 3.5vh;
+		@apply text-4xl;
+		/* font-weight: bold; */
 	}
 
 	.logout-button {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		width: 100px;
-		height: 100%;
-	}
-
-	.logout-button img {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		width: 100px;
-		height: auto;
-		transition: transform 0.3s;
-		margin-right: 2vw;
+		@apply hidden lg:flex lg:opacity-100 lg:pointer-events-auto opacity-0 pointer-events-none items-center mt-2 w-24 h-auto;
 	}
 
 	.logout-button:hover {
-		transform: scale(1.1);
-		cursor: pointer;
+		@apply transform scale-110;
 	}
 
-	@keyframes glowing {
-		0% {
-			text-shadow: 0 0 25px rgb(255, 255, 255);
-		}
-		50% {
-			text-shadow: 0 0 25px rgb(255, 255, 255);
-		}
-		100% {
-			text-shadow: 0 0 25px rgb(255, 255, 255);
-		}
+	.burger-wrapper {
+		@apply relative lg:hidden lg:opacity-0 lg:pointer-events-none;
 	}
 
-	.icon {
-		width: 40px;
-		height: 100%;
-		margin-left: 1vh;
+	.burger-button {
+		@apply flex justify-center p-6 mt-2;
 	}
 
-	@media (max-width: 768px) {
-		html, body {
-			font-size: 2vh;
-		}
-
-		button {
-			padding: 3vh 6vh;
-			font-size: 3vh;
-		}
-		
-		.game-button {
-			font-size: 5vh;
-		}
-		
-		.intro h1 {
-			font-size: 6vh;
-		}
-		
-		.intro p {
-			font-size: 3vh;
-		}
-
-		.intro-ascii {
-			font-size: 3vh;
-		}
+	.burger-text {
+		@apply text-4xl transition-all duration-300 ease-in-out;
 	}
+
+	.burger-open {
+		transform: rotate(90deg);
+	}
+
+	.dropdown-menu {
+		@apply absolute top-full -right-14 mt-2 py-2 w-48 bg-white bg-opacity-10 rounded-md flex flex-col space-y-1 z-10 lg:hidden;
+	}
+
+	.dropdown-buttons {
+		@apply w-full p-1;
+	}
+
+	.chat-box {
+		@apply fixed bottom-0 left-0 m-4 flex items-center space-x-2;
+	}
+
+	.chat-input-container {
+		@apply flex flex-col w-60;
+	}
+
+	.chat-input-button-container {
+		@apply flex items-center space-x-2;
+	}
+
+	.chat-input {
+		@apply p-2 bg-transparent rounded border border-white;
+	}
+
+	.chat-input:focus {
+		@apply outline-none;
+	}
+
+	.chat-send {
+		@apply p-2 rounded cursor-pointer;
+	}
+
+	.chat-history {
+		@apply overflow-auto break-words h-60 flex flex-col bg-transparent bg-opacity-10 rounded p-2 mb-2;
+		scrollbar-width: thin;
+		scrollbar-color: transparent transparent;
+	}
+
+	.chat-history::-webkit-scrollbar { /* Chrome, Safari and Edge */
+		width: 8px;
+	}
+
+	.chat-history::-webkit-scrollbar-thumb { /* Chrome, Safari and Edge */
+		background: transparent;
+	}
+
+	.chat-history::-webkit-scrollbar-thumb:hover { /* Chrome, Safari and Edge */
+		background: #fff;
+	}
+
+	.flex-grow {
+		flex-grow: 1;
+	}
+
 </style>

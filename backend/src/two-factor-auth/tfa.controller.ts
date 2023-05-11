@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Request, UseGuards, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Request, UseGuards, Query } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { TwoFactorAuthService } from './tfa.service';
 import { Users } from '../user/user.service';
@@ -23,20 +23,24 @@ export class TwoFactorAuthController {
 		return { qrCode };
 	}
 
-	@UseGuards(JwtAuthGuard)
+	// @UseGuards(JwtAuthGuard)
 	@Post('verify')
-	async verify2FA(@Request() req, @Query('token') token: string) {
-		const secret = await this.userService.get2FASecret(req.user.id);
+	async verify2FA(@Body('intra') intra: string, @Body('token') token: string) {
+		console.log(token);
+		console.log(intra);
+		const secret = await this.userService.get2FASecret(intra);
 		const isVerified = this.twoFactorAuthService.verify2FAToken(secret, token);
 		if (!isVerified)
-			throw new Error('Invalid 2FA token');
+			return {message: ''};
+		this.userService.setTFA(intra, true);
 		return { message: '2FA token verified successfully' };
 	}
 
-	@UseGuards(JwtAuthGuard)
+	// @UseGuards(JwtAuthGuard)
 	@Get('disable')
-	async disable2FA(@Request() req) {
-		await this.userService.set2FASecret(req.user.id, null);
+	async disable2FA(@Query('intra') intra: string) {
+		await this.userService.set2FASecret(intra, null);
+		await this.userService.setTFA(intra, false);
 		return { message: '2FA disabled successfully' };
 	}
 }

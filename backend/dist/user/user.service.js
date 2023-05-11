@@ -52,26 +52,37 @@ let Users = class Users {
     }
     async getId(intra_name) {
         const usersEntry = await this.prisma.users.findUnique({ where: { intra_name: intra_name } });
-        return usersEntry.intra_name;
+        return usersEntry.id;
     }
-    async get2FASecret(userId) {
-        const user = await this.prisma.users.findUnique({
-            where: { id: userId },
+    async get2FASecret(intra) {
+        const user = await this.prisma.users.findFirst({
+            where: { intra_name: intra },
             select: { twoFactorSecret: true },
         });
         return user.twoFactorSecret;
     }
+    async getTFA(intra_name) {
+        const usersEntry = await this.prisma.users.findUnique({ where: { intra_name: intra_name } });
+        return usersEntry.tfa_enabled;
+    }
+    async getScore(intra_name) {
+        const id = await this.getId(intra_name);
+        const statsEntry = await this.prisma.stats.findUnique({ where: { id: id } });
+        return statsEntry.score;
+    }
     async setUsername(intra, new_username) {
+        if (new_username.length < 2)
+            return ("1");
         const existingUser = await this.prisma.users.findFirst({
             where: {
                 AND: [
                     { intra_name: { not: { equals: intra } } },
-                    { username: new_username },
+                    { username: { equals: new_username, mode: 'insensitive' } },
                 ],
             },
         });
         if (existingUser) {
-            return (null);
+            return ("2");
         }
         const updateUser = await this.prisma.users.update({
             where: { intra_name: intra },
@@ -89,6 +100,12 @@ let Users = class Users {
         return await this.prisma.users.update({
             where: { intra_name: intra },
             data: { twoFactorSecret: secret },
+        });
+    }
+    async setTFA(intra, state) {
+        return await this.prisma.users.update({
+            where: { intra_name: intra },
+            data: { tfa_enabled: state },
         });
     }
 };
