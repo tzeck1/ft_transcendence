@@ -53,6 +53,7 @@
 	import QrcodeVue from 'qrcode.vue';
 	import { storeToRefs } from 'pinia';
 	import router from '@/router';
+	import { io } from 'socket.io-client';
 
 	const userStore = useUserStore();
 	const { username } = storeToRefs(userStore);
@@ -133,13 +134,14 @@
 	onMounted(async () => {
 		try {
 			const cookie_username = getUsernameFromCookie();
-			if (!cookie_username)
-			{
+			if (!cookie_username) {
 				router.push('/'); //do we need to return after that?
 				return ;
 			}
 			if (!userStore.intra)
 				userStore.setIntra(cookie_username);
+			if (!userStore.socket)
+				userStore.socket = io(`${location.hostname}:3000/chat_socket`);
 			const response = await axios.get(`http://${location.hostname}:3000/auth/getUserData?intra=${userStore.intra}`);
 			const data = response.data;
 			userStore.setUsername(data.username);

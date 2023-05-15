@@ -78,7 +78,7 @@
 	{
 		//establish connection
 		if (!isLooking.value) {
-			socket = io(`${location.hostname}:3000`);
+			socket = io(`${location.hostname}:3000/game_socket`);
 			gameStore.setSocket(socket);
 			socket.on('connect', function() {
 				console.log('Connected');
