@@ -7,7 +7,7 @@ import {
 	SubscribeMessage,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { ChatService } from './chat.service';
+import { ChatService, User, Channel } from './chat.service';
 import { Users } from '../user/user.service';
 
 
@@ -20,9 +20,17 @@ import { Users } from '../user/user.service';
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	constructor(private readonly chatService: ChatService, private readonly users: Users) {}
 
+	//		key: channel_id
+	private channels: Map<string, Channel> = new Map<string, Channel>;
+
+	//		key: intraname
+	private members: Map<string, User> = new Map<string, User>;
+	private global_channel: Channel = new Channel("global", null);
+
 	@WebSocketServer() server: Server;
 
 	afterInit(server: Server) {
+		this.channels.set("global", this.global_channel);
 		console.log('Chat Initialized');
 	}
 
@@ -31,7 +39,18 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	handleConnection(client: Socket, ...args: any[]) {
+		let intra = client.handshake.query.intra as string;
+		let user = new User(intra, this.users, client, this.global_channel);
+
+		this.members.set(intra, user);
+
+		client.join("global");
 		console.log(`Chat Client Connected: ${client.id}`);
+	}
+
+	@SubscribeMessage("messageToServer")
+	handleMessageToServer(client: Socket, ...args: any[]) {
+		this.server.to("global").emit("messageToClient", args.)// TODO where to call this?
 	}
 
 }

@@ -60,6 +60,7 @@
 	const route = useRoute();
 	const dropdownVisible = ref(false);
 	const userStore = useUserStore();
+	const socket = userStore.socket;
 	const message = ref('');
 	const lastMessages = ref<string[]>([]);
 	const inputFocus = ref(false);

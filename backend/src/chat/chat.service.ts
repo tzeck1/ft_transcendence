@@ -37,7 +37,7 @@ export class User {
  */
 export class Channel {
 	constructor(
-		private readonly room_id: string,
+		private readonly channel_id: string,
 		private readonly owner: User,
 	) {}
 
