@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { Users } from '../user/user.service';
+import prisma from 'src/prisma';
 import { SubscribeMessage } from '@nestjs/websockets';
 
 @Injectable()
-export class GameService {
+export class Games {
 	constructor( readonly users: Users ) {}
 }
 
@@ -147,4 +148,37 @@ export class Room {
 		this.left_score_status = false;
 		this.right_score_status = false;
 	}
+}
+
+@Injectable()
+export class Game {
+
+	/*	========== SETTER ==========	*/
+	async setGameData(intra: string, enemy: string, player_score: number, enemy_score: number, ranked: boolean) {
+		console.log("went into newUserEntry");
+		const newUsersEntry = await prisma.games.create( {
+			data: {
+				player:				intra,
+				enemy:				enemy,
+				player_score:		player_score,
+				enemy_score:		enemy_score,
+				ranked:				ranked,
+				date:				new Date(),
+			},
+		});
+	}
+
+	/*	========== GETTER ==========	*/
+	async getLastGame(intra: string) {
+		const latestGame = await prisma.games.findFirst({
+			where: {
+			  player: intra,
+			},
+			orderBy: {
+			  date: 'desc',
+			},
+		});
+		return latestGame;
+	}
+
 }

@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { useGameStore } from '@/stores/GameStore';
 import { Socket } from 'socket.io-client';
 import pongComp from '../components/Game/Pong.vue';
+import axios from 'axios';
 
 export default class Pong extends Phaser.Scene {
 	left_player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -27,7 +28,7 @@ export default class Pong extends Phaser.Scene {
 	height = 1080;
 	left_score = 0;
 	right_score = 0;
-	winning_score = 11;
+	winning_score = 2;
 	next_ball_spawn_left = false;
 	next_ball_spawn_right = false;
 	paddle_velocity = 16;
@@ -152,6 +153,8 @@ export default class Pong extends Phaser.Scene {
 			this.left_score_txt.text = String(this.left_score);
 			this.right_score_txt.text = String(this.right_score);
 			if (this.left_score == this.winning_score || this.right_score == this.winning_score) {
+				// save score in db
+				axios.post(`http://${location.hostname}:3000/game/setGameData`, { intra: this.gameStore.intra, enemy: this.gameStore.enemy_name, player_score: this.left_score, enemy_score: this.right_score, ranked: true });
 				this.game.destroy(true); //don't know if destroy is the correct way to end instance of pong
 				// TODO end game here
 			}

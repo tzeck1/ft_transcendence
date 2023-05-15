@@ -15,8 +15,8 @@ const socket_io_1 = require("socket.io");
 const game_service_1 = require("./game.service");
 const user_service_1 = require("../user/user.service");
 let GameGateway = class GameGateway {
-    constructor(gameService, users) {
-        this.gameService = gameService;
+    constructor(games, users) {
+        this.games = games;
         this.users = users;
         this.rooms = new Map;
         this.lobby = new Map;
@@ -78,20 +78,31 @@ let GameGateway = class GameGateway {
         else
             player = room.getRightPlayer();
         room.validateScore(client);
-        if (room.isScoreTrue() == true) {
+        if (client == room.getLeftPlayer().getSocket()) {
             console.log("inside if of isScoreTrue was called");
             room.playerScored(player);
             room.spawn_ball();
         }
     }
+    handleBallPosition(client, data) {
+        let room = this.rooms.get(data.room);
+        if (client == room.getLeftPlayer().getSocket()) {
+            room.setNewBallData(data.ball_x, data.ball_y, data.ball_velocity, data.ball_speed);
+        }
+    }
     handlePaddleMovement(client, data) {
         let room = this.rooms.get(data.room);
+        let enemy;
         let player;
-        if (room.getLeftPlayer().getSocket() == client)
-            player = room.getRightPlayer();
-        else
+        if (room.getLeftPlayer().getSocket() == client) {
+            enemy = room.getRightPlayer();
             player = room.getLeftPlayer();
-        room.movePlayer(player, data);
+        }
+        else {
+            enemy = room.getLeftPlayer();
+            player = room.getRightPlayer();
+        }
+        room.moveBoth(player, enemy, data);
     }
     handleIAmReady(client, room_id) {
         let room = this.rooms.get(room_id);
@@ -101,13 +112,6 @@ let GameGateway = class GameGateway {
             room.getRightPlayer().getSocket().emit("startTheGame");
             room.spawn_ball();
         }
-    }
-    handleCancelQueue(client, intra) {
-        console.log("calling handleCancel");
-        let player = this.lobby.get(intra);
-        client.leave("lobby");
-        this.lobby.delete(player.getIntraname());
-        client.disconnect(true);
     }
 };
 __decorate([
@@ -133,6 +137,12 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], GameGateway.prototype, "handleScoreRequest", null);
 __decorate([
+    (0, websockets_1.SubscribeMessage)("ballData"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
+    __metadata("design:returntype", void 0)
+], GameGateway.prototype, "handleBallPosition", null);
+__decorate([
     (0, websockets_1.SubscribeMessage)("paddleMovement"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
@@ -150,7 +160,7 @@ GameGateway = __decorate([
             origin: '*',
         },
     }),
-    __metadata("design:paramtypes", [game_service_1.GameService, user_service_1.Users])
+    __metadata("design:paramtypes", [game_service_1.Games, user_service_1.Users])
 ], GameGateway);
 exports.GameGateway = GameGateway;
 //# sourceMappingURL=game.gateway.js.map

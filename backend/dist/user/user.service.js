@@ -8,72 +8,63 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Users = void 0;
 const common_1 = require("@nestjs/common");
-const client_1 = require("@prisma/client");
+const prisma_1 = require("../prisma");
 let Users = class Users {
-    constructor() {
-        this.prisma = new client_1.PrismaClient({
-            datasources: {
-                db: {
-                    url: "postgresql://myuser:mypassword@database:5432/mydatabase?schema=public",
-                },
-            },
-        });
-    }
     async createNewUser(name, photo) {
-        if (await this.prisma.users.findUnique({ where: { intra_name: name } }) != null)
+        if (await prisma_1.default.users.findUnique({ where: { intra_name: name } }) != null)
             return;
-        const newUsersEntry = await this.prisma.users.create({
+        const newUsersEntry = await prisma_1.default.users.create({
             data: {
                 username: name,
                 intra_name: name,
                 profile_picture: photo,
             }
         });
-        const newStatsEntry = await this.prisma.stats.create({
+        const newStatsEntry = await prisma_1.default.stats.create({
             data: {}
         });
         console.log('user created: ', name);
     }
     async getUsername(id) {
-        const usersEntry = await this.prisma.users.findUnique({ where: { id: id } });
+        const usersEntry = await prisma_1.default.users.findUnique({ where: { id: id } });
         return usersEntry.username;
     }
     async getUsernameByIntra(intra_name) {
-        const usersEntry = await this.prisma.users.findUnique({ where: { intra_name: intra_name } });
+        const usersEntry = await prisma_1.default.users.findUnique({ where: { intra_name: intra_name } });
         return usersEntry.username;
     }
     async getAvatarByIntra(intra_name) {
-        const usersEntry = await this.prisma.users.findUnique({ where: { intra_name: intra_name } });
+        const usersEntry = await prisma_1.default.users.findUnique({ where: { intra_name: intra_name } });
         return usersEntry.profile_picture;
     }
     async getIntraName(id) {
-        const usersEntry = await this.prisma.users.findUnique({ where: { id: id } });
+        const usersEntry = await prisma_1.default.users.findUnique({ where: { id: id } });
         return usersEntry.intra_name;
     }
     async getId(intra_name) {
-        const usersEntry = await this.prisma.users.findUnique({ where: { intra_name: intra_name } });
+        const usersEntry = await prisma_1.default.users.findUnique({ where: { intra_name: intra_name } });
         return usersEntry.id;
     }
     async get2FASecret(intra) {
-        const user = await this.prisma.users.findFirst({
+        const user = await prisma_1.default.users.findFirst({
             where: { intra_name: intra },
             select: { twoFactorSecret: true },
         });
         return user.twoFactorSecret;
     }
     async getTFA(intra_name) {
-        const usersEntry = await this.prisma.users.findUnique({ where: { intra_name: intra_name } });
+        const usersEntry = await prisma_1.default.users.findUnique({ where: { intra_name: intra_name } });
         return usersEntry.tfa_enabled;
     }
     async getScore(intra_name) {
         const id = await this.getId(intra_name);
-        const statsEntry = await this.prisma.stats.findUnique({ where: { id: id } });
+        const statsEntry = await prisma_1.default.stats.findUnique({ where: { id: id } });
         return statsEntry.score;
     }
     async setUsername(intra, new_username) {
         if (new_username.length < 2)
             return ("1");
-        const existingUser = await this.prisma.users.findFirst({
+        const existingUser = await prisma_1.default.users.findFirst({
             where: {
                 AND: [
                     { intra_name: { not: { equals: intra } } },
@@ -84,26 +75,26 @@ let Users = class Users {
         if (existingUser) {
             return ("2");
         }
-        const updateUser = await this.prisma.users.update({
+        const updateUser = await prisma_1.default.users.update({
             where: { intra_name: intra },
             data: { username: new_username },
         });
         return (new_username);
     }
     async setAvatar(intra, picture) {
-        const updateUser = await this.prisma.users.update({
+        const updateUser = await prisma_1.default.users.update({
             where: { intra_name: intra },
             data: { profile_picture: picture },
         });
     }
     async set2FASecret(intra, secret) {
-        return await this.prisma.users.update({
+        return await prisma_1.default.users.update({
             where: { intra_name: intra },
             data: { twoFactorSecret: secret },
         });
     }
     async setTFA(intra, state) {
-        return await this.prisma.users.update({
+        return await prisma_1.default.users.update({
             where: { intra_name: intra },
             data: { tfa_enabled: state },
         });

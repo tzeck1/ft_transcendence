@@ -1,12 +1,4 @@
-import { PrismaClient } from '@prisma/client';
 export declare class Users {
-    prisma: PrismaClient<{
-        datasources: {
-            db: {
-                url: string;
-            };
-        };
-    }, never, false>;
     createNewUser(name: string, photo: string): Promise<void>;
     getUsername(id: number): Promise<string>;
     getUsernameByIntra(intra_name: string): Promise<string>;

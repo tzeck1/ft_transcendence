@@ -66,7 +66,7 @@
 	const isIntro = computed(() => route.path === '/');
 
 	function loadIntro() {
-		const cookies = document.cookie.split(";");
+		const cookies = document.cookie.split(";"); // for deleteing coockies
 		for (let i = 0; i < cookies.length; i++) {
 			const cookie = cookies[i];
 			const eqPos = cookie.indexOf("=");

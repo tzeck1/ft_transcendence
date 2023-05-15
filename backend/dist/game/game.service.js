@@ -9,19 +9,20 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Room = exports.Player = exports.GameService = void 0;
+exports.Game = exports.Room = exports.Player = exports.Games = void 0;
 const common_1 = require("@nestjs/common");
 const user_service_1 = require("../user/user.service");
-let GameService = class GameService {
+const prisma_1 = require("../prisma");
+let Games = class Games {
     constructor(users) {
         this.users = users;
     }
 };
-GameService = __decorate([
+Games = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [user_service_1.Users])
-], GameService);
-exports.GameService = GameService;
+], Games);
+exports.Games = Games;
 class Player {
     constructor(socket, intraname, users) {
         this.socket = socket;
@@ -68,11 +69,20 @@ class Room {
     getRoomId() { return this.room_id; }
     getLeftPlayer() { return this.left_player; }
     getRightPlayer() { return this.right_player; }
-    movePlayer(player, inputPayload) {
-        if (inputPayload.up == true)
-            player.getSocket().emit('enemyPaddleUp');
-        else if (inputPayload.down == true)
-            player.getSocket().emit('enemyPaddleDown');
+    moveBoth(player, enemy, inputPayload) {
+        let player_socket = player.getSocket();
+        let enemy_socket = enemy.getSocket();
+        if (inputPayload.up == true) {
+            player_socket.emit('myPaddleUp');
+            enemy_socket.emit("enemyPaddleUp");
+        }
+        else if (inputPayload.down == true) {
+            player_socket.emit('myPaddleDown');
+            enemy_socket.emit("enemyPaddleDown");
+        }
+    }
+    setNewBallData(x, y, velocity, speed) {
+        this.right_player.getSocket().emit('newBallData', x, y, velocity, speed);
     }
     isRoomReady() {
         if (this.left_player_status && this.right_player_status)
@@ -137,4 +147,34 @@ class Room {
     }
 }
 exports.Room = Room;
+let Game = class Game {
+    async setGameData(intra, enemy, player_score, enemy_score, ranked) {
+        console.log("went into newUserEntry");
+        const newUsersEntry = await prisma_1.default.games.create({
+            data: {
+                player: intra,
+                enemy: enemy,
+                player_score: player_score,
+                enemy_score: enemy_score,
+                ranked: ranked,
+                date: new Date(),
+            },
+        });
+    }
+    async getLastGame(intra) {
+        const latestGame = await prisma_1.default.games.findFirst({
+            where: {
+                player: intra,
+            },
+            orderBy: {
+                date: 'desc',
+            },
+        });
+        return latestGame;
+    }
+};
+Game = __decorate([
+    (0, common_1.Injectable)()
+], Game);
+exports.Game = Game;
 //# sourceMappingURL=game.service.js.map

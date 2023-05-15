@@ -1,6 +1,6 @@
 <template>
 	<StartGame v-if="showStart" @start-match="startMatch"></StartGame>
-	<Pong v-if="showMatch" @show-end="switchToEnd"></Pong>
+	<Pong v-if="showMatch" @show-end="switchToEnd" class="pong"></Pong>
 	<EndGame v-if="showEnd" @start-match="startMatch" @show-start="switchToStart"></EndGame>
 </template>
 

@@ -1,6 +1,6 @@
 import { Socket } from 'socket.io';
 import { Users } from '../user/user.service';
-export declare class GameService {
+export declare class Games {
     readonly users: Users;
     constructor(users: Users);
 }
@@ -43,11 +43,16 @@ export declare class Room {
     getRoomId(): string;
     getLeftPlayer(): Player;
     getRightPlayer(): Player;
-    movePlayer(player: Player, inputPayload: any): void;
+    moveBoth(player: Player, enemy: Player, inputPayload: any): void;
+    setNewBallData(x: number, y: number, velocity: any, speed: number): void;
     isRoomReady(): boolean;
     isScoreTrue(): boolean;
     validatePlayer(client: Socket): void;
     validateScore(client: Socket): void;
     spawn_ball(): void;
     playerScored(player: Player): void;
+}
+export declare class Game {
+    setGameData(intra: string, enemy: string, player_score: number, enemy_score: number, ranked: boolean): Promise<void>;
+    getLastGame(intra: string): Promise<import(".prisma/client").games>;
 }
