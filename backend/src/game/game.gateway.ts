@@ -126,7 +126,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		room.moveBoth(player, enemy, data);
 	}
 
-
 	@SubscribeMessage("iAmReady")
 	handleIAmReady(client: Socket, room_id: string) {
 		let room = this.rooms.get(room_id);

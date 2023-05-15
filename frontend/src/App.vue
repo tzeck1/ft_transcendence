@@ -89,6 +89,7 @@
 		console.log(message.value);
 		lastMessages.value.unshift(message.value);
 		message.value = '';
+		// TODO emit here
 	}
 
 	// async function sendMessage() {
