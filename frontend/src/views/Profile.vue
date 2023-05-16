@@ -140,8 +140,6 @@
 			}
 			if (!userStore.intra)
 				userStore.setIntra(cookie_username);
-			if (!userStore.socket)
-				userStore.socket = io(`${location.hostname}:3000/chat_socket`, {query: {intra: userStore.intra}});
 			const response = await axios.get(`http://${location.hostname}:3000/auth/getUserData?intra=${userStore.intra}`);
 			const data = response.data;
 			userStore.setUsername(data.username);
