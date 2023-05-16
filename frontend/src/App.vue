@@ -40,7 +40,7 @@
 			<div class="chat-input-container">
 				<div class="chat-history" v-show="inputFocus">
 					<div class="flex-grow"></div>
-					<p v-for="(msg, index) in [...lastMessages].reverse()" :key="index">{{ userStore.username + ': ' + msg }}</p>
+					<p v-for="(tuple, index) in [...lastMessages].reverse()" :key="index">{{ tuple[0] + ': ' + tuple[1] }}</p>
 				</div>
 				<div class="chat-input-button-container">
 					<input type="text" v-model="message" class="chat-input" @focus="inputFocus=true" @blur="inputFocus=false" @keyup.enter="sendMessage()" placeholder="Type your message...">
@@ -50,21 +50,36 @@
 		</div>
 	</div>
 </template>
-
+ 
 <script setup lang="ts">
-	import { ref, computed, watch, nextTick } from 'vue';
+	import { ref, computed, watch, nextTick, onMounted } from 'vue';
 	import { useRouter, useRoute } from 'vue-router';
 	import { useUserStore } from './stores/UserStore';
+	import type { Socket } from 'socket.io-client'
+	import { io } from 'socket.io-client';
+	import { stringify } from 'postcss';
 
 	const router = useRouter();
 	const route = useRoute();
 	const dropdownVisible = ref(false);
 	const userStore = useUserStore();
-	const socket = userStore.socket;
+	// const socket = userStore.socket;
 	const message = ref('');
-	const lastMessages = ref<string[]>([]);
+	const lastMessages = ref<[string, string][]>([]);
 	const inputFocus = ref(false);
 	const isIntro = computed(() => route.path === '/');
+
+	watch( () => userStore.intra, (newVal, oldVal) => {
+		if (newVal != undefined) {
+			userStore.socket = io(`${location.hostname}:3000/chat_socket`, {query: {intra: userStore.intra}});
+			//listener here
+			userStore.socket.on("messageToClient", (sender: string, message: string) => {
+				console.log("args in messsageToClient listener:", message, "from:", sender);
+				lastMessages.value.unshift([sender, message]);
+			})
+
+		}
+	})
 
 	function loadIntro() {
 		const cookies = document.cookie.split(";");
@@ -88,9 +103,11 @@
 
 	function sendMessage() {
 		console.log(message.value);
-		lastMessages.value.unshift(message.value);
+		// lastMessages.value.unshift(message.value);
+		if (userStore.socket != undefined) {
+			userStore.socket.emit("messageToServer", message.value);
+		}
 		message.value = '';
-		// TODO emit here
 	}
 
 	// async function sendMessage() {

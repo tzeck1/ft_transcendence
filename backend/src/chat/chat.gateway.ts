@@ -50,7 +50,16 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	@SubscribeMessage("messageToServer")
 	handleMessageToServer(client: Socket, ...args: any[]) {
-		this.server.to("global").emit("messageToClient", args.)// TODO where to call this?
+		let intra: string;
+
+		for (let [intraname, user] of this.members) {
+			if (user.getSocket() == client) {
+				intra = intraname;
+				break;
+			}
+		}
+		console.log("message args inside subscribemessage:", args[0]);
+		this.server.to("global").emit("messageToClient", intra, args[0]);
 	}
 
 }
