@@ -22,12 +22,13 @@ export class AuthController {
 
 	@Get('getUserData')
 		async getUserData(@Query('intra') intra: string): Promise<any> {
-		const userData = {
-			username: await this.users.getUsernameByIntra(intra),
-			avatarUrl: await this.users.getAvatarByIntra(intra),
-			tfa_enabled: await this.users.getTFA(intra),
-		}
-		return userData;
+		// const userData = {
+		// 	username: await this.users.getUsernameByIntra(intra),
+		// 	avatarUrl: await this.users.getAvatarByIntra(intra),
+		// 	tfa_enabled: await this.users.getTFA(intra),
+		// }
+		// return userData;
+		return this.users.getUser(intra);
 	}
 
 	@Get('api42')

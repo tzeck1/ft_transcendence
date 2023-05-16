@@ -27,12 +27,7 @@ let AuthController = class AuthController {
         res.redirect(frontendUrl);
     }
     async getUserData(intra) {
-        const userData = {
-            username: await this.users.getUsernameByIntra(intra),
-            avatarUrl: await this.users.getAvatarByIntra(intra),
-            tfa_enabled: await this.users.getTFA(intra),
-        };
-        return userData;
+        return this.users.getUser(intra);
     }
     api42Login(res) {
         console.log('Api42Login called');

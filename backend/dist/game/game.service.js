@@ -160,6 +160,36 @@ let Game = class Game {
                 date: new Date(),
             },
         });
+        if (player_score > enemy_score) {
+            console.log("increase ", intra, "s rank!");
+            await prisma_1.default.users.update({
+                where: {
+                    intra_name: intra,
+                },
+                data: {
+                    rank: { increment: 1 }
+                }
+            });
+        }
+        else {
+            console.log("decrease ", intra, "s rank!");
+            await prisma_1.default.users.update({
+                where: {
+                    intra_name: intra,
+                },
+                data: {
+                    rank: { decrement: 1 }
+                }
+            });
+        }
+        await prisma_1.default.users.update({
+            where: {
+                intra_name: intra,
+            },
+            data: {
+                games_played: { increment: 1 }
+            }
+        });
     }
     async getLastGame(intra) {
         const latestGame = await prisma_1.default.games.findFirst({

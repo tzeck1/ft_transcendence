@@ -3,6 +3,7 @@ import type { RouteRecordRaw } from 'vue-router';
 import Intro from '../views/Intro.vue';
 import Profile from '../views/Profile.vue';
 import Game from '../views/Game.vue';
+import Leaderboard from '@/views/Leaderboard.vue';
 import NotFound from '../views/NotFound.vue'
 
 const routes: Array<RouteRecordRaw> = [
@@ -20,6 +21,11 @@ const routes: Array<RouteRecordRaw> = [
 		path: '/game',
 		name: 'Game',
 		component: Game,
+	},
+	{
+		path: '/leaderboard',
+		name: 'Leaderboard',
+		component: Leaderboard,
 	},
 	{
 		path: '/:pathMatch(.*)*',

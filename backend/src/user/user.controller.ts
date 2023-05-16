@@ -12,6 +12,11 @@ export class UserController {
 		return this.users.getUsername(id);
 	}
 
+	@Get('getUsers')
+	async getUsers() {
+		return this.users.getUsers();
+	}
+
 	@Post('setAvatar')
 	async setAvatar(@Body('intra') intra: string, @Body('picture') picture: string) {
 		console.log("Avatar changed to:", picture);

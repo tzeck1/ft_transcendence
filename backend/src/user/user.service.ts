@@ -26,6 +26,20 @@ export class Users {
 
 	/*	========== GETTER ==========	*/
 
+	async getUser(intra: string) {
+		return prisma.users.findUnique( { where: { intra_name: intra } });
+	}
+
+	async getUsers() {
+		const Users = await prisma.users.findMany({
+			orderBy: {
+				rank: 'desc',
+			},
+		});
+
+		return Users;
+	}
+
 	async getUsername(id: number): Promise<string> {
 		const usersEntry = await prisma.users.findUnique( {where: {id: id}} );
 		return usersEntry.username;
@@ -115,4 +129,6 @@ export class Users {
 			data: { tfa_enabled: state },
 		});
 	}
+
+
 }

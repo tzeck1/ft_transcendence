@@ -18,6 +18,7 @@
 				</div>
 				<span v-if="showUsernameError" class="username-error" >{{ error_text }}</span>
 				<img class="rank" src="../assets/ranks/floppy_2.png" alt="Rank" />
+				<span>{{ rank }}</span>
 				<button class="two-factor-button" @click="toggle2FA">{{ twoFactorButtonText }}</button>
 			</div>
 			<div class="feature-grid">
@@ -54,6 +55,7 @@
 	import { storeToRefs } from 'pinia';
 	import router from '@/router';
 
+	const rank = ref(0);
 	const userStore = useUserStore();
 	const { username } = storeToRefs(userStore);
 	const { profile_picture } = storeToRefs(userStore);
@@ -143,8 +145,9 @@
 			const response = await axios.get(`http://${location.hostname}:3000/auth/getUserData?intra=${userStore.intra}`);
 			const data = response.data;
 			userStore.setUsername(data.username);
-			userStore.setProfilePicture(data.avatarUrl);
+			userStore.setProfilePicture(data.profile_picture);
 			userStore.setTFA(data.tfa_enabled);
+			rank.value = data.rank;
 		} catch (error) {
 			console.error('Error fetching user data:', error);
 		}

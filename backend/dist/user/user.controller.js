@@ -22,6 +22,9 @@ let UserController = class UserController {
     async getUsername(id) {
         return this.users.getUsername(id);
     }
+    async getUsers() {
+        return this.users.getUsers();
+    }
     async setAvatar(intra, picture) {
         console.log("Avatar changed to:", picture);
         this.users.setAvatar(intra, picture);
@@ -41,6 +44,12 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getUsername", null);
+__decorate([
+    (0, common_1.Get)('getUsers'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getUsers", null);
 __decorate([
     (0, common_1.Post)('setAvatar'),
     __param(0, (0, common_1.Body)('intra')),

@@ -166,6 +166,36 @@ export class Game {
 				date:				new Date(),
 			},
 		});
+		if (player_score > enemy_score) {
+			console.log("increase ", intra, "s rank!");
+			await prisma.users.update({
+				where: {
+					intra_name: intra,
+				},
+				data: {
+					rank: { increment: 1}
+				}
+			})
+		}
+		else {
+			console.log("decrease ", intra, "s rank!");
+			await prisma.users.update({
+				where: {
+					intra_name: intra,
+				},
+				data: {
+					rank: { decrement: 1}
+				}
+			})
+		}
+		await prisma.users.update({
+			where: {
+				intra_name: intra,
+			},
+			data: {
+				games_played: { increment: 1}
+			}
+		})
 	}
 
 	/*	========== GETTER ==========	*/

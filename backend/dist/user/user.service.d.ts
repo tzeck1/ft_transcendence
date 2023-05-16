@@ -1,5 +1,7 @@
 export declare class Users {
     createNewUser(name: string, photo: string): Promise<void>;
+    getUser(intra: string): Promise<import(".prisma/client").users>;
+    getUsers(): Promise<import(".prisma/client").users[]>;
     getUsername(id: number): Promise<string>;
     getUsernameByIntra(intra_name: string): Promise<string>;
     getAvatarByIntra(intra_name: string): Promise<string>;

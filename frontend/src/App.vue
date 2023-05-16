@@ -10,7 +10,9 @@
 					<router-link to="/game" v-slot="{ navigate, isActive }">
 						<button class="game-button" id="game-button" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro">Game</button>
 					</router-link>
-					<button :disabled="isIntro">Leaderboard</button>
+					<router-link to="/leaderboard" v-slot="{ navigate, isActive }">
+						<button id="leaderboardButton" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro">Leaderboard</button>
+					</router-link>
 				</div>
 				<div class="logout-button" @click="loadIntro" :disabled="isIntro">
 					<img src="./assets/logout.png" alt="Logout">
@@ -26,7 +28,9 @@
 						<router-link to="/game" v-slot="{ navigate, isActive }">
 							<button class="dropdown-buttons" @click="hideDropdown(); navigate();" :class="{'active-button': isActive}" :disabled="isIntro">Game</button>
 						</router-link>
-						<button class="dropdown-buttons" @click="hideDropdown" :disabled="isIntro">Leaderboard</button>
+						<router-link to="/leaderboard" v-slot="{ navigate, isActive }">
+							<button class="dropdown-buttons" @click="hideDropdown(); navigate();" :class="{'active-button': isActive}" :disabled="isIntro">Leaderboard</button>
+						</router-link>
 						<button class="dropdown-buttons" @click="hideDropdown(); loadIntro();" :disabled="isIntro">Logout</button>
 					</div>
 				</div>

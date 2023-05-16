@@ -20,6 +20,8 @@ model users {
 	tfa_enabled		Boolean	@default(false)
 	twoFactorSecret	String?
 	games			games[]
+	rank			Int		@default(0)
+	games_played	Int		@default(0)
 }
 
 model games {

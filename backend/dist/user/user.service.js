@@ -25,6 +25,17 @@ let Users = class Users {
         });
         console.log('user created: ', name);
     }
+    async getUser(intra) {
+        return prisma_1.default.users.findUnique({ where: { intra_name: intra } });
+    }
+    async getUsers() {
+        const Users = await prisma_1.default.users.findMany({
+            orderBy: {
+                rank: 'desc',
+            },
+        });
+        return Users;
+    }
     async getUsername(id) {
         const usersEntry = await prisma_1.default.users.findUnique({ where: { id: id } });
         return usersEntry.username;

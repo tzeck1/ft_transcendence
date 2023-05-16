@@ -22,4 +22,5 @@ export class GameController {
 	async getUserGames(@Query('intra') intra: string) {
 		return this.games.getUserGames(intra);
 	}
+
 }
