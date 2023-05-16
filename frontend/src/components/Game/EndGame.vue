@@ -29,7 +29,7 @@
 	import { useGameStore } from '@/stores/GameStore';
 	import { useUserStore } from '@/stores/UserStore';
 	import { storeToRefs } from 'pinia';
-import axios from 'axios';
+	import axios from 'axios';
 
 	const emit = defineEmits(["start-match", "show-start"]);
 	const gameStore = useGameStore();

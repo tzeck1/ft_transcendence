@@ -172,9 +172,29 @@ let Game = class Game {
         });
         return latestGame;
     }
+    async getUserGames(intra) {
+        const userGames = await prisma_1.default.games.findMany({
+            where: {
+                player: intra,
+            },
+            orderBy: {
+                date: 'desc',
+            },
+        });
+        userGames.forEach(game => {
+            game.formattedDate = formatDate(game.date);
+        });
+        return userGames;
+    }
 };
 Game = __decorate([
     (0, common_1.Injectable)()
 ], Game);
 exports.Game = Game;
+function formatDate(date) {
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear().toString().substr(-2);
+    return `${day}/${month}/${year}`;
+}
 //# sourceMappingURL=game.service.js.map

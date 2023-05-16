@@ -172,13 +172,38 @@ export class Game {
 	async getLastGame(intra: string) {
 		const latestGame = await prisma.games.findFirst({
 			where: {
-			  player: intra,
+				player: intra,
 			},
 			orderBy: {
-			  date: 'desc',
+				date: 'desc',
 			},
 		});
 		return latestGame;
 	}
 
+	async getUserGames(intra: string) {
+		const userGames = await prisma.games.findMany({
+			where: {
+				player: intra,
+			},
+			orderBy: {
+				date: 'desc',
+			},
+		});
+
+		userGames.forEach(game => {
+			(game as any).formattedDate = formatDate(game.date);
+		});
+
+		return userGames;
+	}
+
+}
+
+function formatDate(date: Date) {
+	const day = date.getDate();
+	const month = date.getMonth() + 1;
+	const year = date.getFullYear().toString().substr(-2);
+
+	return `${day}/${month}/${year}`;
 }

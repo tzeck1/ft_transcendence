@@ -26,6 +26,9 @@ let GameController = class GameController {
     async getLastGame(intra) {
         return this.games.getLastGame(intra);
     }
+    async getUserGames(intra) {
+        return this.games.getUserGames(intra);
+    }
 };
 __decorate([
     (0, common_1.Post)('setGameData'),
@@ -45,6 +48,13 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], GameController.prototype, "getLastGame", null);
+__decorate([
+    (0, common_1.Get)('getUserGames'),
+    __param(0, (0, common_1.Query)('intra')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], GameController.prototype, "getUserGames", null);
 GameController = __decorate([
     (0, common_1.Controller)('game'),
     __metadata("design:paramtypes", [game_service_1.Game])

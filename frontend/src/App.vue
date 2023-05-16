@@ -119,7 +119,7 @@
 	}
 
 	nav {
-		@apply container relative mx-auto flex items-center justify-between transition-all duration-300 ease-in-out;
+		@apply container relative h-32 mx-auto flex items-center justify-between transition-all duration-300 ease-in-out;
 	}
 	.nav-buttons {
 		@apply hidden lg:flex lg:opacity-100 lg:pointer-events-auto opacity-0 pointer-events-none mt-2 items-center text-2xl space-x-4;

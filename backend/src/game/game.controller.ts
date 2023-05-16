@@ -17,4 +17,9 @@ export class GameController {
 	async getLastGame(@Query('intra') intra: string) {
 		return this.games.getLastGame(intra);
 	}
+
+	@Get('getUserGames')
+	async getUserGames(@Query('intra') intra: string) {
+		return this.games.getUserGames(intra);
+	}
 }
