@@ -13,7 +13,8 @@ export class ChatService {
 	//		key: intraname
 	private members: Map<string, User> = new Map<string, User>;
 
-	getIntraFromSocket(client: Socket): string {
+
+	public getIntraFromSocket(client: Socket): string {
 		for (let [intraname, user] of this.members) {
 			if (user.getSocket() == client)
 				return intraname;
@@ -21,7 +22,7 @@ export class ChatService {
 		return undefined;
 	}
 
-	getChannelByChannelId(key: string): Channel {
+	public getChannelByChannelId(key: string): Channel {
 		for (let [room_id, channel] of this.channels) {
 			if (key == room_id)
 				return channel;
@@ -29,13 +30,53 @@ export class ChatService {
 		return undefined;
 	}
 
-	addChannel(channel_id: string, owner: User) {
+	public addChannel(channel_id: string, owner: User) {
 		this.channels.set(channel_id, new Channel(channel_id, owner));
 	}
 
-	addUser(intra: string, client: Socket) {
+	public addUser(intra: string, client: Socket) {
 		this.members.set(intra, new User(intra, this.users, client, this.getChannelByChannelId("global")));
+		//console.log(this.getChannelByChannelId("global").getChannelId());
 		client.join("global");
+	}
+
+	public resolvePrompt(client: Socket, prompt: string): [string, string] {
+		let command: string = this.parsePrompt(prompt);
+		let intra: string = this.getIntraFromSocket(client);
+		let user: User = this.members.get(intra);
+		let response: [string, string] = this.executeCommand(command, prompt, user);
+		return response;
+	}
+
+	private parsePrompt(prompt: string): string {
+		console.log("Prompt is:", prompt)
+		if (prompt.indexOf("/help") == 0) {
+			console.log("Command 'HELP' was identified");
+			return "HELP";
+		}
+		console.log("No command was found, treating as a normal message");
+		return "MESSAGE";
+	}
+
+	private executeCommand(command: string, prompt: string, user: User): [string, string] {
+		//console.log("User:", user.getIntraname());
+		//console.log("Channel_id:", user.getActiveChannel().getChannelId());
+		if (command == "MESSAGE") {
+			console.log("'MESSAGE' gets executed");
+			return [user.getActiveChannel().getChannelId(), prompt];
+		}
+		else if (command == "HELP") {
+			console.log("'HELP' gets executed");
+			return this.help(user);
+		}
+	}
+
+	private help(user: User): [string, string] {
+		let response = "/help\n";
+		response = response.concat("/lorem\n");
+		response = response.concat("/ipsum\n");
+		console.log(response);
+		return [user.getSocket().id, response];
 	}
 }
 
@@ -49,18 +90,18 @@ export class User {
 
 	private username:	string;
 
-	async updateUserData() {
+	private async updateUserData() {
 		this.username = await this.users.getUsernameByIntra(this.intraname);
 	}
 
-	getUsername(): string { if (this.username == undefined) this.updateUserData(); return this.username; }
+	public getUsername(): string { if (this.username == undefined) this.updateUserData(); return this.username; }
 
-	getIntraname(): string { return this.intraname; }
-	getSocket(): Socket { return this.socket; }
-	getActiveChannel(): Channel { return this.active_channel; }
+	public getIntraname(): string { return this.intraname; }
+	public getSocket(): Socket { return this.socket; }
+	public getActiveChannel(): Channel { return this.active_channel; }
 
-	setSocket(socket: Socket) { this.socket = socket; }
-	setActiveChannel(channel: Channel) { this.active_channel = channel; }
+	public setSocket(socket: Socket) { this.socket = socket; }
+	public setActiveChannel(channel: Channel) { this.active_channel = channel; }
 }
 
 /**
@@ -77,37 +118,39 @@ export class Channel {
 	private chat_history:	[user: User, message: string][];
 	private password:		string;
 
-	initChannel() {
+	private initChannel() {
 		this.admins.push(this.owner);
 	}
 
-	isOwner(user: User): boolean {
+	public getChannelId() { return this.channel_id; }
+
+	public isOwner(user: User): boolean {
 		if (user == this.owner)
 			return (true);
 		return (false);
 	}
 
-	isAdmin(user: User): boolean {
+	public isAdmin(user: User): boolean {
 		for (let admin of this.admins)
 			if (user == admin) return (true);
 		return (false);
 	}
 
-	isMember(user: User): boolean {
+	public isMember(user: User): boolean {
 		for (let member of this.members)
 			if (user == member) return (true);
 		return (false);
 	}
 
-	checkPassword(input: string): boolean {
+	public checkPassword(input: string): boolean {
 		if (input == this.password)
 			return (true);
 		return (false);
 	}
 
-	getChatHistory(): [User, string][] { return (this.chat_history); }
+	public getChatHistory(): [User, string][] { return (this.chat_history); }
 
-	addMessage(user: User, message: string) {
+	public addMessage(user: User, message: string) {
 		if (this.chat_history.length > 42)
 			this.chat_history.shift();
 		this.chat_history.push([user, message]);

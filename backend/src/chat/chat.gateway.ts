@@ -39,8 +39,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	@SubscribeMessage("messageToServer")
 	handleMessageToServer(client: Socket, ...args: any[]) {
-		let intra = this.chatService.getIntraFromSocket(client);
 		console.log("message args inside 'messageToServer' listener:", args[0]);
-		this.server.to("global").emit("messageToClient", intra, args[0]);
+		let intra = this.chatService.getIntraFromSocket(client);
+		let response = this.chatService.resolvePrompt(client, args[0]);
+		this.server.to(response[0]).emit("messageToClient", intra, response[1]);
 	}
 }
