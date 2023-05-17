@@ -6,6 +6,37 @@ import { SubscribeMessage } from '@nestjs/websockets';
 @Injectable()
 export class ChatService {
 	constructor( readonly users: Users ) {}
+
+	//		key: channel_id
+	private channels: Map<string, Channel> = new Map<string, Channel>;
+
+	//		key: intraname
+	private members: Map<string, User> = new Map<string, User>;
+
+	getIntraFromSocket(client: Socket): string {
+		for (let [intraname, user] of this.members) {
+			if (user.getSocket() == client)
+				return intraname;
+		}
+		return undefined;
+	}
+
+	getChannelByChannelId(key: string): Channel {
+		for (let [room_id, channel] of this.channels) {
+			if (key == room_id)
+				return channel;
+		}
+		return undefined;
+	}
+
+	addChannel(channel_id: string, owner: User) {
+		this.channels.set(channel_id, new Channel(channel_id, owner));
+	}
+
+	addUser(intra: string, client: Socket) {
+		this.members.set(intra, new User(intra, this.users, client, this.getChannelByChannelId("global")));
+		client.join("global");
+	}
 }
 
 export class User {
@@ -14,7 +45,7 @@ export class User {
 		private readonly users: Users,
 		private          socket: Socket,
 		private          active_channel: Channel,
-	){}// TODO active_channel is global channel
+	){}
 
 	private username:	string;
 

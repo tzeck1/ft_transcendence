@@ -20,17 +20,10 @@ import { Users } from '../user/user.service';
 export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
 	constructor(private readonly chatService: ChatService, private readonly users: Users) {}
 
-	//		key: channel_id
-	private channels: Map<string, Channel> = new Map<string, Channel>;
-
-	//		key: intraname
-	private members: Map<string, User> = new Map<string, User>;
-	private global_channel: Channel = new Channel("global", null);
-
 	@WebSocketServer() server: Server;
 
 	afterInit(server: Server) {
-		this.channels.set("global", this.global_channel);
+		this.chatService.addChannel("global", null);
 		console.log('Chat Initialized');
 	}
 
@@ -40,26 +33,14 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	handleConnection(client: Socket, ...args: any[]) {
 		let intra = client.handshake.query.intra as string;
-		let user = new User(intra, this.users, client, this.global_channel);
-
-		this.members.set(intra, user);
-
-		client.join("global");
+		this.chatService.addUser(intra, client);
 		console.log(`Chat Client Connected: ${client.id}`);
 	}
 
 	@SubscribeMessage("messageToServer")
 	handleMessageToServer(client: Socket, ...args: any[]) {
-		let intra: string;
-
-		for (let [intraname, user] of this.members) {
-			if (user.getSocket() == client) {
-				intra = intraname;
-				break;
-			}
-		}
-		console.log("message args inside subscribemessage:", args[0]);
+		let intra = this.chatService.getIntraFromSocket(client);
+		console.log("message args inside 'messageToServer' listener:", args[0]);
 		this.server.to("global").emit("messageToClient", intra, args[0]);
 	}
-
 }

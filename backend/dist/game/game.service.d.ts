@@ -43,7 +43,8 @@ export declare class Room {
     getRoomId(): string;
     getLeftPlayer(): Player;
     getRightPlayer(): Player;
-    movePlayer(player: Player, inputPayload: any): void;
+    moveBoth(player: Player, enemy: Player, inputPayload: any): void;
+    setNewBallData(x: number, y: number, velocity: any, speed: number): void;
     isRoomReady(): boolean;
     isScoreTrue(): boolean;
     validatePlayer(client: Socket): void;

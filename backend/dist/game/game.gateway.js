@@ -24,13 +24,13 @@ let GameGateway = class GameGateway {
         this.threshold = 20;
     }
     afterInit(server) {
-        console.log('Initialized');
+        console.log('Game Initialized');
     }
     handleDisconnect(client) {
-        console.log(`Client Disconnected: ${client.id}`);
+        console.log(`Game Client Disconnected: ${client.id}`);
     }
     handleConnection(client, ...args) {
-        console.log(`Client Connected: ${client.id}`);
+        console.log(`Game Client Connected: ${client.id}`);
     }
     async handleCreateOrJoin(client, intra) {
         if (intra == '')
@@ -78,20 +78,31 @@ let GameGateway = class GameGateway {
         else
             player = room.getRightPlayer();
         room.validateScore(client);
-        if (room.isScoreTrue() == true) {
+        if (client == room.getLeftPlayer().getSocket()) {
             console.log("inside if of isScoreTrue was called");
             room.playerScored(player);
             room.spawn_ball();
         }
     }
+    handleBallPosition(client, data) {
+        let room = this.rooms.get(data.room);
+        if (client == room.getLeftPlayer().getSocket()) {
+            room.setNewBallData(data.ball_x, data.ball_y, data.ball_velocity, data.ball_speed);
+        }
+    }
     handlePaddleMovement(client, data) {
         let room = this.rooms.get(data.room);
+        let enemy;
         let player;
-        if (room.getLeftPlayer().getSocket() == client)
-            player = room.getRightPlayer();
-        else
+        if (room.getLeftPlayer().getSocket() == client) {
+            enemy = room.getRightPlayer();
             player = room.getLeftPlayer();
-        room.movePlayer(player, data);
+        }
+        else {
+            enemy = room.getLeftPlayer();
+            player = room.getRightPlayer();
+        }
+        room.moveBoth(player, enemy, data);
     }
     handleIAmReady(client, room_id) {
         let room = this.rooms.get(room_id);
@@ -101,13 +112,6 @@ let GameGateway = class GameGateway {
             room.getRightPlayer().getSocket().emit("startTheGame");
             room.spawn_ball();
         }
-    }
-    handleCancelQueue(client, intra) {
-        console.log("calling handleCancel");
-        let player = this.lobby.get(intra);
-        client.leave("lobby");
-        this.lobby.delete(player.getIntraname());
-        client.disconnect(true);
     }
 };
 __decorate([
@@ -133,6 +137,12 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], GameGateway.prototype, "handleScoreRequest", null);
 __decorate([
+    (0, websockets_1.SubscribeMessage)("ballData"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
+    __metadata("design:returntype", void 0)
+], GameGateway.prototype, "handleBallPosition", null);
+__decorate([
     (0, websockets_1.SubscribeMessage)("paddleMovement"),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
@@ -146,6 +156,7 @@ __decorate([
 ], GameGateway.prototype, "handleIAmReady", null);
 GameGateway = __decorate([
     (0, websockets_1.WebSocketGateway)({
+        namespace: '/game_socket',
         cors: {
             origin: '*',
         },

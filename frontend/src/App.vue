@@ -72,7 +72,6 @@
 	watch( () => userStore.intra, (newVal, oldVal) => {
 		if (newVal != undefined) {
 			userStore.socket = io(`${location.hostname}:3000/chat_socket`, {query: {intra: userStore.intra}});
-			//listener here
 			userStore.socket.on("messageToClient", (sender: string, message: string) => {
 				console.log("args in messsageToClient listener:", message, "from:", sender);
 				lastMessages.value.unshift([sender, message]);
@@ -103,7 +102,6 @@
 
 	function sendMessage() {
 		console.log(message.value);
-		// lastMessages.value.unshift(message.value);
 		if (userStore.socket != undefined) {
 			userStore.socket.emit("messageToServer", message.value);
 		}
