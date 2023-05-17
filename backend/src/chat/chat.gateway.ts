@@ -23,7 +23,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	@WebSocketServer() server: Server;
 
 	afterInit(server: Server) {
-		this.chatService.addChannel("global", null);
+		this.chatService.addChannel("global", undefined, undefined);
 		console.log('Chat Initialized');
 	}
 
@@ -37,11 +37,14 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		console.log(`Chat Client Connected: ${client.id}`);
 	}
 
+	// TODO change most occurences from intra to username
 	@SubscribeMessage("messageToServer")
 	handleMessageToServer(client: Socket, ...args: any[]) {
 		console.log("message args inside 'messageToServer' listener:", args[0]);
-		let intra = this.chatService.getIntraFromSocket(client);
+		let intra = this.chatService.getIntraFromSocket(client) + ": ";
 		let response = this.chatService.resolvePrompt(client, args[0]);
+		if (client.id == response[0])
+			intra = "";
 		this.server.to(response[0]).emit("messageToClient", intra, response[1]);
 	}
 }

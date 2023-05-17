@@ -36,11 +36,11 @@
 			<router-link to="/"></router-link>
 			<router-view/>
 		</main>
-		<div class="chat-box" v-if="!isIntro">
+		<div class="chat-box" v-if="!isIntro" :class="{'blur': inputFocus === true}">
 			<div class="chat-input-container">
 				<div class="chat-history" v-show="inputFocus">
 					<div class="flex-grow"></div>
-					<p v-for="(tuple, index) in [...lastMessages].reverse()" :key="index">{{ tuple[0] + ': ' + tuple[1] }}</p>
+					<p v-for="(tuple, index) in [...lastMessages].reverse()" :key="index">{{ tuple[0] + tuple[1] }}</p>
 				</div>
 				<div class="chat-input-button-container">
 					<input type="text" v-model="message" class="chat-input" @focus="inputFocus=true" @blur="inputFocus=false" @keyup.enter="sendMessage()" placeholder="Type your message...">
@@ -217,9 +217,10 @@
 	}
 
 	.chat-history {
-		@apply overflow-auto break-words h-60 flex flex-col bg-transparent bg-opacity-10 rounded p-2 mb-2;
+		@apply overflow-auto break-words h-60 flex flex-col bg-transparent bg-opacity-10 rounded-2xl p-2 mb-2;
 		scrollbar-width: thin;
 		scrollbar-color: transparent transparent;
+		white-space: pre-wrap;
 	}
 
 	.chat-history::-webkit-scrollbar { /* Chrome, Safari and Edge */
@@ -236,6 +237,9 @@
 
 	.flex-grow {
 		flex-grow: 1;
+	}
+	.blur {
+		backdrop-filter: blur(5px);
 	}
 
 </style>
