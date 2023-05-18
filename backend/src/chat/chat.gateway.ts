@@ -30,6 +30,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	handleConnection(client: Socket, ...args: any[]) {
 		let intra = client.handshake.query.intra as string;
 		// FIXME this is for disallowing a conection in second tab
+		// I am using getIntraFromSocket but should be using getSocketFromIntra
 		if (this.chatService.getIntraFromSocket(client) != intra) {
 			this.chatService.addUser(intra, client);
 			console.log(`Chat Client Connected: ${client.id}`);

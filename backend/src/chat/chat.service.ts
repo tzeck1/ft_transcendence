@@ -16,7 +16,6 @@ export class ChatService {
 	public addChannel(channel_id: string, client: Socket, open: boolean, password: string) {
 		let user = this.getUserFromSocket(client);
 		let channel = new Channel(channel_id, user, open, password);
-		channel.initChannel();
 		this.channels.set(channel_id, channel);
 	}
 
@@ -24,6 +23,8 @@ export class ChatService {
 		let user = new User(intra, this.users, client, "global");
 		await user.updateUserData();
 		this.members.set(intra, user);
+		let global_channel = this.channels.get("global");
+		global_channel.addMember(user);
 		client.join("global");
 		client.emit("changeInputPlaceholder", "[ Channel: global ]");
 		let username = user.getUsername();
@@ -76,6 +77,7 @@ export class ChatService {
 			if (channel.isGhostChannel() == true && channel_id != "global") {
 				this.channels.delete(channel_id);
 				console.log("ROOM", channel_id, "GOT REAPED");
+				this.reapeEmptyChannels();
 			}
 		})
 	}
@@ -197,6 +199,7 @@ export class User {
 	public getSocket(): Socket { return this.socket; }
 	public getActiveChannelId(): string { return this.active_channel; }
 	public getUsername(): string { return this.username; }
+	public getIntra(): string { return this.intraname; }
 
 	public setActiveChannel(channel: string) { this.active_channel = channel; }
 }
@@ -212,13 +215,12 @@ export class Channel {
 		private password: string
 	) {}
 
-	private members: Array<User> = new Array<User>;
-	private admins:	Array<User> = new Array<User>;
+	private members: Array<User> = new Array<User>(this.owner);
+	private admins:	Array<User> = new Array<User>(this.owner);
 	private chat_history:[user: User, message: string][];
 
-	public initChannel() { this.members.push(this.owner); this.admins.push(this.owner); }
-
-	public isGhostChannel(): boolean { if (this.members.length == 0) return true; else return false; }
+	// TODO empty channels do not get deleted because of this function. The array this.members is longer than it should be for some reason
+	public isGhostChannel(): boolean { console.log("isGhostChannel::Len:", this.members.length); if (this.members.length == 0) return true; else return false; }
 
 	public isPrivate(): boolean { if (this.open == true) return false; else return true; }
 
@@ -232,8 +234,10 @@ export class Channel {
 
 	public removeMember(user: User) {
 		let index = this.members.indexOf(user);
-		if (index == -1)
+		if (index == -1) {
 			console.error("internal error in removeMember::Channel");
+			console.error("Was trying to remove member", user.getIntra(), "from channel", this.channel_id);
+		}
 		this.members.splice(index, 1);
 	}
 }
