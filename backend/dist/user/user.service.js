@@ -72,6 +72,28 @@ let Users = class Users {
         const statsEntry = await prisma_1.default.stats.findUnique({ where: { id: id } });
         return statsEntry.score;
     }
+    async getPaddleStats(intra) {
+        const user = await prisma_1.default.users.findUnique({
+            where: {
+                intra_name: intra,
+            },
+        });
+        const userStats = await prisma_1.default.games.aggregate({
+            where: {
+                intra: user.intra_name,
+            },
+            _sum: {
+                paddle_hits_m: true,
+                paddle_hits_e: true,
+                enemy_score: true,
+            },
+        });
+        return {
+            paddle_hits_m: userStats._sum.paddle_hits_m,
+            paddle_hits_e: userStats._sum.paddle_hits_e,
+            paddle_miss: userStats._sum.enemy_score,
+        };
+    }
     async setUsername(intra, new_username) {
         if (new_username.length < 2)
             return ("1");

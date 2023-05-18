@@ -78,10 +78,6 @@
 			...match,
 			result: computed(() => match.player_score > match.enemy_score ? 'Won' : 'Lost')
 		}));
-		// if (player_score.value > enemy_score.value)
-		// 	result.value = "Winner!";
-		// else
-		// 	result.value = "Loser!";
 	});
 </script>
 

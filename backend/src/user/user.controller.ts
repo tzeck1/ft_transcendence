@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { Users } from './user.service';
 import { PrismaClient } from '@prisma/client';
 
@@ -12,9 +12,19 @@ export class UserController {
 		return this.users.getUsername(id);
 	}
 
+	@Get('getUser')
+	async getUser(@Query('intra') intra: string) {
+		return this.users.getUser(intra);
+	}
+
 	@Get('getUsers')
 	async getUsers() {
 		return this.users.getUsers();
+	}
+
+	@Get('getPaddleStats')
+	async getPaddleStats(@Query('intra') intra: string) {
+		return this.users.getPaddleStats(intra);
 	}
 
 	@Post('setAvatar')

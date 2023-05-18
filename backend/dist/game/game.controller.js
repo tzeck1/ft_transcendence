@@ -19,9 +19,9 @@ let GameController = class GameController {
     constructor(games) {
         this.games = games;
     }
-    async setGameData(intra, player, enemy, player_score, enemy_score, ranked) {
+    async setGameData(intra, player, enemy, player_score, enemy_score, ranked, paddle_hits_e, paddle_hits_m) {
         console.log("went into setGameData");
-        return this.games.setGameData(intra, player, enemy, player_score, enemy_score, ranked);
+        return this.games.setGameData(intra, player, enemy, player_score, enemy_score, ranked, paddle_hits_e, paddle_hits_m);
     }
     async getLastGame(intra) {
         return this.games.getLastGame(intra);
@@ -38,8 +38,10 @@ __decorate([
     __param(3, (0, common_1.Body)('player_score')),
     __param(4, (0, common_1.Body)('enemy_score')),
     __param(5, (0, common_1.Body)('ranked')),
+    __param(6, (0, common_1.Body)('paddle_hits_e')),
+    __param(7, (0, common_1.Body)('paddle_hits_m')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, String, Number, Number, Boolean]),
+    __metadata("design:paramtypes", [String, String, String, Number, Number, Boolean, Number, Number]),
     __metadata("design:returntype", Promise)
 ], GameController.prototype, "setGameData", null);
 __decorate([

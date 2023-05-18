@@ -10,6 +10,11 @@ export declare class Users {
     get2FASecret(intra: string): Promise<string>;
     getTFA(intra_name: string): Promise<boolean>;
     getScore(intra_name: string): Promise<number>;
+    getPaddleStats(intra: string): Promise<{
+        paddle_hits_m: number;
+        paddle_hits_e: number;
+        paddle_miss: number;
+    }>;
     setUsername(intra: string, new_username: string): Promise<string>;
     setAvatar(intra: string, picture: string): Promise<void>;
     set2FASecret(intra: string, secret: string): Promise<import(".prisma/client").users>;

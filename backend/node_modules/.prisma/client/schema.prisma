@@ -22,6 +22,8 @@ model users {
 	games			games[]
 	rank			Int		@default(0)
 	games_played	Int		@default(0)
+	games_won		Int		@default(0)
+	games_lost		Int		@default(0)
 }
 
 model games {
@@ -34,6 +36,8 @@ model games {
 	enemy_score		Int
 	ranked			Boolean
 	date			DateTime
+	paddle_hits_e	Int			@default(0)
+	paddle_hits_m	Int			@default(0)
 	user			users @relation(fields: [intra], references: [intra_name])
 }
 

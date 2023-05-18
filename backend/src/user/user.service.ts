@@ -84,6 +84,31 @@ export class Users {
 		return statsEntry.score;
 	}
 
+	async getPaddleStats(intra: string) {
+		const user = await prisma.users.findUnique({
+			where: {
+				intra_name: intra,
+			},
+		});
+		
+		const userStats = await prisma.games.aggregate({
+		where: {
+			intra: user.intra_name,
+		},
+		_sum: {
+			paddle_hits_m: true,
+			paddle_hits_e: true,
+			enemy_score: true,
+		},
+		});
+	
+		return {
+			paddle_hits_m: userStats._sum.paddle_hits_m,
+			paddle_hits_e: userStats._sum.paddle_hits_e,
+			paddle_miss: userStats._sum.enemy_score,
+		};
+	}
+
 	/*	========== SETTER ==========	*/
 
 	async setUsername(intra: string, new_username: string) {

@@ -23,9 +23,9 @@
 			</div>
 			<div class="feature-grid">
 				<MatchHistory class="grid-item"></MatchHistory>
-				<div class="grid-item">Friends</div>
-				<div class="grid-item">Achievements</div>
-				<div class="grid-item">Statistics</div>
+				<Stats class="grid-item">Stats</Stats>
+				<div class="grid-item"></div>
+				<div class="grid-item"></div>
 			</div>
 		</div>
 		<div v-if="qrCodeVisible || showTFA" class="qr-code-overlay" @click="hideQRCode">
@@ -49,6 +49,7 @@
 <script setup lang="ts">
 	import { ref, onMounted, watch, nextTick, computed } from 'vue';
 	import MatchHistory from '@/components/Profile/MatchHistory.vue';
+	import Stats from '@/components/Profile/Stats.vue';
 	import axios from 'axios';
 	import { useUserStore } from '../stores/UserStore';
 	import QrcodeVue from 'qrcode.vue';

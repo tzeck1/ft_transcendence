@@ -30,6 +30,8 @@ export default class Pong extends Phaser.Scene {
 	height = 1080;
 	left_score = 0;
 	right_score = 0;
+	paddle_hits_m = 0;
+	paddle_hits_e = 0;
 	winning_score = 3;
 	next_ball_spawn_left = false;
 	next_ball_spawn_right = false;
@@ -156,7 +158,7 @@ export default class Pong extends Phaser.Scene {
 			this.right_score_txt.text = String(this.right_score);
 			if (this.left_score == this.winning_score || this.right_score == this.winning_score) {
 				// save score in db
-				axios.post(`http://${location.hostname}:3000/game/setGameData`, { intra: this.gameStore.intra, player: this.userStore.username, enemy: this.gameStore.enemy_name, player_score: this.left_score, enemy_score: this.right_score, ranked: true });
+				axios.post(`http://${location.hostname}:3000/game/setGameData`, { intra: this.gameStore.intra, player: this.userStore.username, enemy: this.gameStore.enemy_name, player_score: this.left_score, enemy_score: this.right_score, ranked: true, paddle_hits_e: this.paddle_hits_e, paddle_hits_m: this.paddle_hits_m });
 				this.game.destroy(true); //don't know if destroy is the correct way to end instance of pong
 				// TODO end game here
 			}
@@ -223,6 +225,14 @@ export default class Pong extends Phaser.Scene {
 			angle = 30;
 		else if (distance > 32)
 			angle = 15;
+		if (angle === 0) {
+			if (player === this.left_player)
+				this.paddle_hits_m++;
+		}
+		else {
+			if (player === this.left_player)
+				this.paddle_hits_e++;
+		}
 		if ((player.y > this.ball.y && this.ball.x < this.width / 2) || player.y < this.ball.y && this.ball.x > this.width / 2)
 			angle *= -1;
 		if (this.ball.x > this.width / 2)

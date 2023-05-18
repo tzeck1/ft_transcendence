@@ -148,7 +148,7 @@ class Room {
 }
 exports.Room = Room;
 let Game = class Game {
-    async setGameData(intra, player, enemy, player_score, enemy_score, ranked) {
+    async setGameData(intra, player, enemy, player_score, enemy_score, ranked, paddle_hits_e, paddle_hits_m) {
         const newUsersEntry = await prisma_1.default.games.create({
             data: {
                 intra: intra,
@@ -158,6 +158,8 @@ let Game = class Game {
                 enemy_score: enemy_score,
                 ranked: ranked,
                 date: new Date(),
+                paddle_hits_e: paddle_hits_e,
+                paddle_hits_m: paddle_hits_m,
             },
         });
         if (player_score > enemy_score) {
@@ -166,7 +168,8 @@ let Game = class Game {
                     intra_name: intra,
                 },
                 data: {
-                    rank: { increment: 1 }
+                    rank: { increment: 1 },
+                    games_won: { increment: 1 }
                 }
             });
         }
@@ -182,7 +185,8 @@ let Game = class Game {
                         intra_name: intra,
                     },
                     data: {
-                        rank: { decrement: 1 }
+                        rank: { decrement: 1 },
+                        games_lost: { increment: 1 }
                     }
                 });
             }
