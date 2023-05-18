@@ -30,19 +30,35 @@ export class ChatService {
 		return undefined;
 	}
 
+	public getUser(client: Socket): User {
+		let intra = this.getIntraFromSocket(client);
+		let user = this.members.get(intra);
+		return user;
+	}
+
+	public getUsername(client: Socket): string {
+		for (let [key, user] of this.members) {
+			if (user.getSocket() == client)
+				return user.getUsername();
+		}
+		return undefined;
+	}
+
 	public addChannel(channel_id: string, owner: User, password: string) {
 		this.channels.set(channel_id, new Channel(channel_id, owner, password));
 	}
 
-	public addUser(intra: string, client: Socket) {
-		this.members.set(intra, new User(intra, this.users, client, "global"));
+	public async addUser(intra: string, client: Socket) {
+		let user = new User(intra, this.users, client, "global");
+		await user.updateUserData();
+		this.members.set(intra, user);
 		client.join("global");
 	}
 
-	public resolvePrompt(client: Socket, prompt: string): [string, string] {
+	public resolvePrompt(client: Socket, prompt: string): [string, string, string] {
 		let intra: string = this.getIntraFromSocket(client);
 		let user: User = this.members.get(intra);
-		let response: [string, string] = this.parsePrompt(prompt, user);
+		let response: [string, string, string] = this.parsePrompt(prompt, user);
 		return response;
 	}
 
@@ -54,7 +70,7 @@ export class ChatService {
 		return false;
 	}
 
-	private parsePrompt(prompt: string, user: User): [string, string] {
+	private parsePrompt(prompt: string, user: User): [string, string, string] {
 		let tokens: string[] = prompt.split(' ', 3);
 		if (tokens[0] == "/help" && tokens.length == 1) {
 			console.log("Command 'HELP' was identified");
@@ -63,28 +79,28 @@ export class ChatService {
 		else if (tokens[0] == "/join") {
 			console.log("Command 'JOIN' was identified");
 			if (tokens[1] == undefined)
-				return [user.getSocket().id, prompt + "\n" + "Error: no channel specified"]
+				return [user.getSocket().id, prompt + "\n", "Error: no channel specified"]
 			return this.join(prompt, user, tokens[1], tokens[2]);
 		}
 		else if (tokens[0][0] == "/")
-			return [user.getSocket().id, prompt + "\n" + "Error: Unknown command"];
+			return [user.getSocket().id, prompt + "\n", "Error: Unknown command"];
 		else {
 			console.log("No command identified");
-			return [user.getActiveChannel(), prompt];
+			return [user.getActiveChannel(), "" , prompt];
 		}
 	}
 
-	private help(prompt: string, user: User): [string, string] {
+	private help(prompt: string, user: User): [string, string, string] {
 		console.log("'HELP' gets executed");
-		let response = "/join channel password\n";
+		let response = "/join [channel] (password)\n";
 		response = response.concat("/lorem opt1\n");
 		response = response.concat("/ipsuim opt1 opt2 opt3\n");
-		return [user.getSocket().id, prompt + "\n" + response];
+		return [user.getSocket().id, prompt + "\n", response];
 	}
 
 	// TODO working currently on join command. Here exist serveral issues that need to be debugged.
 	// ISSUE feels like the client gets stuck in infinite loop after joining a room a second time (or generally joining a created room)
-	private join(prompt: string, user: User, channel_id: string, channel_password: string): [string, string] {
+	private join(prompt: string, user: User, channel_id: string, channel_password: string): [string, string, string] {
 		console.log("'JOIN' gets executed");
 
 		let channel: Channel;
@@ -94,20 +110,23 @@ export class ChatService {
 			channel = this.getChannelByChannelId(channel_id);
 			if (channel.isPrivate() == true) {
 				if (channel.checkPassword(channel_password) == false)
-					return [user.getSocket().id, prompt + "\n" + "Error: Wrong password"]; // if channels exists and is password protected but user inputs no or wrong password
+					return [user.getSocket().id, prompt + "\n", "Error: Wrong password"]; // if channels exists and is password protected but user inputs no or wrong password
 			}
 			if (channel.isMember(user) == false)
 				channel.addMember(user);
 			user.setActiveChannel(channel_id); // TODO somehow fetch and show the channel history (if not global) to the chat box in fronted
-			return [channel_id, user.getUsername() + "entered the channel"]; // if channel exists and password check did not fail
+			return [channel_id, user.getUsername(), "entered the channel"]; // if channel exists and password check did not fail
 		}
 
 		// CREATE CHANNEL
 		this.addChannel(channel_id, user, channel_password);
+		let password_response = " as a private channel with password protection."
+		if (channel_password == undefined)
+			password_response = "";
 		channel = this.getChannelByChannelId(channel_id);
 		channel.addMember(user);
 		user.setActiveChannel(channel_id);
-		return [user.getSocket().id, "you created the channel " + channel_id]; // if channel did not exist prior and was created now, setting the user as owner
+		return [user.getSocket().id, "You created the channel " + channel_id, password_response]; // if channel did not exist prior and was created now, setting the user as owner
 	}
 }
 
@@ -121,7 +140,7 @@ export class User {
 
 	private username:	string;
 
-	private async updateUserData() {
+	public async updateUserData() {
 		this.username = await this.users.getUsernameByIntra(this.intraname);
 	}
 
@@ -132,7 +151,13 @@ export class User {
 	public getActiveChannel(): string { return this.active_channel; }
 
 	public setSocket(socket: Socket) { this.socket = socket; }
-	public setActiveChannel(channel: string) { this.active_channel = channel; }
+	public setActiveChannel(channel: string) {
+		if (this.active_channel == "global" && channel != "global")
+			this.socket.leave("global");
+		else if (channel == "global" && this.active_channel != "global")
+			this.socket.join("global");
+		this.active_channel = channel;
+	}
 }
 
 /**

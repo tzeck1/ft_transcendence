@@ -76,7 +76,6 @@
 				console.log("args in messsageToClient listener:", message, "from:", sender);
 				lastMessages.value.unshift([sender, message]);
 			})
-
 		}
 	})
 

@@ -33,18 +33,29 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	handleConnection(client: Socket, ...args: any[]) {
 		let intra = client.handshake.query.intra as string;
-		this.chatService.addUser(intra, client);
-		console.log(`Chat Client Connected: ${client.id}`);
+		if (this.chatService.getIntraFromSocket(client) != intra) {
+			this.chatService.addUser(intra, client);
+			console.log(`Chat Client Connected: ${client.id}`);
+		}
+		else
+			client.disconnect();
 	}
 
-	// TODO change most occurences from intra to username
+	/**
+	 * 	@response [0]: socket room to emit to
+	 * 	@response [1]: if command, usually the same prompt the user has entered with trailing newline. Otherwise empty.
+	 * 	@response [2]: response in form of message/command response/error message
+	 */
 	@SubscribeMessage("messageToServer")
 	handleMessageToServer(client: Socket, ...args: any[]) {
 		console.log("message args inside 'messageToServer' listener:", args[0]);
-		let intra = this.chatService.getIntraFromSocket(client) + ": ";
+		let user = this.chatService.getUser(client);
+		console.log("user:", user.getIntraname());
+		let username = user.getUsername() + ": ";
+		console.log("username:", user.getUsername());
 		let response = this.chatService.resolvePrompt(client, args[0]);
 		if (client.id == response[0])
-			intra = "";
-		this.server.to(response[0]).emit("messageToClient", intra, response[1]);
+			username = "";
+		this.server.to(response[0]).emit("messageToClient", username, response[1] + response[2]);
 	}
 }
