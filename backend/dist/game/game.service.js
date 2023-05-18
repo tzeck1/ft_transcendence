@@ -148,11 +148,11 @@ class Room {
 }
 exports.Room = Room;
 let Game = class Game {
-    async setGameData(intra, enemy, player_score, enemy_score, ranked) {
-        console.log("went into newUserEntry");
+    async setGameData(intra, player, enemy, player_score, enemy_score, ranked) {
         const newUsersEntry = await prisma_1.default.games.create({
             data: {
-                player: intra,
+                intra: intra,
+                player: player,
                 enemy: enemy,
                 player_score: player_score,
                 enemy_score: enemy_score,
@@ -161,7 +161,6 @@ let Game = class Game {
             },
         });
         if (player_score > enemy_score) {
-            console.log("increase ", intra, "s rank!");
             await prisma_1.default.users.update({
                 where: {
                     intra_name: intra,
@@ -172,15 +171,21 @@ let Game = class Game {
             });
         }
         else {
-            console.log("decrease ", intra, "s rank!");
-            await prisma_1.default.users.update({
+            const user = await prisma_1.default.users.findUnique({
                 where: {
                     intra_name: intra,
                 },
-                data: {
-                    rank: { decrement: 1 }
-                }
             });
+            if (user && user.rank > 0) {
+                await prisma_1.default.users.update({
+                    where: {
+                        intra_name: intra,
+                    },
+                    data: {
+                        rank: { decrement: 1 }
+                    }
+                });
+            }
         }
         await prisma_1.default.users.update({
             where: {
@@ -194,7 +199,7 @@ let Game = class Game {
     async getLastGame(intra) {
         const latestGame = await prisma_1.default.games.findFirst({
             where: {
-                player: intra,
+                intra: intra,
             },
             orderBy: {
                 date: 'desc',
@@ -205,7 +210,7 @@ let Game = class Game {
     async getUserGames(intra) {
         const userGames = await prisma_1.default.games.findMany({
             where: {
-                player: intra,
+                intra: intra,
             },
             orderBy: {
                 date: 'desc',

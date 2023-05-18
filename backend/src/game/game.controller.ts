@@ -8,9 +8,9 @@ export class GameController {
 	constructor(private readonly games: Game) {}
 
 	@Post('setGameData')
-	async setGameData(@Body('intra') intra: string, @Body('enemy') enemy: string, @Body('player_score') player_score: number, @Body('enemy_score') enemy_score: number, @Body('ranked') ranked: boolean) {
+	async setGameData(@Body('intra') intra: string, @Body('player') player: string, @Body('enemy') enemy: string, @Body('player_score') player_score: number, @Body('enemy_score') enemy_score: number, @Body('ranked') ranked: boolean) {
 		console.log("went into setGameData");
-		return this.games.setGameData(intra, enemy, player_score, enemy_score, ranked);
+		return this.games.setGameData(intra, player, enemy, player_score, enemy_score, ranked);
 	}
 
 	@Get('getLastGame')

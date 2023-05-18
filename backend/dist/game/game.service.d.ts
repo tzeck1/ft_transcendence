@@ -53,7 +53,7 @@ export declare class Room {
     playerScored(player: Player): void;
 }
 export declare class Game {
-    setGameData(intra: string, enemy: string, player_score: number, enemy_score: number, ranked: boolean): Promise<void>;
+    setGameData(intra: string, player: string, enemy: string, player_score: number, enemy_score: number, ranked: boolean): Promise<void>;
     getLastGame(intra: string): Promise<import(".prisma/client").games>;
     getUserGames(intra: string): Promise<import(".prisma/client").games[]>;
 }

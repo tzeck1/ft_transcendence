@@ -27,13 +27,14 @@ model users {
 model games {
 
 	id				Int			@id @default(autoincrement())
+	intra			String
 	player			String
 	enemy			String
 	player_score	Int
 	enemy_score		Int
 	ranked			Boolean
 	date			DateTime
-	user			users @relation(fields: [player], references: [intra_name])
+	user			users @relation(fields: [intra], references: [intra_name])
 }
 
 model stats {

@@ -1,10 +1,10 @@
 <template>
 	<div class="match-history-container">
 		<h2 class="title">Match History</h2>
-		<div v-for="match in matches" :key="match.id" class="match-item">
+		<div v-for="(match, index) in matches" :key="match.id" :class="{'highlight': index % 2 === 0}" class="match-item">
 			<div class="match-details">
 				<div class="player-details">
-					<p class="names">{{ username }}</p>
+					<p class="names">{{ match.player }}</p>
 					<p>{{ match.player_score }}</p>
 				</div>
 				<div class="match-result">
@@ -26,9 +26,12 @@
 	import axios from 'axios';
 	import { useUserStore } from '@/stores/UserStore';
 	import { storeToRefs } from 'pinia';
+	import { useRoute } from 'vue-router';
+	import router from '@/router';
 
 	interface Match {
 		id: number;
+		player: string;
 		enemy: string;
 		player_score: number;
 		enemy_score: number;
@@ -39,10 +42,37 @@
 	const userStore = useUserStore();
 	const matches = ref<Match[]>([]);
 	const { username } = storeToRefs(userStore);
+	const route = useRoute();
 	// const result = ref('Win');
 
+	const getUsernameFromCookie = () => {
+		const cookie = document.cookie.split(';').find(cookie => cookie.trim().startsWith('username='));
+		if (cookie) {
+			const usernameJson = cookie.split('=')[1];
+			const user_name = JSON.parse(decodeURIComponent(usernameJson));
+			return user_name;
+		}
+		return null;
+	};
+
 	onMounted(async () => {
-		const gameData = await axios.get(`http://${location.hostname}:3000/game/getUserGames?intra=${userStore.intra}`);
+		const cookie_username = getUsernameFromCookie();
+		if (!cookie_username)
+		{
+			router.push('/'); //do we need to return after that?
+			return ;
+		}
+		if (!userStore.intra)
+			userStore.setIntra(cookie_username);
+		let intra = '';
+		if (!route.params.username) {
+			intra = userStore.intra;
+		}
+		else {
+			intra = route.params.username.toString();
+		}
+		console.log("matchhistory for: ", intra);
+		const gameData = await axios.get(`http://${location.hostname}:3000/game/getUserGames?intra=${intra}`);
 		matches.value = gameData.data;
 		matches.value = gameData.data.map(match => ({
 			...match,
@@ -66,8 +96,8 @@
 	}
 
 	.match-item {
-		@apply my-6;
-		border-bottom: 2px dotted;
+		@apply py-2;
+		/* border-bottom: 2px dotted; */
 	}
 
 	.match-details {
@@ -90,5 +120,8 @@
 		@apply text-xl;
 	}
 
+	.highlight {
+		@apply bg-white bg-opacity-10;
+	}
 
 </style>

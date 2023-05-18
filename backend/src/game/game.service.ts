@@ -154,11 +154,11 @@ export class Room {
 export class Game {
 
 	/*	========== SETTER ==========	*/
-	async setGameData(intra: string, enemy: string, player_score: number, enemy_score: number, ranked: boolean) {
-		console.log("went into newUserEntry");
+	async setGameData(intra: string, player: string, enemy: string, player_score: number, enemy_score: number, ranked: boolean) {
 		const newUsersEntry = await prisma.games.create( {
 			data: {
-				player:				intra,
+				intra:				intra,
+				player:				player,
 				enemy:				enemy,
 				player_score:		player_score,
 				enemy_score:		enemy_score,
@@ -167,7 +167,6 @@ export class Game {
 			},
 		});
 		if (player_score > enemy_score) {
-			console.log("increase ", intra, "s rank!");
 			await prisma.users.update({
 				where: {
 					intra_name: intra,
@@ -178,15 +177,21 @@ export class Game {
 			})
 		}
 		else {
-			console.log("decrease ", intra, "s rank!");
-			await prisma.users.update({
+			const user = await prisma.users.findUnique({
 				where: {
-					intra_name: intra,
+				  intra_name: intra,
 				},
-				data: {
-					rank: { decrement: 1}
-				}
-			})
+			});
+			if (user && user.rank > 0) {
+				await prisma.users.update({
+					where: {
+						intra_name: intra,
+					},
+					data: {
+						rank: { decrement: 1}
+					}
+				})
+			}
 		}
 		await prisma.users.update({
 			where: {
@@ -202,7 +207,7 @@ export class Game {
 	async getLastGame(intra: string) {
 		const latestGame = await prisma.games.findFirst({
 			where: {
-				player: intra,
+				intra: intra,
 			},
 			orderBy: {
 				date: 'desc',
@@ -214,7 +219,7 @@ export class Game {
 	async getUserGames(intra: string) {
 		const userGames = await prisma.games.findMany({
 			where: {
-				player: intra,
+				intra: intra,
 			},
 			orderBy: {
 				date: 'desc',

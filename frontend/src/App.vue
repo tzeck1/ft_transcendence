@@ -40,7 +40,7 @@
 			<router-link to="/"></router-link>
 			<router-view/>
 		</main>
-		<div class="chat-box" v-if="!isIntro">
+		<div class="chat-box" v-if="!isIntro"  :class="{'blur': inputFocus === true}">
 			<div class="chat-input-container">
 				<div class="chat-history" v-show="inputFocus">
 					<div class="flex-grow"></div>
@@ -199,12 +199,16 @@
 		@apply outline-none;
 	}
 
+	.blur {
+		backdrop-filter: blur(5px);
+	}
+
 	.chat-send {
 		@apply p-2 rounded cursor-pointer;
 	}
 
 	.chat-history {
-		@apply overflow-auto break-words h-60 flex flex-col bg-transparent bg-opacity-10 rounded p-2 mb-2;
+		@apply overflow-auto break-words h-60 flex flex-col bg-transparent bg-opacity-10 rounded-2xl p-2 mb-2;
 		scrollbar-width: thin;
 		scrollbar-color: transparent transparent;
 	}
