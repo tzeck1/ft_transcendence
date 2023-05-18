@@ -43,7 +43,7 @@
 					<p v-for="(tuple, index) in [...lastMessages].reverse()" :key="index">{{ tuple[0] + tuple[1] }}</p>
 				</div>
 				<div class="chat-input-button-container">
-					<input type="text" v-model="message" class="chat-input" @focus="inputFocus=true" @blur="inputFocus=false" @keyup.enter="sendMessage()" placeholder="Type your message...">
+					<input type="text" v-model="message" class="chat-input" @focus="inputFocus=true" @blur="inputFocus=false" @keyup.enter="sendMessage()" :placeholder="active_channel">
 					<button class="chat-send" @click="sendMessage()">Send</button>
 				</div>
 			</div>
@@ -52,29 +52,31 @@
 </template>
  
 <script setup lang="ts">
-	import { ref, computed, watch, nextTick, onMounted } from 'vue';
+	import { ref, computed, watch } from 'vue';
 	import { useRouter, useRoute } from 'vue-router';
 	import { useUserStore } from './stores/UserStore';
-	import type { Socket } from 'socket.io-client'
 	import { io } from 'socket.io-client';
-	import { stringify } from 'postcss';
 
 	const router = useRouter();
 	const route = useRoute();
 	const dropdownVisible = ref(false);
 	const userStore = useUserStore();
-	// const socket = userStore.socket;
 	const message = ref('');
+	const active_channel = ref('');
 	const lastMessages = ref<[string, string][]>([]);
 	const inputFocus = ref(false);
 	const isIntro = computed(() => route.path === '/');
 
+	// TODO max len for input field (250 chars)
 	watch( () => userStore.intra, (newVal, oldVal) => {
 		if (newVal != undefined) {
 			userStore.socket = io(`${location.hostname}:3000/chat_socket`, {query: {intra: userStore.intra}});
 			userStore.socket.on("messageToClient", (sender: string, message: string) => {
 				console.log("args in messsageToClient listener:", message, "from:", sender);
 				lastMessages.value.unshift([sender, message]);
+			})
+			userStore.socket.on("changeInputPlaceholder", (new_channel: string) => {
+				active_channel.value = new_channel;
 			})
 		}
 	})
@@ -106,24 +108,6 @@
 		}
 		message.value = '';
 	}
-
-	// async function sendMessage() {
-	// 	if (message.value.trim() === '') {
-	// 		return;
-	// 	}
-	// 	const newMessage = message.value.trim();
-	// 	message.value = '';
-	// 	const messageChars = newMessage.split('');
-	// 	let index = 0;
-	// 	const typingInterval = setInterval(() => {
-	// 		if (index < messageChars.length) {
-	// 			lastMessages.value[0] += messageChars[index];
-	// 			index++;
-	// 		} else {
-	// 			clearInterval(typingInterval);
-	// 		}
-	// 	}, 50);
-	// }
 
 </script>
 

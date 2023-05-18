@@ -14,8 +14,9 @@ export class ChatService {
 	private members: Map<string, User> = new Map<string, User>;
 
 	public addChannel(channel_id: string, client: Socket, open: boolean, password: string) {
-		let intra = this.getIntraFromSocket(client);
-		let channel = new Channel(channel_id, intra, open, password);
+		let user = this.getUserFromSocket(client);
+		let channel = new Channel(channel_id, user, open, password);
+		channel.initChannel();
 		this.channels.set(channel_id, channel);
 	}
 
@@ -24,13 +25,24 @@ export class ChatService {
 		await user.updateUserData();
 		this.members.set(intra, user);
 		client.join("global");
+		client.emit("changeInputPlaceholder", "[ Channel: global ]");
+		let username = user.getUsername();
+		client.to("global").emit("messageToClient", username, " has joined the channel.");
 	}
 
 	public joinChannel(client: Socket, channel_id: string) {
 		let user = this.getUserFromSocket(client);
+		let new_channel = this.getChannelFromId(channel_id);
+		let old_channel = this.getChannelFromId(user.getActiveChannelId());
+		old_channel.removeMember(user);
 		client.leave(user.getActiveChannelId());
 		user.setActiveChannel(channel_id);
 		client.join(user.getActiveChannelId());
+		new_channel.addMember(user);
+		if (user.getActiveChannelId().length > 7)
+			client.emit("changeInputPlaceholder", "[ " + user.getActiveChannelId() + " ]");
+		else
+			client.emit("changeInputPlaceholder", "[ Channel: " + user.getActiveChannelId() + " ]");
 	}
 
 	public getUserFromSocket (client: Socket): User {
@@ -47,7 +59,6 @@ export class ChatService {
 			if (user.getSocket() == client)
 				return intra;
 		}
-		console.log("getIntraFromSocket returned undefined");
 		return undefined;
 	}
 
@@ -60,9 +71,19 @@ export class ChatService {
 		return undefined;
 	}
 
+	public reapeEmptyChannels() {
+		this.channels.forEach((channel, channel_id) => {
+			if (channel.isGhostChannel() == true && channel_id != "global") {
+				this.channels.delete(channel_id);
+				console.log("ROOM", channel_id, "GOT REAPED");
+			}
+		})
+	}
+
 
 	/************************************** COMMANDS ***************************************/
 
+	// TODO do not let the user emit an empty message_body or just spaces
 	message(client: Socket, message_body: string): [string, string, string] {
 		let user = this.getUserFromSocket(client);
 		let sender = user.getUsername() + ": ";
@@ -90,20 +111,67 @@ export class ChatService {
 		return [recipient, sender, message_body];
 	}
 
-	create(client: Socket, channel_id: string, passwd: string, prompt: string): [string, string, string] {
+	create(client: Socket, channel_id: string, passwd: string): [string, string, string] {
+		this.reapeEmptyChannels();
 		let user = this.getUserFromSocket(client);
 		let recipient = user.getSocket().id;
-		let message_body: string;
-		let sender: string;
+		let message_body: string, sender: string;
 		if (this.channels.get(channel_id) != undefined) {
 			sender = "Error: ";
 			message_body = "a channel with the name " + channel_id + " already exists.";
+			return [recipient, sender, message_body];
+		}
+		if (channel_id.length > 16) {
+			sender = "Error: ";
+			message_body = "channel name is too long.";
 			return [recipient, sender, message_body];
 		}
 		this.addChannel(channel_id, client, true, passwd);
 		this.joinChannel(client, channel_id);
 		sender = "Floppy: ";
 		message_body = "You created and joined channel " + channel_id + " as the owner!";
+		return [recipient, sender, message_body];
+	}
+
+	join(client: Socket, channel_id: string, passwd: string): [string, string, string] {
+		this.reapeEmptyChannels();
+		let user = this.getUserFromSocket(client);
+		let recipient: string, message_body: string, sender: string;
+		let channel = this.channels.get(channel_id);
+		if (channel == undefined) {
+			recipient = user.getSocket().id;
+			sender = "Error: ";
+			message_body = "no such channel exists.";
+			return [recipient, sender, message_body];
+		}
+		if (channel_id == user.getActiveChannelId()) {
+			recipient = user.getSocket().id;
+			sender = "";
+			message_body = "Waiting for something to happen?";
+			return [recipient, sender, message_body];
+		}
+		if (channel.isPrivate() == true) {
+			recipient = user.getSocket().id;
+			sender = "Error: ";
+			message_body = "this channel is private.";
+			return [recipient, sender, message_body];
+		}
+		if (channel.isProtected() == true && passwd == undefined) {
+			recipient = user.getSocket().id;
+			sender = "Error: ";
+			message_body = "this channel is password protected.";
+			return [recipient, sender, message_body];
+		}
+		if (channel.isProtected() == true && channel.rightPassword(passwd) == false) {
+			recipient = user.getSocket().id;
+			sender = "Error: ";
+			message_body = "wrong password.";
+			return [recipient, sender, message_body];
+		}
+		this.joinChannel(client, channel_id);
+		recipient = channel_id;
+		sender = "";
+		message_body = user.getUsername() + " has joined the channel.";
 		return [recipient, sender, message_body];
 	}
 }
@@ -120,6 +188,8 @@ export class User {
 
 	private username:	string;
 
+	// TODO if username is changed we do not change it in chat at the moment
+	// solution: add antoher watch function for userStore.username in App.vue and emit an event to the server when username changes
 	public async updateUserData() {
 		this.username = await this.users.getUsernameByIntra(this.intraname);
 	}
@@ -137,7 +207,7 @@ export class User {
 export class Channel {
 	constructor(
 		private readonly channel_id: string,
-		private owner: string,
+		private owner: User,
 		private open: boolean,
 		private password: string
 	) {}
@@ -145,4 +215,25 @@ export class Channel {
 	private members: Array<User> = new Array<User>;
 	private admins:	Array<User> = new Array<User>;
 	private chat_history:[user: User, message: string][];
+
+	public initChannel() { this.members.push(this.owner); this.admins.push(this.owner); }
+
+	public isGhostChannel(): boolean { if (this.members.length == 0) return true; else return false; }
+
+	public isPrivate(): boolean { if (this.open == true) return false; else return true; }
+
+	public isProtected(): boolean { if (this.password != undefined) return true; else return false; }
+
+	public rightPassword(passwd: string): boolean { if (this.password == passwd) return true; else return false; }
+
+	public addMember(user: User) { this.members.push(user); }
+
+	public addAdmin(user: User) { this.admins.push(user); }
+
+	public removeMember(user: User) {
+		let index = this.members.indexOf(user);
+		if (index == -1)
+			console.error("internal error in removeMember::Channel");
+		this.members.splice(index, 1);
+	}
 }

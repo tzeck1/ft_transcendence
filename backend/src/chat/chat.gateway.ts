@@ -23,7 +23,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	@WebSocketServer() server: Server;
 
 	afterInit(server: Server) {
-		this.chatService.addChannel("global", undefined, false, undefined);
+		this.chatService.addChannel("global", undefined, true, undefined);
 		console.log('Chat Initialized');
 	}
 
@@ -36,6 +36,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		}
 		else
 			client.disconnect(true);
+		let sender = "Floppy: ";
+		let message_body = "Welcome to ft_transcendence!\nType '/help' for a list of commands.";
+		client.emit("messageToClient", sender, message_body);
 	}
 
 	handleDisconnect(client: Socket) {
@@ -49,9 +52,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		if (tokens[0] == "/help" && tokens.length == 1)
 			response = this.chatService.help(client);
 		else if (tokens[0] == "/create" && (tokens.length == 2 || tokens.length == 3))
-			response = this.chatService.create(client, tokens[1], tokens[2], args[0]);
-		//else if (tokens[0] == "/join" && (tokens.length == 2 || tokens.length == 3))
-		//	response = this.chatService.join();
+			response = this.chatService.create(client, tokens[1], tokens[2]);
+		else if (tokens[0] == "/join" && (tokens.length == 2 || tokens.length == 3))
+			response = this.chatService.join(client, tokens[1], tokens[2]);
 		else if (tokens[0][0] == '/')
 			response = this.chatService.unknown(client, tokens[0]);
 		else
