@@ -60,6 +60,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			response = this.chatService.dm(client, tokens[1], tokens[2]);
 		else if (tokens[0] == "/leave" && tokens.length == 1)
 			response = this.chatService.leave(client);
+		
+		// else if (tokens[0] == "/operator" && tokens.length == 2)
+		// 	response = this.chatService.make_admin(client, tokens[1]);
+		
+
 		else if (tokens[0][0] == '/')
 			response = this.chatService.unknown(client, tokens[0]);
 		else

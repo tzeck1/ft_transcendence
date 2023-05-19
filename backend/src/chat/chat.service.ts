@@ -213,6 +213,7 @@ export class ChatService {
 			return [recipient, sender, message_body];
 		}
 		if (channel.isPrivate() == true) {
+			// TODO in here check for invited array
 			recipient = user.getSocket().id;
 			sender = "Error: ";
 			message_body = "this channel is private.";
@@ -295,29 +296,120 @@ export class ChatService {
 		return [recipient, sender, message_body];
 	}
 
-	kick(client: Socket, username: string) {
-		//check if client is admin
-		//make username leave channel
-	}
+	// make_admin(client: Socket, username: string, channel_id: string): [string, string, string] {
+	// 	let admin = this.getUserFromSocket(client);
+	// 	let channel = this.channels.get(channel_id);
 
-	ban() {
+	// 	if (admin == undefined || channel == undefined)
+	// 		return;
+	// 	if (channel.isAdmin(admin) == false)
+	// 		return;
+	// 	let user = this.findUserFromUsername(username);
+	// 	if (user != undefined && channel.isAdmin(user) == false) {
+	// 		channel.addAdmin(user);
+	// 		// TODO emit here user became admin
+	// 		return;//with message to command-user
+	// 	}
+
+	// 	let recipient = client.id;
+	// 	let sender = "";
+	// 	let message_body: string = "failed to make " + username + " an admin";
+	// 	return [recipient, sender, message_body];//return error to command-user
+	// }
+
+	// kick(client: Socket, username: string, channel_id: string): [string, string, string] {
+	// 	let admin = this.getUserFromSocket(client);
+	// 	let channel = this.channels.get(channel_id);
+
+	// 	if (admin == undefined || channel == undefined)
+	// 		return;
+	// 	if (channel.isAdmin(admin) == false)
+	// 		return;
+	// 	let user = this.findUserFromUsername(username);
+	// 	if (user != undefined && channel.isOwner(user) == false) {
+	// 		// TODO make user leave channel
+	// 		// TODO emit to kicked player
+	// 		return;// TODO return success message to command-user
+	// 	}
+	// 	let recipient = client.id;
+	// 	let sender = "";
+	// 	let message_body: string = user.getUsername() + " was kicked by " + client;
+	// 	return [recipient, sender, message_body];// TODO return error message to command-user
+	// }
+
+	// ban(client: Socket, username: string, channel_id: string): [string, string, string] {
+	// 	let admin = this.getUserFromSocket(client);
+	// 	let channel = this.channels.get(channel_id);
+
+	// 	if (admin == undefined || channel == undefined)
+	// 		return;
+	// 	if (channel.isAdmin(admin) == false)
+	// 		return;
+	// 	let user = this.findUserFromUsername(username);
+	// 	if (user != undefined && channel.isOwner(user) == false) {
+	// 		channel.addBanned(user);
+	// 		// TODO emit to banned player
+	// 		return;// TODO return success message to command-user
+	// 	}
+	// 	let recipient = client.id;
+	// 	let sender = "";
+	// 	let message_body: string = "failed to ban " + user.getUsername();
+	// 	return;// TODO return error message to command-user
+	// }
+
+	// mute(client: Socket, username: string, duration: number, channel_id: string): [string, string, string] {
+	// 	//check if client is admin && username is not owner
+	// 	//add username's User to mute array with Date.now() + duration
+	// 	//addMuted()
+	// 	let admin = this.getUserFromSocket(client);
+	// 	let channel = this.channels.get(channel_id);
+
+	// 	if (admin == undefined || channel == undefined)
+	// 		return;
+	// 	if (channel.isAdmin(admin) == false)
+	// 		return;
+	// 	let user = this.findUserFromUsername(username);
+	// 	if (user != undefined && channel.isOwner(user) == false)
+	// 		channel.addMuted(user, Date.now() / 1000 + duration);
 		
-	}
+	// 	// TODO return
+	// }
 
-	mute(client: Socket, username: string, duration: string) {
-		//check if client is admin && username is not owner
-		//add username's intra to mute array with Date.now() + duration
-	}
+	// channelInvite(client: Socket, username: string): [string, string, string] {
+	// 	//check if client is admin
+	// 	//add username's User to invited Array
+	// 	//send request to username's User ("use '/join <channel_id> to accept invitation from <invitee>")
+	// 	//addInvited()
+	// }
 
-	change_password(client: Socket, new_password: string) {
-		//check if client is owner
-		//change password to new_password
-	}
 
-	remove_password(client: Socket) {
-		//check if client is owner
-		//remove password
-	}
+	// // TODO check if it doesn't make more sense to put all 3 password functions in one function
+
+	// setPassword(client: Socket, password: string): [string, string, string] {
+	// 	//check if client is owner
+	// 	//channel.changePassword(password);
+	// }
+	// changePassword(client: Socket, new_password: string): [string, string, string] {
+	// 	//check if client is owner
+	// 	//channel.changePassword(new_password);
+	// }
+	// removePassword(client: Socket): [string, string, string] {
+	// 	//check if client is owner
+	// 	//channel.changePassword(undefined);
+	// }
+
+	// gameInvite(client: Socket, username: string): [string, string, string] {
+	// 	//ping/pong handshake
+	// 	// TODO think about how to hold this request open
+	// }
+
+	// visit(client: Socket, username: string): [string, string, string] {
+	// 	//redirect client to username's profile page
+	// }
+
+	// block(client: Socket, username: string): [string, string, string] {
+	// 	//add username's User to client's list of blocked users
+	// }
 }
 
 /************************************** USER ***************************************/
@@ -360,7 +452,9 @@ export class Channel {
 	private members: Array<User> = [this.owner];
 	private admins:	Array<User> = [this.owner];
 	private chat_history: [user: User, message: string][];
-	private muted: [user: User, epoch_seconds: number][];// (Date.now() / 1000)
+	// private muted: [user: User, epoch_seconds: number][] = [[undefined, 0]];
+	// private banned: Array<User> = [undefined];// NOTE is this the correct datatype? or User[]?
+	// private invited: Array<User> = [undefined];
 
 	public isGhostChannel(): boolean {
 		if (this.members.length == 0)
@@ -381,6 +475,8 @@ export class Channel {
 
 	public isOwner(user: User): boolean { if (this.owner == user) return true; else return false; }
 
+	public isAdmin(user: User): boolean { if (this.admins.find(element => element == user) != undefined) return true; return false; }
+
 	public isPrivate(): boolean { if (this.open == true) return false; else return true; }
 
 	public isProtected(): boolean { if (this.password != undefined) return true; else return false; }
@@ -389,9 +485,54 @@ export class Channel {
 
 	public rightPassword(passwd: string): boolean { if (this.password == passwd) return true; else return false; }
 
+	// public changePassword(new_password: string) { this.password = new_password; }
+
 	public addMember(user: User) { this.members.push(user); }
 
-	public addAdmin(user: User) { this.admins.push(user); }
+	// /**
+	//  * Adds user to admins array if not already present.
+	//  */
+	// public addAdmin(user: User) { 
+	// 	if (this.admins.find(element => element == user) == undefined)
+	// 		this.admins.push(user);
+	// }
+
+	// /**
+	//  * Adds user to muted array if not already present.
+	//  * If already present, updates the time to epoch_seconds.
+	//  */
+	// public addMuted(user: User, epoch_seconds: number) {
+	// 	// for (let entry of this.muted) {
+	// 	// 	if (entry[0] == user) {
+	// 	// 		entry[1] = epoch_seconds;
+	// 	// 		return;
+	// 	// 	}
+	// 	// 	// TODO maybe check if entry[1] < Date.now(), and remove entry if true
+	// 	// }
+
+	// 	//this or the for loop above?
+	// 	let entry = this.muted.find(element => element[0] == user);
+	// 	if (entry == undefined)
+	// 		this.muted.push([user, epoch_seconds]);
+	// 	else
+	// 		entry[1] = epoch_seconds;
+	// }
+
+	// /**
+	//  * Adds user to banned array if not already present.
+	//  */
+	// public addBanned(user: User) {
+	// 	if (this.banned.find(element => element == user) == undefined)
+	// 		this.banned.push(user);
+	// }
+
+	// /**
+	//  * Adds user to invited array if not already present.
+	//  */
+	// public addInvited(user: User) {
+	// 	if (this.invited.find(element => element == user) == undefined)
+	// 		this.invited.push(user);
+	// }
 
 	public removeMember(user: User) {
 		let index = this.members.indexOf(user);
