@@ -102,8 +102,9 @@
 	}
 
 	function sendMessage() {
-		console.log(message.value);
+		console.log("Outside", message.value);
 		if (userStore.socket != undefined) {
+			console.log("Inside", message.value);
 			userStore.socket.emit("messageToServer", message.value);
 		}
 		message.value = '';

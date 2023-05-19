@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { Users } from '../user/user.service';
+import { channel } from 'diagnostics_channel';
 
 @Injectable()
 export class ChatService {
@@ -12,10 +13,13 @@ export class ChatService {
 	//		key: intraname
 	private members: Map<string, User> = new Map<string, User>;
 
-	public addChannel(channel_id: string, client: Socket, open: boolean, password: string) {
+	public addChannel(channel_id: string, client: Socket, open: boolean, password: string): Channel {
 		let user = this.getUserFromSocket(client);
+		if (user == undefined)
+			console.log("user in addChannel is undefined");
 		let channel = new Channel(channel_id, user, open, password);
 		this.channels.set(channel_id, channel);
+		return channel;
 	}
 
 	public async addUser(intra: string, client: Socket) {
@@ -32,19 +36,21 @@ export class ChatService {
 
 	public joinChannel(client: Socket, channel_id: string) {
 		let user = this.getUserFromSocket(client);
+		if (user == undefined)
+			console.log("user in joinChannel is undefined");
 		let new_channel = this.getChannelFromId(channel_id);
 		let old_channel = this.getChannelFromId(user.getActiveChannelId());
-		if (channel_id.indexOf("DM") != 0)
+		if (old_channel.getChannelId().indexOf("DM") != 0)
 			old_channel.removeMember(user);
 		client.leave(user.getActiveChannelId());
 		user.setActiveChannel(channel_id);
 		client.join(user.getActiveChannelId());
-		if (new_channel.isOwner(user) == false)
+		if (new_channel.isOwner(user) == false && new_channel.getChannelId().indexOf("DM") != 0)
 			new_channel.addMember(user);
-		if (user.getActiveChannelId().length > 8)
+		if (new_channel.getChannelId().indexOf("DM") == 0)
+			client.emit("changeInputPlaceholder", "[ DM: " + new_channel.getOtherDmUsername(user.getIntra()) + " ]");
+		else if (user.getActiveChannelId().length > 8)
 			client.emit("changeInputPlaceholder", "[ " + user.getActiveChannelId() + " ]");
-		else if (new_channel.getChannelId().indexOf("DM") == 0)
-			client.emit("changeInputPlaceholder", "[ DM: " + new_channel.getOtherDmUsername(user.getIntra()) + " ]"); // TODO doesn work
 		else
 			client.emit("changeInputPlaceholder", "[ Channel: " + user.getActiveChannelId() + " ]");
 	}
@@ -72,6 +78,7 @@ export class ChatService {
 				return user;
 			}
 		}
+		console.log("findUserFromUsername returned undefined");
 		return undefined;
 	}
 
@@ -100,12 +107,17 @@ export class ChatService {
 	// TODO do not let the user emit an empty message_body or just spaces
 	message(client: Socket, message_body: string): [string, string, string] {
 		let user = this.getUserFromSocket(client);
+		if (user == undefined)
+			console.log("user in message command is undefined");
 		let sender = user.getUsername() + ": ";
 		let recipient = user.getActiveChannelId();
 
 		// TODO in DMs channel one does not recieve his own messages
 		if (recipient.indexOf("DM") == 0) {
 			let channel = this.getChannelFromId(recipient);
+			console.log("Emitting to", client.id, "as", sender, "with content:", message_body);
+			sender = "[" + user.getUsername() + "]: ";
+			client.emit("messageToClient", sender, message_body);
 			return this.dm(client, channel.getOtherDmUsername(user.getIntra()), message_body);
 		}
 		return [recipient, sender, message_body];
@@ -113,6 +125,8 @@ export class ChatService {
 
 	unknown(client: Socket, command: string): [string, string, string] {
 		let user = this.getUserFromSocket(client);
+		if (user == undefined)
+			console.log("user in unknown command is undefined");
 		let recipient = user.getSocket().id;
 		let sender = "Error: "
 		let message_body = "'" + command + "' is an unknown command or has wrong options.";
@@ -121,6 +135,8 @@ export class ChatService {
 
 	help(client: Socket): [string, string, string] {
 		let user = this.getUserFromSocket(client);
+		if (user == undefined)
+			console.log("user in help command is undefined");
 		let recipient = user.getSocket().id;
 		let sender = "\nFloppy: \n"
 		let message_body ="[mandatory] (optional)\n";
@@ -134,6 +150,8 @@ export class ChatService {
 	create(client: Socket, channel_id: string, passwd: string): [string, string, string] {
 		this.reapeEmptyChannels();
 		let user = this.getUserFromSocket(client);
+		if (user == undefined)
+			console.log("user in create command is undefined");
 		let recipient = user.getSocket().id;
 		let message_body: string, sender: string;
 		if (channel_id.indexOf("DM") == 0) {
@@ -172,6 +190,8 @@ export class ChatService {
 	join(client: Socket, channel_id: string, passwd: string): [string, string, string] {
 		this.reapeEmptyChannels();
 		let user = this.getUserFromSocket(client);
+		if (user == undefined)
+			console.log("user in join command is undefined");
 		let recipient: string, message_body: string, sender: string;
 		if (channel_id.indexOf("DM") == 0) {
 			recipient = client.id;
@@ -220,6 +240,8 @@ export class ChatService {
 	// TODO do not allow empty message body
 	dm(client: Socket, username: string, message_body: string): [string, string, string] {
 		let user = this.getUserFromSocket(client);
+		if (user == undefined)
+			console.log("user in dm command is undefined");
 		let recipient: string, sender: string;
 		let other_user = this.findUserFromUsername(username);
 		if (other_user == undefined) {
@@ -239,7 +261,9 @@ export class ChatService {
 				channel = this.channels.get("DM" + other_user.getIntra() + user.getIntra());
 			if (channel == undefined) {
 				let channel_id = "DM" + user.getIntra() + other_user.getIntra();
-				this.addChannel(channel_id, undefined, false, undefined);
+				let channel = this.addChannel(channel_id, undefined, false, undefined);
+				channel.addMember(user);
+				channel.addMember(other_user);
 				this.joinChannel(client, channel_id);
 			}
 			else
@@ -250,17 +274,24 @@ export class ChatService {
 			return [recipient, sender, message_body];
 		}
 		recipient = other_user.getSocket().id;
-		sender = "[DM " + user.getUsername() + "]: ";
+		sender = "[" + user.getUsername() + "]: ";
 		return [recipient, sender, message_body];
 	}
 
 	leave(client: Socket): [string, string, string] {
 		let user = this.getUserFromSocket(client);
+		if (user == undefined)
+			console.log("user in leave command is undefined");
 		let old_channel_id = user.getActiveChannelId();
+		let old_channel = this.channels.get(old_channel_id);
 		this.joinChannel(client, "global");
 		let recipient = client.id;
 		let sender = "";
-		let message_body = "You left " + old_channel_id;
+		let message_body: string;
+		if (old_channel_id.indexOf("DM") == 0)
+			message_body = "You left the DMs of " + old_channel.getOtherDmUsername(user.getIntra());
+		else
+			message_body = "You left " + old_channel_id;
 		return [recipient, sender, message_body];
 	}
 
@@ -338,9 +369,14 @@ export class Channel {
 	}
 	
 	public getOtherDmUsername(intra: string): string {
-		if (this.members[1].getIntra() == intra)
-			return this.members[2].getUsername();
-		return this.members[1].getUsername();
+		//if (this.members[1].getIntra() == intra)
+		//	return this.members[2].getUsername();
+		//return this.members[1].getUsername();
+		for (let user of this.members){
+			if (user != undefined && user.getIntra() != intra)
+				return user.getUsername();
+		}
+		return undefined;
 	}
 
 	public isOwner(user: User): boolean { if (this.owner == user) return true; else return false; }
@@ -359,6 +395,7 @@ export class Channel {
 
 	public removeMember(user: User) {
 		let index = this.members.indexOf(user);
+		console.log("Removed member", user.getIntra(), "from", this.channel_id);
 		if (index == -1) {
 			console.error("internal error in removeMember::Channel");
 			console.error("Was trying to remove member", user.getIntra(), "from channel", this.channel_id);
