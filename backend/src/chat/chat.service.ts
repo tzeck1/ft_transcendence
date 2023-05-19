@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { Users } from '../user/user.service';
-import { SubscribeMessage } from '@nestjs/websockets';
 
 @Injectable()
 export class ChatService {
@@ -39,7 +38,8 @@ export class ChatService {
 		client.leave(user.getActiveChannelId());
 		user.setActiveChannel(channel_id);
 		client.join(user.getActiveChannelId());
-		new_channel.addMember(user);
+		if (new_channel.isOwner(user) == false)
+			new_channel.addMember(user);
 		if (user.getActiveChannelId().length > 7)
 			client.emit("changeInputPlaceholder", "[ " + user.getActiveChannelId() + " ]");
 		else
@@ -215,12 +215,26 @@ export class Channel {
 		private password: string
 	) {}
 
-	private members: Array<User> = new Array<User>(this.owner);
-	private admins:	Array<User> = new Array<User>(this.owner);
+	private members: Array<User> = [this.owner];
+	private admins:	Array<User> = [this.owner];
 	private chat_history:[user: User, message: string][];
 
-	// TODO empty channels do not get deleted because of this function. The array this.members is longer than it should be for some reason
-	public isGhostChannel(): boolean { console.log("isGhostChannel::Len:", this.members.length); if (this.members.length == 0) return true; else return false; }
+	public isGhostChannel(): boolean {
+		//console.log("isGhostChannel::Len: ", this.members.length, "in channel", this.channel_id);
+		//this.members.forEach((user, index) => {
+		//	let intra: string;
+		//	if (user == undefined)
+		//		intra = "undefined";
+		//	else
+		//		intra = user.getIntra();
+		//	console.log("this.members[%d]:", index, intra);
+		//});
+		if (this.members.length == 0)
+			return true;
+		return false;
+	}
+
+	public isOwner(user: User): boolean { if (this.owner == user) return true; else return false; }
 
 	public isPrivate(): boolean { if (this.open == true) return false; else return true; }
 
