@@ -15,8 +15,6 @@ export class ChatService {
 
 	public addChannel(channel_id: string, client: Socket, open: boolean, password: string): Channel {
 		let user = this.getUserFromSocket(client);
-		if (user == undefined)
-			console.log("user in addChannel is undefined");
 		let channel = new Channel(channel_id, user, open, password);
 		this.channels.set(channel_id, channel);
 		return channel;
@@ -36,8 +34,6 @@ export class ChatService {
 
 	public joinChannel(client: Socket, channel_id: string) {
 		let user = this.getUserFromSocket(client);
-		if (user == undefined)
-			console.log("user in joinChannel is undefined");
 		let new_channel = this.getChannelFromId(channel_id);
 		let old_channel = this.getChannelFromId(user.getActiveChannelId());
 		if (old_channel.getChannelId().indexOf("DM") != 0)
@@ -48,11 +44,11 @@ export class ChatService {
 		if (new_channel.isOwner(user) == false && new_channel.getChannelId().indexOf("DM") != 0)
 			new_channel.addMember(user);
 		if (new_channel.getChannelId().indexOf("DM") == 0)
-			client.emit("changeInputPlaceholder", "[ DM: " + new_channel.getOtherDmUsername(user.getIntra()) + " ]");
+			client.emit("changeInputPlaceholder", "[ DM: " + new_channel.getOtherDmUsername(user.getIntra()) + " ]", user.getActiveChannelId());
 		else if (user.getActiveChannelId().length > 8)
-			client.emit("changeInputPlaceholder", "[ " + user.getActiveChannelId() + " ]");
+			client.emit("changeInputPlaceholder", "[ " + user.getActiveChannelId() + " ]", user.getActiveChannelId());
 		else
-			client.emit("changeInputPlaceholder", "[ Channel: " + user.getActiveChannelId() + " ]");
+			client.emit("changeInputPlaceholder", "[ Channel: " + user.getActiveChannelId() + " ]", user.getActiveChannelId());
 	}
 
 	public getUserFromSocket(client: Socket): User {
@@ -60,7 +56,6 @@ export class ChatService {
 			if (user.getSocket() == client)
 				return user;
 		}
-		console.log("getUserFromSocket returned undefined");
 		return undefined;
 	}
 
@@ -78,7 +73,6 @@ export class ChatService {
 				return user;
 			}
 		}
-		console.log("findUserFromUsername returned undefined");
 		return undefined;
 	}
 
@@ -87,7 +81,6 @@ export class ChatService {
 			if (channel_id_to_find == channel_id)
 				return channel;
 		}
-		console.log("getChannelFromId returned undefined");
 		return undefined;
 	}
 
@@ -95,7 +88,6 @@ export class ChatService {
 		this.channels.forEach((channel, channel_id) => {
 			if (channel.isGhostChannel() == true && channel_id != "global" && (channel_id.indexOf("DM") != 0)) {
 				this.channels.delete(channel_id);
-				console.log("ROOM", channel_id, "GOT REAPED");
 				this.reapeEmptyChannels();
 			}
 		})
@@ -107,26 +99,22 @@ export class ChatService {
 	// TODO do not let the user emit an empty message_body or just spaces
 	message(client: Socket, message_body: string): [string, string, string] {
 		let user = this.getUserFromSocket(client);
-		if (user == undefined)
-			console.log("user in message command is undefined");
 		let sender = user.getUsername() + ": ";
 		let recipient = user.getActiveChannelId();
 
-		// TODO in DMs channel one does not recieve his own messages
+		let channel = this.getChannelFromId(recipient);
 		if (recipient.indexOf("DM") == 0) {
-			let channel = this.getChannelFromId(recipient);
-			console.log("Emitting to", client.id, "as", sender, "with content:", message_body);
 			sender = "[" + user.getUsername() + "]: ";
+			channel.addMessageToHistory(user.getUsername(), message_body);
 			client.emit("messageToClient", sender, message_body);
 			return this.dm(client, channel.getOtherDmUsername(user.getIntra()), message_body);
 		}
+		channel.addMessageToHistory(user.getUsername(), message_body);
 		return [recipient, sender, message_body];
 	}
 
 	unknown(client: Socket, command: string): [string, string, string] {
 		let user = this.getUserFromSocket(client);
-		if (user == undefined)
-			console.log("user in unknown command is undefined");
 		let recipient = user.getSocket().id;
 		let sender = "Error: "
 		let message_body = "'" + command + "' is an unknown command or has wrong options.";
@@ -135,8 +123,6 @@ export class ChatService {
 
 	help(client: Socket): [string, string, string] {
 		let user = this.getUserFromSocket(client);
-		if (user == undefined)
-			console.log("user in help command is undefined");
 		let recipient = user.getSocket().id;
 		let sender = "\nFloppy: \n"
 		let message_body ="[mandatory] (optional)\n";
@@ -150,8 +136,6 @@ export class ChatService {
 	create(client: Socket, channel_id: string, passwd: string): [string, string, string] {
 		this.reapeEmptyChannels();
 		let user = this.getUserFromSocket(client);
-		if (user == undefined)
-			console.log("user in create command is undefined");
 		let recipient = user.getSocket().id;
 		let message_body: string, sender: string;
 		if (channel_id.indexOf("DM") == 0) {
@@ -190,8 +174,6 @@ export class ChatService {
 	join(client: Socket, channel_id: string, passwd: string): [string, string, string] {
 		this.reapeEmptyChannels();
 		let user = this.getUserFromSocket(client);
-		if (user == undefined)
-			console.log("user in join command is undefined");
 		let recipient: string, message_body: string, sender: string;
 		if (channel_id.indexOf("DM") == 0) {
 			recipient = client.id;
@@ -238,10 +220,9 @@ export class ChatService {
 	}
 
 	// TODO do not allow empty message body
+	// TODO mesages in form of '/dm username message' do not get put into any channels history
 	dm(client: Socket, username: string, message_body: string): [string, string, string] {
 		let user = this.getUserFromSocket(client);
-		if (user == undefined)
-			console.log("user in dm command is undefined");
 		let recipient: string, sender: string;
 		let other_user = this.findUserFromUsername(username);
 		if (other_user == undefined) {
@@ -280,8 +261,6 @@ export class ChatService {
 
 	leave(client: Socket): [string, string, string] {
 		let user = this.getUserFromSocket(client);
-		if (user == undefined)
-			console.log("user in leave command is undefined");
 		let old_channel_id = user.getActiveChannelId();
 		let old_channel = this.channels.get(old_channel_id);
 		this.joinChannel(client, "global");
@@ -332,8 +311,6 @@ export class User {
 
 	private username:	string;
 
-	// TODO if username is changed we do not change it in chat at the moment
-	// solution: add antoher watch function for userStore.username in App.vue and emit an event to the server when username changes
 	public async updateUserData() {
 		this.username = await this.users.getUsernameByIntra(this.intraname);
 	}
@@ -359,7 +336,7 @@ export class Channel {
 
 	private members: Array<User> = [this.owner];
 	private admins:	Array<User> = [this.owner];
-	private chat_history: [user: User, message: string][];
+	private chat_history: [username: string, message: string][] = [["", ""]];
 	private muted: [user: User, epoch_seconds: number][];// (Date.now() / 1000)
 
 	public isGhostChannel(): boolean {
@@ -369,15 +346,22 @@ export class Channel {
 	}
 	
 	public getOtherDmUsername(intra: string): string {
-		//if (this.members[1].getIntra() == intra)
-		//	return this.members[2].getUsername();
-		//return this.members[1].getUsername();
 		for (let user of this.members){
 			if (user != undefined && user.getIntra() != intra)
 				return user.getUsername();
 		}
 		return undefined;
 	}
+
+	public addMessageToHistory(sender: string, message_body: string) {
+		if (this.chat_history.length == 42)
+			this.chat_history.shift();
+		this.chat_history.push([sender + ": ", message_body]);
+	}
+
+	public getChatHistory(): [string, string][] {
+		return this.chat_history
+	};
 
 	public isOwner(user: User): boolean { if (this.owner == user) return true; else return false; }
 
@@ -395,11 +379,6 @@ export class Channel {
 
 	public removeMember(user: User) {
 		let index = this.members.indexOf(user);
-		console.log("Removed member", user.getIntra(), "from", this.channel_id);
-		if (index == -1) {
-			console.error("internal error in removeMember::Channel");
-			console.error("Was trying to remove member", user.getIntra(), "from channel", this.channel_id);
-		}
 		this.members.splice(index, 1);
 	}
 }
