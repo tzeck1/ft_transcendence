@@ -34,14 +34,17 @@ export class ChatService {
 		let user = this.getUserFromSocket(client);
 		let new_channel = this.getChannelFromId(channel_id);
 		let old_channel = this.getChannelFromId(user.getActiveChannelId());
-		old_channel.removeMember(user);
+		if (channel_id.indexOf("DM") != 0)
+			old_channel.removeMember(user);
 		client.leave(user.getActiveChannelId());
 		user.setActiveChannel(channel_id);
 		client.join(user.getActiveChannelId());
 		if (new_channel.isOwner(user) == false)
 			new_channel.addMember(user);
-		if (user.getActiveChannelId().length > 7)
+		if (user.getActiveChannelId().length > 8)
 			client.emit("changeInputPlaceholder", "[ " + user.getActiveChannelId() + " ]");
+		else if (new_channel.getChannelId().indexOf("DM") == 0)
+			client.emit("changeInputPlaceholder", "[ DM: " + new_channel.getOtherDmUsername(user.getIntra()) + " ]"); // TODO doesn work
 		else
 			client.emit("changeInputPlaceholder", "[ Channel: " + user.getActiveChannelId() + " ]");
 	}
@@ -83,7 +86,7 @@ export class ChatService {
 
 	public reapeEmptyChannels() {
 		this.channels.forEach((channel, channel_id) => {
-			if (channel.isGhostChannel() == true && channel_id != "global") {
+			if (channel.isGhostChannel() == true && channel_id != "global" && (channel_id.indexOf("DM") != 0)) {
 				this.channels.delete(channel_id);
 				console.log("ROOM", channel_id, "GOT REAPED");
 				this.reapeEmptyChannels();
@@ -99,6 +102,12 @@ export class ChatService {
 		let user = this.getUserFromSocket(client);
 		let sender = user.getUsername() + ": ";
 		let recipient = user.getActiveChannelId();
+
+		// TODO in DMs channel one does not recieve his own messages
+		if (recipient.indexOf("DM") == 0) {
+			let channel = this.getChannelFromId(recipient);
+			return this.dm(client, channel.getOtherDmUsername(user.getIntra()), message_body);
+		}
 		return [recipient, sender, message_body];
 	}
 
@@ -118,7 +127,7 @@ export class ChatService {
 		message_body = message_body.concat("/help\n");
 		message_body = message_body.concat("/create [name] (passwd)\n");
 		message_body = message_body.concat("/join [channel] (passwd)\n");
-		message_body = message_body.concat("/dm [username] [message]\n");
+		message_body = message_body.concat("/dm [username] (message)\n");
 		return [recipient, sender, message_body];
 	}
 
@@ -127,6 +136,12 @@ export class ChatService {
 		let user = this.getUserFromSocket(client);
 		let recipient = user.getSocket().id;
 		let message_body: string, sender: string;
+		if (channel_id.indexOf("DM") == 0) {
+			recipient = client.id;
+			sender = "Error: ";
+			message_body = "you cannot create channels that start with 'DM'.";
+			return [recipient, sender, message_body];
+		}
 		if (this.channels.get(channel_id) != undefined) {
 			sender = "Error: ";
 			message_body = "a channel with the name " + channel_id + " already exists.";
@@ -158,6 +173,12 @@ export class ChatService {
 		this.reapeEmptyChannels();
 		let user = this.getUserFromSocket(client);
 		let recipient: string, message_body: string, sender: string;
+		if (channel_id.indexOf("DM") == 0) {
+			recipient = client.id;
+			sender = "Error: ";
+			message_body = "you cannot join channels that start with 'DM'.";
+			return [recipient, sender, message_body];
+		}
 		let channel = this.channels.get(channel_id);
 		if (channel == undefined) {
 			recipient = user.getSocket().id;
@@ -167,8 +188,8 @@ export class ChatService {
 		}
 		if (channel_id == user.getActiveChannelId()) {
 			recipient = user.getSocket().id;
-			sender = "";
-			message_body = "Waiting for something to happen?";
+			sender = "Floppy: ";
+			message_body = "you already are in " + channel_id;
 			return [recipient, sender, message_body];
 		}
 		if (channel.isPrivate() == true) {
@@ -199,20 +220,47 @@ export class ChatService {
 	// TODO do not allow empty message body
 	dm(client: Socket, username: string, message_body: string): [string, string, string] {
 		let user = this.getUserFromSocket(client);
-		console.log("DM from", user.getUsername(), "to", username);
-		let sender = "[DM from" + user.getUsername() + "]:";
+		let recipient: string, sender: string;
 		let other_user = this.findUserFromUsername(username);
 		if (other_user == undefined) {
 			sender = "Floppy: ";
 			message_body = "this user does not exist (yet).";
 			return [client.id, sender, message_body];
 		}
-		let recipient = other_user.getSocket().id;
-		if (client.id == recipient) {
+		if (client.id == other_user.getSocket().id) {
+			recipient = other_user.getSocket().id;
 			sender = "Floppy: ";
 			message_body = "stop talking to yourself and start playing Pong.";
 			return [recipient, sender, message_body];
 		}
+		if (message_body == undefined) {
+			let channel = this.channels.get("DM" + user.getIntra() + other_user.getIntra());
+			if (channel == undefined)
+				channel = this.channels.get("DM" + other_user.getIntra() + user.getIntra());
+			if (channel == undefined) {
+				let channel_id = "DM" + user.getIntra() + other_user.getIntra();
+				this.addChannel(channel_id, undefined, false, undefined);
+				this.joinChannel(client, channel_id);
+			}
+			else
+				this.joinChannel(client, channel.getChannelId());
+			recipient = client.id;
+			sender = "Floppy: ";
+			message_body = "you slided into the DMs of " + other_user.getUsername();
+			return [recipient, sender, message_body];
+		}
+		recipient = other_user.getSocket().id;
+		sender = "[DM " + user.getUsername() + "]: ";
+		return [recipient, sender, message_body];
+	}
+
+	leave(client: Socket): [string, string, string] {
+		let user = this.getUserFromSocket(client);
+		let old_channel_id = user.getActiveChannelId();
+		this.joinChannel(client, "global");
+		let recipient = client.id;
+		let sender = "";
+		let message_body = "You left " + old_channel_id;
 		return [recipient, sender, message_body];
 	}
 }
@@ -259,18 +307,15 @@ export class Channel {
 	private chat_history:[user: User, message: string][];
 
 	public isGhostChannel(): boolean {
-		//console.log("isGhostChannel::Len: ", this.members.length, "in channel", this.channel_id);
-		//this.members.forEach((user, index) => {
-		//	let intra: string;
-		//	if (user == undefined)
-		//		intra = "undefined";
-		//	else
-		//		intra = user.getIntra();
-		//	console.log("this.members[%d]:", index, intra);
-		//});
 		if (this.members.length == 0)
 			return true;
 		return false;
+	}
+	
+	public getOtherDmUsername(intra: string): string {
+		if (this.members[1].getIntra() == intra)
+			return this.members[2].getUsername();
+		return this.members[1].getUsername();
 	}
 
 	public isOwner(user: User): boolean { if (this.owner == user) return true; else return false; }
@@ -278,6 +323,8 @@ export class Channel {
 	public isPrivate(): boolean { if (this.open == true) return false; else return true; }
 
 	public isProtected(): boolean { if (this.password != undefined) return true; else return false; }
+
+	public getChannelId(): string { return this.channel_id; }
 
 	public rightPassword(passwd: string): boolean { if (this.password == passwd) return true; else return false; }
 

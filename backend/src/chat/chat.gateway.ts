@@ -56,8 +56,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			response = this.chatService.create(client, tokens[1], tokens[2]);
 		else if (tokens[0] == "/join" && (tokens.length == 2 || tokens.length == 3))
 			response = this.chatService.join(client, tokens[1], tokens[2]);
-		else if (tokens[0] == "/dm" && tokens.length == 3)
+		else if (tokens[0] == "/dm" && (tokens.length == 2 || tokens.length == 3))
 			response = this.chatService.dm(client, tokens[1], tokens[2]);
+		else if (tokens[0] == "/leave" && tokens.length == 1)
+			response = this.chatService.leave(client);
 		else if (tokens[0][0] == '/')
 			response = this.chatService.unknown(client, tokens[0]);
 		else
