@@ -7,7 +7,7 @@ import {
 	SubscribeMessage,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { ChatService } from './chat.service';
+import { ChatService, Channel } from './chat.service';
 import { Users } from '../user/user.service';
 
 
@@ -73,5 +73,20 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		let sender = response[1]
 		let message_body = response[2];
 		this.server.to(recipient).emit("messageToClient", sender, message_body);
+	}
+
+	@SubscribeMessage("requestChatHistory")
+	handleRequestChatHistory(client: Socket, ...args: any[]) {
+		//console.log("RECEIVING event requestChatHistory on server");
+		let channel_id = args[0];
+		let channel = this.chatService.getChannelFromId(channel_id);
+		//if (channel == undefined) {
+		//	console.log("But channel is undefined with channelId:", channel_id);
+		//}
+		if (channel != undefined) {
+			let chat_history: [string, string][] = channel.getChatHistory();
+			//console.log("Channel is not undefined and following chat_history is emitted:", chat_history);
+			client.emit("ChatHistory", chat_history);
+		}
 	}
 }

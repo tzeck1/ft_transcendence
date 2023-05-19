@@ -72,12 +72,15 @@
 		if (newVal != undefined) {
 			userStore.socket = io(`${location.hostname}:3000/chat_socket`, {query: {intra: userStore.intra}});
 			userStore.socket.on("messageToClient", (sender: string, message: string) => {
-				console.log("args in messsageToClient listener:", message, "from:", sender);
 				lastMessages.value.unshift([sender, message]);
 			})
-			userStore.socket.on("changeInputPlaceholder", (new_channel: string) => {
-				active_channel.value = new_channel;
+			userStore.socket.on("changeInputPlaceholder", (new_channel_placeholder: string, new_channel_id: string) => {
+				active_channel.value = new_channel_placeholder;
+				userStore.socket!.emit("requestChatHistory", new_channel_id);
 			})
+			userStore.socket.on("ChatHistory", (chat_history: [username: string, message: string][]) => {
+				lastMessages.value = chat_history.reverse();
+			});
 		}
 	})
 
@@ -102,9 +105,7 @@
 	}
 
 	function sendMessage() {
-		console.log("Outside", message.value);
 		if (userStore.socket != undefined) {
-			console.log("Inside", message.value);
 			userStore.socket.emit("messageToServer", message.value);
 		}
 		message.value = '';
