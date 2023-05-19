@@ -263,6 +263,30 @@ export class ChatService {
 		let message_body = "You left " + old_channel_id;
 		return [recipient, sender, message_body];
 	}
+
+	kick(client: Socket, username: string) {
+		//check if client is admin
+		//make username leave channel
+	}
+
+	ban() {
+		
+	}
+
+	mute(client: Socket, username: string, duration: string) {
+		//check if client is admin && username is not owner
+		//add username's intra to mute array with Date.now() + duration
+	}
+
+	change_password(client: Socket, new_password: string) {
+		//check if client is owner
+		//change password to new_password
+	}
+
+	remove_password(client: Socket) {
+		//check if client is owner
+		//remove password
+	}
 }
 
 /************************************** USER ***************************************/
@@ -304,7 +328,8 @@ export class Channel {
 
 	private members: Array<User> = [this.owner];
 	private admins:	Array<User> = [this.owner];
-	private chat_history:[user: User, message: string][];
+	private chat_history: [user: User, message: string][];
+	private muted: [user: User, epoch_seconds: number][];// (Date.now() / 1000)
 
 	public isGhostChannel(): boolean {
 		if (this.members.length == 0)
