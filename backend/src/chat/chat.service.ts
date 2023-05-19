@@ -46,7 +46,7 @@ export class ChatService {
 			client.emit("changeInputPlaceholder", "[ Channel: " + user.getActiveChannelId() + " ]");
 	}
 
-	public getUserFromSocket (client: Socket): User {
+	public getUserFromSocket(client: Socket): User {
 		for (let [intra, user] of this.members) {
 			if (user.getSocket() == client)
 				return user;
@@ -55,10 +55,19 @@ export class ChatService {
 		return undefined;
 	}
 
-	public getIntraFromSocket (client: Socket): string {
+	public getIntraFromSocket(client: Socket): string {
 		for (let [intra, user] of this.members) {
 			if (user.getSocket() == client)
 				return intra;
+		}
+		return undefined;
+	}
+
+	public findUserFromUsername(username: string): User {
+		for (let [intra, user] of this.members) {
+			if (user.getUsername() == username) {
+				return user;
+			}
 		}
 		return undefined;
 	}
@@ -128,6 +137,16 @@ export class ChatService {
 			message_body = "channel name is too long.";
 			return [recipient, sender, message_body];
 		}
+		if (channel_id.length < 3) {
+			sender = "Error: ";
+			message_body = "channel name is too short.";
+			return [recipient, sender, message_body];
+		}
+		if (passwd != undefined && passwd.length < 3) {
+			sender = "Error: ";
+			message_body = "password is too short.";
+			return [recipient, sender, message_body];
+		}
 		this.addChannel(channel_id, client, true, passwd);
 		this.joinChannel(client, channel_id);
 		sender = "Floppy: ";
@@ -176,6 +195,26 @@ export class ChatService {
 		message_body = user.getUsername() + " has joined the channel.";
 		return [recipient, sender, message_body];
 	}
+
+	// TODO do not allow empty message body
+	dm(client: Socket, username: string, message_body: string): [string, string, string] {
+		let user = this.getUserFromSocket(client);
+		console.log("DM from", user.getUsername(), "to", username);
+		let sender = "[DM from" + user.getUsername() + "]:";
+		let other_user = this.findUserFromUsername(username);
+		if (other_user == undefined) {
+			sender = "Floppy: ";
+			message_body = "this user does not exist (yet).";
+			return [client.id, sender, message_body];
+		}
+		let recipient = other_user.getSocket().id;
+		if (client.id == recipient) {
+			sender = "Floppy: ";
+			message_body = "stop talking to yourself and start playing Pong.";
+			return [recipient, sender, message_body];
+		}
+		return [recipient, sender, message_body];
+	}
 }
 
 /************************************** USER ***************************************/
@@ -198,7 +237,7 @@ export class User {
 
 	public getSocket(): Socket { return this.socket; }
 	public getActiveChannelId(): string { return this.active_channel; }
-	public getUsername(): string { return this.username; }
+	public getUsername(): string { this.updateUserData(); return this.username; }
 	public getIntra(): string { return this.intraname; }
 
 	public setActiveChannel(channel: string) { this.active_channel = channel; }
