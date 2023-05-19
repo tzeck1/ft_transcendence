@@ -24,7 +24,7 @@
 			<div class="feature-grid">
 				<MatchHistory class="grid-item"></MatchHistory>
 				<Stats class="grid-item">Stats</Stats>
-				<div class="grid-item"></div>
+				<Achievements class="grid-item">Achievements</Achievements>
 				<div class="grid-item"></div>
 			</div>
 		</div>
@@ -50,6 +50,7 @@
 	import { ref, onMounted, watch, nextTick, computed } from 'vue';
 	import MatchHistory from '@/components/Profile/MatchHistory.vue';
 	import Stats from '@/components/Profile/Stats.vue';
+	import Achievements from '@/components/Profile/Achievements.vue';
 	import axios from 'axios';
 	import { useUserStore } from '../stores/UserStore';
 	import QrcodeVue from 'qrcode.vue';
@@ -288,7 +289,7 @@
 	}
 
 	.grid-item {
-		@apply overflow-auto p-4;
+		@apply overflow-auto p-10;
 		/* @apply border overflow-auto; */
 		/* h-1/4 border-red-300 flex justify-center items-center bg-black bg-opacity-50 rounded-2xl text-3xl */
 	}

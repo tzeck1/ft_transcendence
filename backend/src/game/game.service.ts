@@ -237,6 +237,23 @@ export class Game {
 		return userGames;
 	}
 
+	async getUserGamesAsc(intra: string) {
+		const userGames = await prisma.games.findMany({
+			where: {
+				intra: intra,
+			},
+			orderBy: {
+				date: 'asc',
+			},
+		});
+
+		userGames.forEach(game => {
+			(game as any).formattedDate = formatDate(game.date);
+		});
+
+		return userGames;
+	}
+
 }
 
 function formatDate(date: Date) {

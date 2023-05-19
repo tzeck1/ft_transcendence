@@ -215,6 +215,10 @@ export default class Pong extends Phaser.Scene {
 /********************************* METHODS *************************************/
 
 	calculateRebound(player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) {
+		if (player == this.left_player)
+			console.log("left player hit");
+		else
+			console.log("right player hit");
 		let distance = Phaser.Math.Distance.Between(1, player.y, 1, this.ball.y);
 		let angle = 0;
 		if (distance > 128)
@@ -227,11 +231,17 @@ export default class Pong extends Phaser.Scene {
 			angle = 15;
 		if (angle === 0) {
 			if (player === this.left_player)
+			{
 				this.paddle_hits_m++;
+				// console.log(player + 's paddle_hits_m: ' + this.paddle_hits_m)
+			}
 		}
 		else {
 			if (player === this.left_player)
+			{
 				this.paddle_hits_e++;
+				// console.log(player + 's paddle_hits_e: ' + this.paddle_hits_e)
+			}
 		}
 		if ((player.y > this.ball.y && this.ball.x < this.width / 2) || player.y < this.ball.y && this.ball.x > this.width / 2)
 			angle *= -1;

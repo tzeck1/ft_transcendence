@@ -225,6 +225,20 @@ let Game = class Game {
         });
         return userGames;
     }
+    async getUserGamesAsc(intra) {
+        const userGames = await prisma_1.default.games.findMany({
+            where: {
+                intra: intra,
+            },
+            orderBy: {
+                date: 'asc',
+            },
+        });
+        userGames.forEach(game => {
+            game.formattedDate = formatDate(game.date);
+        });
+        return userGames;
+    }
 };
 Game = __decorate([
     (0, common_1.Injectable)()

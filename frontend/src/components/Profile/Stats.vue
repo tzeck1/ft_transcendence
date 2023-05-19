@@ -24,7 +24,9 @@
 	import { Chart, registerables } from 'chart.js';
 	import axios from 'axios';
 	import { useUserStore } from '@/stores/UserStore';
+	import { useRoute } from 'vue-router';
 
+	const route = useRoute();
 	const currentSlide = ref(1);
 	const slides = ref([1, 2, 3]);
 	const wins = ref(0);
@@ -52,9 +54,16 @@
 	Chart.register(...registerables);
 
 	const fetchData = async () => {
-		const winData = await axios.get(`http://${location.hostname}:3000/users/getUser?intra=${userStore.intra}`);
-		const paddleData = await axios.get(`http://${location.hostname}:3000/users/getPaddleStats?intra=${userStore.intra}`);
-		const gameData = await axios.get(`http://${location.hostname}:3000/game/getUserGames?intra=${userStore.intra}`);
+		let intra = '';
+		if (!route.params.username) {
+			intra = userStore.intra;
+		}
+		else {
+			intra = route.params.username.toString();
+		}
+		const winData = await axios.get(`http://${location.hostname}:3000/users/getUser?intra=${intra}`);
+		const paddleData = await axios.get(`http://${location.hostname}:3000/users/getPaddleStats?intra=${intra}`);
+		const gameData = await axios.get(`http://${location.hostname}:3000/game/getUserGamesAsc?intra=${intra}`);
 		games = gameData.data;
 		wins.value = winData.data.games_won;
 		losses.value = winData.data.games_lost;
@@ -124,7 +133,7 @@
 
 	const initLine = () => {
 		const ctx = document.getElementById('LineChart') as HTMLCanvasElement;
-		const labels = games.map((game, index) => `Game ${index + 1}`);
+		const labels = games.map((game, index) => game.formattedDate );
 		let winStreak = 0;
 		const data = games.map(game => {
 			if(game.player_score > game.enemy_score) {
