@@ -155,5 +155,12 @@ export class Users {
 		});
 	}
 
+	async setHackerman(intra: string) {
+		return await prisma.users.update({
+			where: { intra_name: intra },
+			data: { hackerman: true }
+		});
+	}
+
 
 }

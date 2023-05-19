@@ -19,4 +19,5 @@ export declare class Users {
     setAvatar(intra: string, picture: string): Promise<void>;
     set2FASecret(intra: string, secret: string): Promise<import(".prisma/client").users>;
     setTFA(intra: string, state: boolean): Promise<import(".prisma/client").users>;
+    setHackerman(intra: string): Promise<import(".prisma/client").users>;
 }

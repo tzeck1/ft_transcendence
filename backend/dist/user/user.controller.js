@@ -43,6 +43,10 @@ let UserController = class UserController {
             console.log("Username already in use.");
         return (response);
     }
+    async setHackerman(intra) {
+        console.log("setting bool for: ", intra);
+        await this.users.setHackerman(intra);
+    }
 };
 __decorate([
     (0, common_1.Get)('getUsername'),
@@ -86,6 +90,13 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "setUsername", null);
+__decorate([
+    (0, common_1.Post)('setHackerman'),
+    __param(0, (0, common_1.Body)('intra')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "setHackerman", null);
 UserController = __decorate([
     (0, common_1.Controller)('users'),
     __metadata("design:paramtypes", [user_service_1.Users])

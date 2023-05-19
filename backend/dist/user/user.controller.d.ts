@@ -12,4 +12,5 @@ export declare class UserController {
     }>;
     setAvatar(intra: string, picture: string): Promise<void>;
     setUsername(intra: string, username: string): Promise<string>;
+    setHackerman(intra: string): Promise<void>;
 }

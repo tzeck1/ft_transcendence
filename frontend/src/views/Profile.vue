@@ -270,6 +270,7 @@
 
 	.sidebar {
 		@apply flex flex-col items-center justify-start p-8 w-1/5 min-h-full;
+		width: 25vw;
 	}
 
 	.profile-picture {
@@ -283,13 +284,14 @@
 	.feature-grid {
 		@apply grid w-4/5 max-h-full grid-cols-2 grid-rows-2;
 		height: calc(100vh - 128px);
+		width: 75vw;
 		/* position: fixed;
 		right: 0px; */
 		/* @apply border border-blue-300 grid-cols-2 grid-rows-2 gap-4 w-4/5 h-full p-8; */
 	}
 
 	.grid-item {
-		@apply overflow-auto p-10;
+		@apply overflow-auto py-10;
 		/* @apply border overflow-auto; */
 		/* h-1/4 border-red-300 flex justify-center items-center bg-black bg-opacity-50 rounded-2xl text-3xl */
 	}

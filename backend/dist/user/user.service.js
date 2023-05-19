@@ -132,6 +132,12 @@ let Users = class Users {
             data: { tfa_enabled: state },
         });
     }
+    async setHackerman(intra) {
+        return await prisma_1.default.users.update({
+            where: { intra_name: intra },
+            data: { hackerman: true }
+        });
+    }
 };
 Users = __decorate([
     (0, common_1.Injectable)()

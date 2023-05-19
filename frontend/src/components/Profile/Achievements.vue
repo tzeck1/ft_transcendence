@@ -13,7 +13,9 @@
 				<span class="check" v-if="gamesWon">&#10003;</span>
 			</div>
 			<div class="achievements-item" :class="{'completed': friends}">
-				<img src="../../assets/addfriend.png" class="friend-logo"/>
+				<div class="logo">
+					<img src="../../assets/addfriend.png" class="friend-logo"/>
+				</div>
 				<div class="text">
 					<h1>Zuckerberg in Training</h1>
 					<span>Connect with 5 New Friends!</span>
@@ -21,12 +23,24 @@
 				<span class="check" v-if="friends">&#10003;</span>
 			</div>
 			<div class="achievements-item" :class="{'completed': ladder}">
-				<img src="../../assets/trophy.png"/>
+				<div class="logo">
+					<img src="../../assets/trophy.png"/>
+				</div>
 				<div class="text">
 					<h1>Ascend to the Elite</h1>
 					<span>Secure Your Spot in the Top 3!</span>
 				</div>
 				<span class="check" v-if="ladder">&#10003;</span>
+			</div>
+			<div class="achievements-item" :class="{'completed': hackerman}">
+				<div class="logo">
+					<img src="../../assets/hackerman.png"/>
+				</div>
+				<div class="text">
+					<h1>Hackerman</h1>
+					<span>???</span>
+				</div>
+				<span class="check" v-if="hackerman">&#10003;</span>
 			</div>
 		</div>
 	</div>
@@ -45,6 +59,7 @@
 	const gamesWon = ref(false);
 	const friends = ref(false);
 	const ladder = ref(false);
+	const hackerman = ref(false);
 
 	const getUsernameFromCookie = () => {
 		const cookie = document.cookie.split(';').find(cookie => cookie.trim().startsWith('username='));
@@ -75,34 +90,37 @@
 		const winData = await axios.get(`http://${location.hostname}:3000/users/getUser?intra=${intra}`);
 		if (winData.data.games_won >= 10)
 			gamesWon.value = true;
-			const userData = await axios.get(`http://${location.hostname}:3000/users/getUsers`);
-			for (let i = 0; i < 3; i++) {
-				if (userStore.intra === userData.data[i].intra_name)
-					ladder.value = true;
-				}
-		//code
-
+		const userData = await axios.get(`http://${location.hostname}:3000/users/getUsers`);
+		for (let i = 0; i < 3; i++) {
+			if (!userData.data[i])
+				break ;
+			if (userStore.intra === userData.data[i].intra_name)
+				ladder.value = true;
+		}
+		if (winData.data.hackerman == true)
+			hackerman.value = true;
+		
 	});
 </script>
 
 <style scoped>
 
 .achievements-container {
-	/* @apply animate-spin; */
+	/* @apply border; */
 	scrollbar-width: thin;
 	scrollbar-color: transparent transparent;
 }
 
 .title {
-	@apply text-3xl font-bold text-center mb-12;
+	@apply text-3xl font-bold text-center mb-8;
 }
 
 .achievements-list {
-	@apply flex flex-col items-center h-full pb-12;
+	@apply w-full flex flex-col items-center h-full pb-12;
 }
 
 .achievements-item {
-	@apply flex flex-row justify-start gap-16 items-center w-full h-1/3;
+	@apply flex flex-row w-full h-1/4;
 }
 
 h1 {
@@ -126,15 +144,16 @@ span {
 }
 
 .check {
-	@apply text-6xl  w-1/4;
+	@apply flex items-center justify-center text-6xl  w-1/5;
 }
 
 .logo {
-	@apply h-full w-1/2;
+	@apply flex items-center justify-center h-full w-1/5;
 }
 
 .text {
-	@apply w-1/4;
+	@apply flex flex-col items-center justify-center w-3/5;
+	/* white-space: nowrap; */
 }
 
 </style>

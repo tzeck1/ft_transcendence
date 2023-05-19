@@ -42,4 +42,10 @@ export class UserController {
 			console.log("Username already in use.");
 		return (response);
 	}
+
+	@Post('setHackerman')
+	async setHackerman(@Body('intra') intra: string) {
+		console.log("setting bool for: ", intra);
+		await this.users.setHackerman(intra);
+	}
 }
