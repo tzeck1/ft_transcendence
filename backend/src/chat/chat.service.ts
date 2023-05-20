@@ -211,7 +211,7 @@ export class ChatService {
 			message_body = "you already are in " + channel_id;
 			return [recipient, sender, message_body];
 		}
-		if (channel.isPrivate() == true) {
+		if (channel.isPrivate() == true && channel.isInvited(user) == false) {
 			// TODO in here check for invited array
 			recipient = user.getSocket().id;
 			sender = "Error: ";
@@ -460,15 +460,75 @@ export class ChatService {
 		let message_body = "You are stalking " + username;
 		return [recipient, sender, message_body];
 	}
+
+	invite(client: Socket, username: string): [string, string, string] {
+		let admin = this.getUserFromSocket(client);
+		if (admin == undefined)
+			return console.error("Admin (user) in 'ChatService::invite' is undefined") as undefined;
+		let channel = this.channels.get(admin.getActiveChannelId());
+		if (channel == undefined)
+			return console.error("Channel in 'ChatService::invite' is undefined") as undefined;
+
+		if (channel.isAdmin(admin) == false) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = "permission denied.";
+			return [recipient, sender, message_body];
+		}
+		let user = this.findUserFromUsername(username);
+		if (user == undefined) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = "this user does not exist (yet).";
+			return [recipient, sender, message_body];
+		}
+		channel.addInvited(user);
+		user.getSocket().emit("messageToClient", "Floppy: ", "You have been invited to " + channel.getChannelId() + ". Type '/join " + channel.getChannelId() + " ' to join.");
+		let recipient = client.id;
+		let sender = "Floppy: ";
+		let message_body = "you invited " + username + " to this channel.";
+		return [recipient, sender, message_body];
+	}
+
+	set(client: Socket, option: string, value: string): [string, string, string] {
+		let admin = this.getUserFromSocket(client);
+		if (admin == undefined)
+			return console.error("Admin (user) in 'ChatService::set' is undefined") as undefined;
+		let channel = this.channels.get(admin.getActiveChannelId());
+		if (channel == undefined)
+			return console.error("Channel in 'ChatService::set' is undefined") as undefined;
+
+		if (channel.isAdmin(admin) == false) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = "permission denied.";
+			return [recipient, sender, message_body];
+		}
+		if (option == "private") {
+			if (value == "true")
+				channel.setOpen(false);
+			else if (value == "false")
+				channel.setOpen(true);
+			else {
+				let recipient = client.id;
+				let sender = "Error: ";
+				let message_body = "unknown option.";
+				return [recipient, sender, message_body];
+			}
+			let recipient = channel.getChannelId();
+			let sender = "Floppy: ";
+			let message_body: string;
+			if (value == "true")
+				message_body = "this channel was set to private.";
+			else
+				message_body = "this channel was set to public.";
+			return [recipient, sender, message_body];
+		}
+		// TODO else if option for password
+		return undefined;
+	}
 }
 
-
-	// channelInvite(client: Socket, username: string): [string, string, string] {
-	// 	//check if client is admin
-	// 	//add username's User to invited Array
-	// 	//send request to username's User ("use '/join <channel_id> to accept invitation from <invitee>")
-	// 	//addInvited()
-	// }
 
 
 	// // TODO check if it doesn't make more sense to put all 3 password functions in one function
@@ -538,7 +598,7 @@ export class Channel {
 	private chat_history: [username: string, message: string][] = [["", ""]];;
 	private muted: [user: User, epoch_seconds: number][] = [[undefined, 0]];
 	private banned: Array<User> = [undefined];// NOTE is this the correct datatype? or User[]?
-	// private invited: Array<User> = [undefined];
+	private invited: Array<User> = [undefined];
 
 	public isGhostChannel(): boolean {
 		if (this.members.length == 0)
@@ -585,6 +645,8 @@ export class Channel {
 		}
 		return true;
 	}
+
+	public isInvited(user: User): boolean { if (this.invited.find(element => element == user) != undefined) return true; return false; }
 
 	public getChannelId(): string { return this.channel_id; }
 
@@ -639,16 +701,18 @@ export class Channel {
 			this.banned.push(user);
 	}
 
-	// /**
-	//  * Adds user to invited array if not already present.
-	//  */
-	// public addInvited(user: User) {
-	// 	if (this.invited.find(element => element == user) == undefined)
-	// 		this.invited.push(user);
-	// }
+	/**
+	 * Adds user to invited array if not already present.
+	 */
+	public addInvited(user: User) {
+		if (this.invited.find(element => element == user) == undefined)
+			this.invited.push(user);
+	}
 
 	public removeMember(user: User) {
 		let index = this.members.indexOf(user);
 		this.members.splice(index, 1);
 	}
+
+	public setOpen(open: boolean) { this.open = open; }
 }
