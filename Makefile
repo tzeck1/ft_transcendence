@@ -9,3 +9,6 @@ ps:
 
 db:
 	docker-compose exec db psql -U myuser -W -d mydatabase
+
+prisma:
+	cd backend/prisma; npx prisma migrate dev --name init; cd ../..
