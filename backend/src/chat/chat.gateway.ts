@@ -60,15 +60,14 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			response = this.chatService.dm(client, tokens[1], tokens[2]);
 		else if (tokens[0] == "/leave" && tokens.length == 1)
 			response = this.chatService.leave(client);
-		
-		// else if (tokens[0] == "/operator" && tokens.length == 2)
-		// 	response = this.chatService.make_admin(client, tokens[1]);
-		
-
+		else if (tokens[0] == "/operator" && tokens.length == 2)
+		 	response = this.chatService.make_admin(client, tokens[1]);
 		else if (tokens[0][0] == '/')
 			response = this.chatService.unknown(client, tokens[0]);
 		else
 			response = this.chatService.message(client, args[0]);
+		if (response == undefined)
+			return console.error("'ChatGateway::handleMessageToServer' returned without emitting with 'messageToClient' due to (response == undefined)");
 		let recipient = response[0];
 		let sender = response[1]
 		let message_body = response[2];
