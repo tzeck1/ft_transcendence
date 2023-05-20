@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { Users } from '../user/user.service';
+import { truncate } from 'fs';
 
 @Injectable()
 export class ChatService {
@@ -94,6 +95,7 @@ export class ChatService {
 
 
 	/************************************** COMMANDS ***************************************/
+	// TODO some 'error' or 'notify' messages have an empty sender. Maybe replace them with Floppy or set colors
 
 	// TODO do not let the user emit an empty message_body or just spaces
 	message(client: Socket, message_body: string): [string, string, string] {
@@ -107,6 +109,11 @@ export class ChatService {
 			channel.addMessageToHistory(user.getUsername(), message_body);
 			client.emit("messageToClient", sender, message_body);
 			return this.dm(client, channel.getOtherDmUsername(user.getIntra()), message_body);
+		}
+		if (channel.isMuted(user) == true) {
+			recipient = client.id;
+			sender = "";
+			message_body = "You are muted in this channel for another " + channel.getMutedDuration(user) + " seconds.";
 		}
 		channel.addMessageToHistory(user.getUsername(), message_body);
 		return [recipient, sender, message_body];
@@ -363,10 +370,10 @@ export class ChatService {
 	ban(client: Socket, username: string): [string, string, string] {
 		let admin = this.getUserFromSocket(client);
 		if (admin == undefined)
-			return console.error("Admin (user) in 'ChatService::kick' is undefined") as undefined;
+			return console.error("Admin (user) in 'ChatService::ban' is undefined") as undefined;
 		let channel = this.channels.get(admin.getActiveChannelId());
 		if (channel == undefined)
-			return console.error("Channel in 'ChatService::kick' is undefined") as undefined;
+			return console.error("Channel in 'ChatService::ban' is undefined") as undefined;
 
 		if (channel.isAdmin(admin) == false) {
 			let recipient = client.id;
@@ -395,25 +402,42 @@ export class ChatService {
 		let message_body: string = user.getUsername() + " was banned from this channel by " + admin.getUsername();
 		return [recipient, sender, message_body];
 	}
+
+	mute(client: Socket, username: string, duration: number): [string, string, string] {
+		let admin = this.getUserFromSocket(client);
+		if (admin == undefined)
+			return console.error("Admin (user) in 'ChatService::mute' is undefined") as undefined;
+		let channel = this.channels.get(admin.getActiveChannelId());
+		if (channel == undefined)
+			return console.error("Channel in 'ChatService::mute' is undefined") as undefined;
+
+		if (channel.isAdmin(admin) == false) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = "permission denied.";
+			return [recipient, sender, message_body];
+		}
+		let user = this.findUserFromUsername(username);
+		if (user == undefined) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = "this user does not exist (yet).";
+			return [recipient, sender, message_body];
+		}
+		if (channel.isOwner(user) == true) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = "you cannot mute the owner.";
+			return [recipient, sender, message_body];
+		}
+		channel.addMuted(user, Date.now() / 1000 + duration);
+		let recipient = channel.getChannelId();
+		let sender = "";
+		let message_body = user.getUsername() + " was muted for " + duration + "s by " + admin.getUsername();
+		return [recipient, sender, message_body];
+	}
 }
 
-	// mute(client: Socket, username: string, duration: number, channel_id: string): [string, string, string] {
-	// 	//check if client is admin && username is not owner
-	// 	//add username's User to mute array with Date.now() + duration
-	// 	//addMuted()
-	// 	let admin = this.getUserFromSocket(client);
-	// 	let channel = this.channels.get(channel_id);
-
-	// 	if (admin == undefined || channel == undefined)
-	// 		return;
-	// 	if (channel.isAdmin(admin) == false)
-	// 		return;
-	// 	let user = this.findUserFromUsername(username);
-	// 	if (user != undefined && channel.isOwner(user) == false)
-	// 		channel.addMuted(user, Date.now() / 1000 + duration);
-		
-	// 	// TODO return
-	// }
 
 	// channelInvite(client: Socket, username: string): [string, string, string] {
 	// 	//check if client is admin
@@ -492,7 +516,7 @@ export class Channel {
 	private members: Array<User> = [this.owner];
 	private admins:	Array<User> = [this.owner];
 	private chat_history: [username: string, message: string][] = [["", ""]];;
-	// private muted: [user: User, epoch_seconds: number][] = [[undefined, 0]];
+	private muted: [user: User, epoch_seconds: number][] = [[undefined, 0]];
 	private banned: Array<User> = [undefined];// NOTE is this the correct datatype? or User[]?
 	// private invited: Array<User> = [undefined];
 
@@ -530,6 +554,18 @@ export class Channel {
 
 	public isBanned(user: User): boolean { if (this.banned.find(element => element == user) != undefined) return true; return false; }
 
+	public isMuted(user: User): boolean {
+		let muted: [User, number] = this.muted.find(element => element[0] == user);
+		if (muted == undefined)
+			return false;
+		if (muted[1] < Date.now() / 1000) {
+			let index = this.muted.indexOf(muted);
+			this.muted.splice(index, 1);
+			return false;
+		}
+		return true;
+	}
+
 	public getChannelId(): string { return this.channel_id; }
 
 	public rightPassword(passwd: string): boolean { if (this.password == passwd) return true; else return false; }
@@ -546,26 +582,34 @@ export class Channel {
 			this.admins.push(user);
 	}
 
-	// /**
-	//  * Adds user to muted array if not already present.
-	//  * If already present, updates the time to epoch_seconds.
-	//  */
-	// public addMuted(user: User, epoch_seconds: number) {
-	// 	// for (let entry of this.muted) {
-	// 	// 	if (entry[0] == user) {
-	// 	// 		entry[1] = epoch_seconds;
-	// 	// 		return;
-	// 	// 	}
-	// 	// 	// TODO maybe check if entry[1] < Date.now(), and remove entry if true
-	// 	// }
+	/**
+	 * Adds user to muted array if not already present.
+	 * If already present, updates the time to epoch_seconds.
+	 */
+	public addMuted(user: User, epoch_seconds: number) {
+		// for (let entry of this.muted) {
+		// 	if (entry[0] == user) {
+		// 		entry[1] = epoch_seconds;
+		// 		return;
+		// 	}
+		// 	// TODO maybe check if entry[1] < Date.now(), and remove entry if true
+		// }
 
-	// 	//this or the for loop above?
-	// 	let entry = this.muted.find(element => element[0] == user);
-	// 	if (entry == undefined)
-	// 		this.muted.push([user, epoch_seconds]);
-	// 	else
-	// 		entry[1] = epoch_seconds;
-	// }
+	 	//this or the for loop above?
+	 	let entry = this.muted.find(element => element[0] == user);
+	 	if (entry == undefined)
+	 		this.muted.push([user, epoch_seconds]);
+	 	else
+	 		entry[1] = epoch_seconds;
+	}
+
+	public getMutedDuration(user: User): number {
+		let muted: [User, number] = this.muted.find(element => element[0] == user);
+		if (muted == undefined)
+			return 0;
+		let diff = muted[1] - Date.now() / 1000;
+		return Math.trunc(diff);
+	}
 
 	/**
 	 * Adds user to banned array if not already present.

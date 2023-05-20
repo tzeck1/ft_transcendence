@@ -69,6 +69,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			response = this.chatService.kick(client, tokens[1]);
 		else if (tokens[0] == "/ban" && tokens.length == 2)
 			response = this.chatService.ban(client, tokens[1]);
+		else if (tokens[0] == "/mute" && tokens.length == 3) {
+			if (isNaN(parseInt(tokens[2])) == true)
+				return this.server.to(client.id).emit("messageToClient", "Error: ", "please provide a valid duration.");
+			response = this.chatService.mute(client, tokens[1], parseInt(tokens[2]));
+		}
 		else if (tokens[0][0] == '/')
 			response = this.chatService.unknown(client, tokens[0]);
 		else
