@@ -430,6 +430,12 @@ export class ChatService {
 			let message_body = "you cannot mute the owner.";
 			return [recipient, sender, message_body];
 		}
+		if (channel.isMuted(user) == true && duration == 0) {
+			let recipient = channel.getChannelId();
+			let sender = "";
+			let message_body = user.getUsername() + " was unmuted by " + admin.getUsername();
+			return [recipient, sender, message_body];
+		}
 		channel.addMuted(user, Date.now() / 1000 + duration);
 		let recipient = channel.getChannelId();
 		let sender = "";
