@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { Users } from '../user/user.service';
-import { channel } from 'diagnostics_channel';
 
 @Injectable()
 export class ChatService {
@@ -121,15 +120,19 @@ export class ChatService {
 		return [recipient, sender, message_body];
 	}
 
+	// TODO make '/help (command)' possible
 	help(client: Socket): [string, string, string] {
 		let user = this.getUserFromSocket(client);
 		let recipient = user.getSocket().id;
-		let sender = "\nFloppy: \n"
-		let message_body ="[mandatory] (optional)\n";
-		message_body = message_body.concat("/help\n");
+		let sender = "\n";
+		let message_body = 				   "*┄┄┄┄┄┄┄ HELP ┄┄┄┄┄┄┄*\n";
+		message_body = message_body.concat("[mandatory] (optional)\n\n");					 
+		message_body = message_body.concat("/help (command)\n");
 		message_body = message_body.concat("/create [name] (passwd)\n");
 		message_body = message_body.concat("/join [channel] (passwd)\n");
 		message_body = message_body.concat("/dm [username] (message)\n");
+		message_body = message_body.concat("/operator [username]\n");
+		message_body = message_body.concat("*┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄*\n");
 		return [recipient, sender, message_body];
 	}
 
@@ -221,7 +224,9 @@ export class ChatService {
 	}
 
 	// TODO do not allow empty message body
-	// TODO mesages in form of '/dm username message' do not get put into any channels history
+	// TODO messages in form of '/dm username message' do not get put into any channels history
+	// TODO messages in form of '/dm username message' allow [message] to only be one word
+	//	=> '/dm username lorem ipsum' throws an error
 	dm(client: Socket, username: string, message_body: string): [string, string, string] {
 		let user = this.getUserFromSocket(client);
 		let recipient: string, sender: string;
@@ -275,26 +280,41 @@ export class ChatService {
 		return [recipient, sender, message_body];
 	}
 
-	// make_admin(client: Socket, username: string, channel_id: string): [string, string, string] {
-	// 	let admin = this.getUserFromSocket(client);
-	// 	let channel = this.channels.get(channel_id);
+	make_admin(client: Socket, username: string): [string, string, string] {
+		let admin = this.getUserFromSocket(client);
+		if (admin == undefined)
+			return console.error("Admin (user) in 'ChatService::make_admin' is undefined") as undefined;
+		let channel = this.channels.get(admin.getActiveChannelId());
+		if (channel == undefined)
+			return console.error("Channel in 'ChatService::make_admin' is undefined") as undefined;
 
-	// 	if (admin == undefined || channel == undefined)
-	// 		return;
-	// 	if (channel.isAdmin(admin) == false)
-	// 		return;
-	// 	let user = this.findUserFromUsername(username);
-	// 	if (user != undefined && channel.isAdmin(user) == false) {
-	// 		channel.addAdmin(user);
-	// 		// TODO emit here user became admin
-	// 		return;//with message to command-user
-	// 	}
-
-	// 	let recipient = client.id;
-	// 	let sender = "";
-	// 	let message_body: string = "failed to make " + username + " an admin";
-	// 	return [recipient, sender, message_body];//return error to command-user
-	// }
+		if (channel.isAdmin(admin) == false) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = "permission denied.";
+			return [recipient, sender, message_body];
+		}
+		let user = this.findUserFromUsername(username);
+		if (user == undefined) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = "this user does not exist (yet).";
+			return [recipient, sender, message_body];
+		}
+		if (channel.isAdmin(user) == true) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = "this user is already an admin.";
+			return [recipient, sender, message_body];
+		}
+		channel.addAdmin(user);
+		let recipient = client.id;
+		let sender = "Floppy: ";
+		let message_body = "You made " + username + " an admin.";
+		user.getSocket().emit("messageToClient", sender, "You recieved adminhood.");
+		return [recipient, sender, message_body];
+	}
+}
 
 	// kick(client: Socket, username: string, channel_id: string): [string, string, string] {
 	// 	let admin = this.getUserFromSocket(client);
@@ -389,7 +409,6 @@ export class ChatService {
 	// block(client: Socket, username: string): [string, string, string] {
 	// 	//add username's User to client's list of blocked users
 	// }
-}
 
 /************************************** USER ***************************************/
 
@@ -473,13 +492,13 @@ export class Channel {
 
 	public addMember(user: User) { this.members.push(user); }
 
-	// /**
-	//  * Adds user to admins array if not already present.
-	//  */
-	// public addAdmin(user: User) { 
-	// 	if (this.admins.find(element => element == user) == undefined)
-	// 		this.admins.push(user);
-	// }
+	/**
+	 * Adds user to admins array if not already present.
+	 */
+	public addAdmin(user: User) { 
+		if (this.admins.find(element => element == user) == undefined)
+			this.admins.push(user);
+	}
 
 	// /**
 	//  * Adds user to muted array if not already present.
