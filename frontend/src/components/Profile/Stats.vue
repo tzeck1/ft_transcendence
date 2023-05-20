@@ -184,7 +184,7 @@
 <style scoped>
 
 .statistics-container {
-	@apply flex flex-col items-center justify-center;
+	@apply  hidden lg:flex flex-col items-center justify-center;
 	scrollbar-width: thin;
 	scrollbar-color: transparent transparent;
 }

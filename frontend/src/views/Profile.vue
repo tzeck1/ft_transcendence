@@ -25,7 +25,7 @@
 				<MatchHistory class="grid-item"></MatchHistory>
 				<Stats class="grid-item">Stats</Stats>
 				<Achievements class="grid-item">Achievements</Achievements>
-				<div class="grid-item"></div>
+				<Friends class="grid-item">Friends</Friends>
 			</div>
 		</div>
 		<div v-if="qrCodeVisible || showTFA" class="qr-code-overlay" @click="hideQRCode">
@@ -51,6 +51,7 @@
 	import MatchHistory from '@/components/Profile/MatchHistory.vue';
 	import Stats from '@/components/Profile/Stats.vue';
 	import Achievements from '@/components/Profile/Achievements.vue';
+	import Friends from '@/components/Profile/Friends.vue';
 	import axios from 'axios';
 	import { useUserStore } from '../stores/UserStore';
 	import QrcodeVue from 'qrcode.vue';
@@ -282,7 +283,7 @@
 	}
 
 	.feature-grid {
-		@apply grid w-4/5 max-h-full grid-cols-2 grid-rows-2;
+		@apply grid w-4/5 max-h-full grid-cols-1 lg:grid-cols-2 grid-rows-2;
 		height: calc(100vh - 128px);
 		width: 75vw;
 		/* position: fixed;

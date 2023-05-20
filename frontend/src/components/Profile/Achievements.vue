@@ -26,7 +26,7 @@
 				<div class="logo">
 					<img src="../../assets/trophy.png"/>
 				</div>
-				<div class="text">
+				<div class="text" :class="{'rainbow_text_animated': ladder}">
 					<h1>Ascend to the Elite</h1>
 					<span>Secure Your Spot in the Top 3!</span>
 				</div>
@@ -36,7 +36,7 @@
 				<div class="logo">
 					<img src="../../assets/hackerman.png"/>
 				</div>
-				<div class="text">
+				<div class="text" :class="{'rainbow_text_animated': hackerman}">
 					<h1>Hackerman</h1>
 					<span>???</span>
 				</div>
@@ -106,17 +106,17 @@
 <style scoped>
 
 .achievements-container {
-	/* @apply border; */
+	@apply hidden lg:flex h-full flex-col items-center justify-center;
 	scrollbar-width: thin;
 	scrollbar-color: transparent transparent;
 }
 
 .title {
-	@apply text-3xl font-bold text-center mb-8;
+	@apply flex items-center justify-center text-3xl font-bold text-center mb-8 ;
 }
 
 .achievements-list {
-	@apply w-full flex flex-col items-center h-full pb-12;
+	@apply w-full flex flex-col items-center h-full;
 }
 
 .achievements-item {
@@ -154,6 +154,24 @@ span {
 .text {
 	@apply flex flex-col items-center justify-center w-3/5;
 	/* white-space: nowrap; */
+}
+.rainbow_text_animated {
+    background: linear-gradient(to right, #6666ff, #0099ff , #00ff00, #ff3399, #6666ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: rainbow_animation 3s ease-in-out infinite;
+    background-size: 400% 100%;
+}
+
+@keyframes rainbow_animation {
+    0%,100% {
+        background-position: 0 0;
+    }
+
+    50% {
+        background-position: 100% 0;
+    }
 }
 
 </style>
