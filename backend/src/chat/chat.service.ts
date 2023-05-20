@@ -112,7 +112,7 @@ export class ChatService {
 		}
 		if (channel.isMuted(user) == true) {
 			recipient = client.id;
-			sender = "";
+			sender = "Floppy: ";
 			message_body = "You are muted in this channel for another " + channel.getMutedDuration(user) + " seconds.";
 		}
 		channel.addMessageToHistory(user.getUsername(), message_body);
@@ -181,7 +181,6 @@ export class ChatService {
 		return [recipient, sender, message_body];
 	}
 
-	// TODO cannot join banned room
 	join(client: Socket, channel_id: string, passwd: string): [string, string, string] {
 		this.reapeEmptyChannels();
 		let user = this.getUserFromSocket(client);
@@ -212,7 +211,6 @@ export class ChatService {
 			return [recipient, sender, message_body];
 		}
 		if (channel.isPrivate() == true && channel.isInvited(user) == false) {
-			// TODO in here check for invited array
 			recipient = user.getSocket().id;
 			sender = "Error: ";
 			message_body = "this channel is private.";
@@ -232,7 +230,7 @@ export class ChatService {
 		}
 		this.joinChannel(client, channel_id);
 		recipient = channel_id;
-		sender = "";
+		sender = "Floppy: ";
 		message_body = user.getUsername() + " has joined the channel.";
 		return [recipient, sender, message_body];
 	}
@@ -241,7 +239,6 @@ export class ChatService {
 	// TODO messages in form of '/dm username message' do not get put into any channels history
 	// TODO messages in form of '/dm username message' allow [message] to only be one word
 	//	=> '/dm username lorem ipsum' throws an error
-	// TODO set message_body on success as pending_message
 	dm(client: Socket, username: string, message_body: string): [string, string, string] {
 		let user = this.getUserFromSocket(client);
 		let recipient: string, sender: string;
@@ -270,30 +267,24 @@ export class ChatService {
 			}
 			else
 				this.joinChannel(client, channel.getChannelId());
-			recipient = client.id;
-			sender = "Floppy: ";
-			message_body = "you slided into the DMs of " + other_user.getUsername();
-			return [recipient, sender, message_body];
+			user.setPendingMessage("Floppy: You slided into the DMs of " + other_user.getUsername());
+			return undefined;
 		}
 		recipient = other_user.getSocket().id;
 		sender = "[" + user.getUsername() + "]: ";
 		return [recipient, sender, message_body];
 	}
 
-	// TODO set message_body on success as pending_message
 	leave(client: Socket): [string, string, string] {
 		let user = this.getUserFromSocket(client);
 		let old_channel_id = user.getActiveChannelId();
 		let old_channel = this.channels.get(old_channel_id);
 		this.joinChannel(client, "global");
-		let recipient = client.id;
-		let sender = "";
-		let message_body: string;
 		if (old_channel_id.indexOf("DM") == 0)
-			message_body = "You left the DMs of " + old_channel.getOtherDmUsername(user.getIntra());
+			user.setPendingMessage("Floppy: You left " + old_channel.getOtherDmUsername(user.getIntra()) + " and slided back into gloabl.");
 		else
-			message_body = "You left " + old_channel_id;
-		return [recipient, sender, message_body];
+			user.setPendingMessage("Floppy: You left " + old_channel_id);
+		return undefined;
 	}
 
 	// TODO make another command to remove admin from someone '/demote [username]'
@@ -362,7 +353,7 @@ export class ChatService {
 		this.leave(user.getSocket());
 		user.setPendingMessage("You have been kicked by " + admin.getUsername());
 		let recipient = channel.getChannelId();
-		let sender = "";
+		let sender = "Floppy: ";
 		let message_body: string = user.getUsername() + " was kicked by " + admin.getUsername();
 		return [recipient, sender, message_body];
 	}
@@ -398,7 +389,7 @@ export class ChatService {
 		this.leave(user.getSocket());
 		user.setPendingMessage("You have been banned from channel " + channel.getChannelId() + " by " + admin.getUsername());
 		let recipient = channel.getChannelId();
-		let sender = "";
+		let sender = "Floppy: ";
 		let message_body: string = user.getUsername() + " was banned from this channel by " + admin.getUsername();
 		return [recipient, sender, message_body];
 	}
@@ -432,13 +423,13 @@ export class ChatService {
 		}
 		if (channel.isMuted(user) == true && duration == 0) {
 			let recipient = channel.getChannelId();
-			let sender = "";
+			let sender = "Floppy: ";
 			let message_body = user.getUsername() + " was unmuted by " + admin.getUsername();
 			return [recipient, sender, message_body];
 		}
 		channel.addMuted(user, Date.now() / 1000 + duration);
 		let recipient = channel.getChannelId();
-		let sender = "";
+		let sender = "Floppy: ";
 		let message_body = user.getUsername() + " was muted for " + duration + "s by " + admin.getUsername();
 		return [recipient, sender, message_body];
 	}
