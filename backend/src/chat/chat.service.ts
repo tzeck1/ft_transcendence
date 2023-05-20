@@ -442,6 +442,24 @@ export class ChatService {
 		let message_body = user.getUsername() + " was muted for " + duration + "s by " + admin.getUsername();
 		return [recipient, sender, message_body];
 	}
+
+	async visit(client: Socket, username: string): Promise<[string, string, string]> {
+		let user = this.getUserFromSocket(client);
+		if (user == undefined)
+			return console.error("Admin (user) in 'ChatService::visit' is undefined") as undefined;
+		let intra = await this.users.getIntraByUsername(username);
+		if (intra == undefined) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = "couldn't find user profile.";
+			return [recipient, sender, message_body];
+		}
+		client.emit("sendToProfile", intra);
+		let recipient = client.id;
+		let sender = "Floppy: ";
+		let message_body = "You are stalking " + username;
+		return [recipient, sender, message_body];
+	}
 }
 
 
@@ -471,10 +489,6 @@ export class ChatService {
 	// gameInvite(client: Socket, username: string): [string, string, string] {
 	// 	//ping/pong handshake
 	// 	// TODO think about how to hold this request open
-	// }
-
-	// visit(client: Socket, username: string): [string, string, string] {
-	// 	//redirect client to username's profile page
 	// }
 
 	// block(client: Socket, username: string): [string, string, string] {

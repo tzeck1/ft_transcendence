@@ -47,7 +47,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	@SubscribeMessage("messageToServer")
-	handleMessageToServer(client: Socket, ...args: any[]) {
+	async handleMessageToServer(client: Socket, ...args: any[]) {
 		let input: string = args[0];
 		if (input.length > 250)
 			input = input.substring(0, 249);
@@ -76,6 +76,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		}
 		else if (tokens[0] == "/unmute" && tokens.length == 2)
 			response = this.chatService.mute(client, tokens[1], 0);
+		else if (tokens[0] == "/visit" && tokens.length == 2)
+			response = await this.chatService.visit(client, tokens[1]);
 		else if (tokens[0][0] == '/')
 			response = this.chatService.unknown(client, tokens[0]);
 		else

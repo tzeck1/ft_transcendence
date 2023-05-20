@@ -67,7 +67,6 @@
 	const inputFocus = ref(false);
 	const isIntro = computed(() => route.path === '/');
 
-	// TODO max len for input field (250 chars)
 	watch( () => userStore.intra, (newVal, oldVal) => {
 		if (newVal != undefined) {
 			userStore.socket = io(`${location.hostname}:3000/chat_socket`, {query: {intra: userStore.intra}});
@@ -83,6 +82,9 @@
 					chat_history.push(["", pending_message]);
 				lastMessages.value = chat_history.reverse();
 			});
+			userStore.socket.on("sendToProfile", (intra: string) => {
+				router.push('/profile/' + intra);
+			})
 		}
 	})
 
