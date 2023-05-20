@@ -50,7 +50,7 @@ export class ChatService {
 		else
 			client.emit("changeInputPlaceholder", "[ Channel: " + user.getActiveChannelId() + " ]", user.getActiveChannelId());
 	}
-
+	 
 	public getUserFromSocket(client: Socket): User {
 		for (let [intra, user] of this.members) {
 			if (user.getSocket() == client)
@@ -527,6 +527,32 @@ export class ChatService {
 		// TODO else if option for password
 		return undefined;
 	}
+
+	// TODO make unblock command
+	async block(client: Socket, username: string): Promise<[string, string, string]> {
+		let user = this.getUserFromSocket(client);
+		if (user == undefined)
+			return console.error("User in 'ChatService::block' is undefined") as undefined;
+		let intra = await this.users.getIntraByUsername(username);
+		if (intra == undefined) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = "couldn't find user profile.";
+			return [recipient, sender, message_body];
+		}
+		if (user.isAlreadyBlocked(intra) == true) {
+			let recipient = client.id;
+			let sender = "Floppy: ";
+			let message_body = "this user is already blocked.";
+			return [recipient, sender, message_body];
+		}
+		user.addBlockedUser(intra);
+		//user.updateBlockedUsers();
+		let recipient = client.id;
+		let sender = "Floppy: ";
+		let message_body = "you blocked " + username;
+		return [recipient, sender, message_body];
+	}
 }
 
 
@@ -551,10 +577,6 @@ export class ChatService {
 	// 	// TODO think about how to hold this request open
 	// }
 
-	// block(client: Socket, username: string): [string, string, string] {
-	// 	//add username's User to client's list of blocked users
-	// }
-
 /************************************** USER ***************************************/
 
 export class User {
@@ -567,19 +589,54 @@ export class User {
 
 	private username: string;
 	private pending_message: string = undefined;
+	private blocked_users: string[];
 
 	public async updateUserData() {
+		//let old_username = this.username;
 		this.username = await this.users.getUsernameByIntra(this.intraname);
+		//if (this.username != old_username)
+		//	this.updateBlockedUsers();
+		this.blocked_users = await this.users.getBlocksByIntra(this.intraname);
 	}
+
+	//public updateBlockedUsers() {
+	//	let blocked_usernames = this.getBlockedUsernames();
+	//	this.socket.emit("updateBlockedUsers", blocked_usernames);
+	//}
+
+	//public getBlockedUsernames(): string[] {
+	//	let blocked_usernames: string[] = (undefined);
+	//	this.blocked_users.forEach( async (intra) => {
+	//		let username = await this.users.getUsernameByIntra(intra);
+	//		blocked_usernames.push(username);
+	//	});
+	//	return blocked_usernames;
+	//}
 
 	public getSocket(): Socket { return this.socket; }
 	public getActiveChannelId(): string { return this.active_channel; }
 	public getUsername(): string { this.updateUserData(); return this.username; }
 	public getIntra(): string { return this.intraname; }
 	public getPendingMessage(): string { return this.pending_message; }
+	public getBlocks(): string[] { this.updateUserData(); return this.blocked_users; }
 
 	public setActiveChannel(channel: string) { this.active_channel = channel; }
 	public setPendingMessage(message: string) { this.pending_message = message; }
+
+	public addBlockedUser(intra: string) {
+		this.updateUserData();
+		this.blocked_users.push(intra);
+		this.users.setBlocks(this.intraname, this.blocked_users);
+	}
+
+	public removeBlockedUser(intra: string){
+		this.updateUserData();
+		let index = this.blocked_users.indexOf(intra);
+		this.blocked_users.splice(index, 1);
+		this.users.setBlocks(this.intraname, this.blocked_users);
+	}
+
+	public isAlreadyBlocked(intra: string): boolean { if (this.blocked_users.indexOf(intra) == -1) return false; else return true;}
 }
 
 

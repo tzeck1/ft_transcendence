@@ -51,6 +51,11 @@ export class Users {
 		return usersEntry.username;
 	}
 
+	async getBlocksByIntra(intra_name: string): Promise<string[]> {
+		const usersEntry = await this.prisma.users.findUnique( {where: {intra_name: intra_name}} );
+		return usersEntry.blocks;
+	}
+
 	async getAvatarByIntra(intra_name: string): Promise<string> {
 		const usersEntry = await this.prisma.users.findUnique( {where: {intra_name: intra_name}} );
 		return usersEntry.profile_picture;
@@ -128,6 +133,13 @@ export class Users {
 		return await this.prisma.users.update({
 			where: { intra_name: intra },
 			data: { tfa_enabled: state },
+		});
+	}
+
+	async setBlocks(intra: string, blocked_users: string[]) {
+		return await this.prisma.users.update({
+			where: { intra_name: intra },
+			data: { blocks: blocked_users },
 		});
 	}
 }

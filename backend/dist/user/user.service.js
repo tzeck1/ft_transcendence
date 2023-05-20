@@ -48,6 +48,10 @@ let Users = class Users {
         const usersEntry = await this.prisma.users.findUnique({ where: { intra_name: intra_name } });
         return usersEntry.username;
     }
+    async getBlocksByIntra(intra_name) {
+        const usersEntry = await this.prisma.users.findUnique({ where: { intra_name: intra_name } });
+        return usersEntry.blocks;
+    }
     async getAvatarByIntra(intra_name) {
         const usersEntry = await this.prisma.users.findUnique({ where: { intra_name: intra_name } });
         return usersEntry.profile_picture;
@@ -112,6 +116,12 @@ let Users = class Users {
         return await this.prisma.users.update({
             where: { intra_name: intra },
             data: { tfa_enabled: state },
+        });
+    }
+    async setBlocks(intra, blocked_users) {
+        return await this.prisma.users.update({
+            where: { intra_name: intra },
+            data: { blocks: blocked_users },
         });
     }
 };
