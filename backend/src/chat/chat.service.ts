@@ -96,15 +96,18 @@ export class ChatService {
 
 
 	/************************************** COMMANDS ***************************************/
-	// TODO some 'error' or 'notify' messages have an empty sender. Maybe replace them with Floppy or set colors
 
 	// TODO do not let the user emit an empty message_body or just spaces
 	message(client: Socket, message_body: string): [string, string, string] {
 		let user = this.getUserFromSocket(client);
+		if (user == undefined)
+			return console.error("user in 'ChatService::message' is undefined") as undefined;
+		let channel = this.channels.get(user.getActiveChannelId());
+		if (channel == undefined)
+			return console.error("Channel in 'ChatService::message' is undefined") as undefined;
 		let sender = user.getUsername() + ": ";
 		let recipient = user.getActiveChannelId();
 
-		let channel = this.getChannelFromId(recipient);
 		if (recipient.indexOf("DM") == 0) {
 			sender = "[" + user.getUsername() + "]: ";
 			channel.addMessageToHistory(user.getUsername(), message_body);
@@ -135,11 +138,23 @@ export class ChatService {
 		let sender = "\n";
 		let message_body = 				   "*┄┄┄┄┄┄┄ HELP ┄┄┄┄┄┄┄*\n";
 		message_body = message_body.concat("[mandatory] (optional)\n\n");					 
-		message_body = message_body.concat("/help (command)\n");
+		message_body = message_body.concat("/help (command) {wip}\n");
 		message_body = message_body.concat("/create [name] (passwd)\n");
 		message_body = message_body.concat("/join [channel] (passwd)\n");
 		message_body = message_body.concat("/dm [username] (message)\n");
+		message_body = message_body.concat("/leave\n");
 		message_body = message_body.concat("/operator [username]\n");
+		message_body = message_body.concat("/kick [username]\n");
+		message_body = message_body.concat("/ban [username]\n");
+		message_body = message_body.concat("/mute [username] [sec]\n");
+		message_body = message_body.concat("/unmute [username]\n");
+		message_body = message_body.concat("/visit [username]\n");
+		message_body = message_body.concat("/invite [username]\n");
+		message_body = message_body.concat("/set [option] [value]\n");
+		message_body = message_body.concat("/block [username]\n");
+		message_body = message_body.concat("/unset password\n");
+		message_body = message_body.concat("/unblock [username]\n");
+		message_body = message_body.concat("/demote [username]\n");
 		message_body = message_body.concat("*┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄*\n");
 		return [recipient, sender, message_body];
 	}
@@ -516,6 +531,7 @@ export class ChatService {
 		return [recipient, sender, message_body];
 	}
 
+	// TODO some issues with password setting, not sure what exactly fails => more testing
 	set(client: Socket, option: string, value: string): [string, string, string] {
 		let admin = this.getUserFromSocket(client);
 		if (admin == undefined)
