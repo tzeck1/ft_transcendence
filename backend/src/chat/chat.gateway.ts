@@ -48,7 +48,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	@SubscribeMessage("messageToServer")
 	handleMessageToServer(client: Socket, ...args: any[]) {
-		let tokens: string[] = args[0].split(' ');
+		let input: string = args[0];
+		if (input.length > 250)
+			input = input.substring(0, 249);
+		let tokens: string[] = input.split(' ');
 		let response: [string, string, string];
 		if (tokens[0] == "/help" && tokens.length == 1)
 			response = this.chatService.help(client);
@@ -67,7 +70,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		else if (tokens[0][0] == '/')
 			response = this.chatService.unknown(client, tokens[0]);
 		else
-			response = this.chatService.message(client, args[0]);
+			response = this.chatService.message(client, input);
 		if (response == undefined)
 			return console.error("'ChatGateway::handleMessageToServer' returned without emitting with 'messageToClient' due to (response == undefined)");
 		let recipient = response[0];

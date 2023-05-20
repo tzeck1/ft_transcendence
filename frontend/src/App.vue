@@ -43,7 +43,7 @@
 					<p v-for="(tuple, index) in [...lastMessages].reverse()" :key="index">{{ tuple[0] + tuple[1] }}</p>
 				</div>
 				<div class="chat-input-button-container">
-					<input type="text" v-model="message" class="chat-input" @focus="inputFocus=true" @blur="inputFocus=false" @keyup.enter="sendMessage()" :placeholder="active_channel">
+					<input type="text" v-model="message" class="chat-input" @focus="inputFocus=true" @blur="inputFocus=false" @keyup.enter="sendMessage()" :placeholder="active_channel" :maxlength="250">
 					<button class="chat-send" @click="sendMessage()">Send</button>
 				</div>
 			</div>
