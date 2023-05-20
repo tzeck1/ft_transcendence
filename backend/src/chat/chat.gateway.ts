@@ -86,6 +86,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			response = await this.chatService.block(client, tokens[1]);
 		else if (tokens[0] == "/unset" && tokens.length == 2)
 			response = this.chatService.unset(client, tokens[1]);
+		else if (tokens[0] == "/unblock" && tokens.length == 2)
+			response = await this.chatService.unblock(client, tokens[1]);
 		else if (tokens[0][0] == '/')
 			response = this.chatService.unknown(client, tokens[0]);
 		else

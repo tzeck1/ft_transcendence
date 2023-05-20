@@ -558,7 +558,6 @@ export class ChatService {
 		return [recipient, sender, message_body];
 	}
 
-	// TODO make unblock command
 	async block(client: Socket, username: string): Promise<[string, string, string]> {
 		let user = this.getUserFromSocket(client);
 		if (user == undefined)
@@ -581,6 +580,31 @@ export class ChatService {
 		let recipient = client.id;
 		let sender = "Floppy: ";
 		let message_body = "you blocked " + username;
+		return [recipient, sender, message_body];
+	}
+
+	async unblock(client: Socket, username: string): Promise<[string, string, string]> {
+		let user = this.getUserFromSocket(client);
+		if (user == undefined)
+			return console.error("User in 'ChatService::unblock' is undefined") as undefined;
+		let intra = await this.users.getIntraByUsername(username);
+		if (intra == undefined) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = "couldn't find user profile.";
+			return [recipient, sender, message_body];
+		}
+		if (user.isAlreadyBlocked(intra) == false) {
+			let recipient = client.id;
+			let sender = "Floppy: ";
+			let message_body = "this user is not blocked by you (yet).";
+			return [recipient, sender, message_body];
+		}
+		user.removeBlockedUser(intra);
+		//user.updateBlockedUsers();
+		let recipient = client.id;
+		let sender = "Floppy: ";
+		let message_body = "you unblocked " + username;
 		return [recipient, sender, message_body];
 	}
 }
