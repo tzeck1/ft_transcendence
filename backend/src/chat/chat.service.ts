@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { Users } from '../user/user.service';
 import { truncate } from 'fs';
+import { PassThrough } from 'stream';
 
 @Injectable()
 export class ChatService {
@@ -287,8 +288,8 @@ export class ChatService {
 		return undefined;
 	}
 
-	// TODO make another command to remove admin from someone '/demote [username]'
-	make_admin(client: Socket, username: string): [string, string, string] {
+	// TODO when owner leaves, a new user has to become owner
+	operator(client: Socket, username: string): [string, string, string] {
 		let admin = this.getUserFromSocket(client);
 		if (admin == undefined)
 			return console.error("Admin (user) in 'ChatService::make_admin' is undefined") as undefined;
@@ -320,6 +321,40 @@ export class ChatService {
 		let sender = "Floppy: ";
 		let message_body = "You made " + username + " an admin.";
 		user.getSocket().emit("messageToClient", sender, "You recieved adminhood.");
+		return [recipient, sender, message_body];
+	}
+
+	demote(client: Socket, username: string): [string, string, string] {
+		let admin = this.getUserFromSocket(client);
+		if (admin == undefined)
+			return console.error("Admin (user) in 'ChatService::demote' is undefined") as undefined;
+		let channel = this.channels.get(admin.getActiveChannelId());
+		if (channel == undefined)
+			return console.error("Channel in 'ChatService::demote' is undefined") as undefined;
+
+		if (channel.isAdmin(admin) == false) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = "permission denied.";
+			return [recipient, sender, message_body];
+		}
+		let user = this.findUserFromUsername(username);
+		if (channel.isAdmin(user) == false) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = "this user is not an admin.";
+			return [recipient, sender, message_body];
+		}
+		if (channel.isOwner(user) == true) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = "you cannot demote the owner.";
+			return [recipient, sender, message_body];
+		}
+		channel.removeAdmin(user);
+		let recipient = channel.getChannelId();
+		let sender = "Floppy: ";
+		let message_body = user.getUsername() + " lost his adminhood.";
 		return [recipient, sender, message_body];
 	}
 
@@ -522,11 +557,16 @@ export class ChatService {
 				let message_body = "password is too short.";
 				return [recipient, sender, message_body];
 			}
+			let change = "changed";
+			let old_password = channel.getPassword();
+			if (old_password == undefined)
+				change = "set";
+			channel.setPassword(option);
 			let recipient = admin.getActiveChannelId();
 			let sender = "Floppy: ";
-			let message_body = "This cahnnels password was changed by " + admin.getUsername();
+			let message_body = "This cahnnels password was " + change + " by " + admin.getUsername();
 			if (value.length > 42)
-				message_body = "This cahnnels password was changed by " + admin.getUsername() + "\n Good luck remembering it";
+				message_body = "This cahnnels password was " + change + " by " + admin.getUsername() + "\n Good luck remembering it";
 			return [recipient, sender, message_body];
 		}
 		return undefined;
@@ -547,6 +587,7 @@ export class ChatService {
 			return [recipient, sender, message_body];
 		}
 		if (password == "password") {
+			channel.setPassword(undefined);
 			let recipient = admin.getActiveChannelId();
 			let sender = "Floppy: ";
 			let message_body = "This channels password was removed by " + admin.getUsername();
@@ -608,23 +649,6 @@ export class ChatService {
 		return [recipient, sender, message_body];
 	}
 }
-
-
-
-	// // TODO check if it doesn't make more sense to put all 3 password functions in one function
-
-	// setPassword(client: Socket, password: string): [string, string, string] {
-	// 	//check if client is owner
-	// 	//channel.changePassword(password);
-	// }
-	// changePassword(client: Socket, new_password: string): [string, string, string] {
-	// 	//check if client is owner
-	// 	//channel.changePassword(new_password);
-	// }
-	// removePassword(client: Socket): [string, string, string] {
-	// 	//check if client is owner
-	// 	//channel.changePassword(undefined);
-	// }
 
 	// gameInvite(client: Socket, username: string): [string, string, string] {
 	// 	//ping/pong handshake
@@ -735,6 +759,10 @@ export class Channel {
 		return this.chat_history
 	};
 
+	public getPassword(): string { return this.password; }
+
+	public setPassword(passwd: string) { this.password = passwd; }
+
 	public isOwner(user: User): boolean { if (this.owner == user) return true; else return false; }
 
 	public isAdmin(user: User): boolean { if (this.admins.find(element => element == user) != undefined) return true; return false; }
@@ -762,8 +790,6 @@ export class Channel {
 	public getChannelId(): string { return this.channel_id; }
 
 	public rightPassword(passwd: string): boolean { if (this.password == passwd) return true; else return false; }
-
-	// public changePassword(new_password: string) { this.password = new_password; }
 
 	public addMember(user: User) { this.members.push(user); }
 
@@ -823,6 +849,11 @@ export class Channel {
 	public removeMember(user: User) {
 		let index = this.members.indexOf(user);
 		this.members.splice(index, 1);
+	}
+
+	public removeAdmin(user: User) {
+		let index = this.admins.indexOf(user);
+		this.admins.splice(index, 1);
 	}
 
 	public setOpen(open: boolean) { this.open = open; }

@@ -64,7 +64,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		else if (tokens[0] == "/leave" && tokens.length == 1)
 			response = this.chatService.leave(client);
 		else if (tokens[0] == "/operator" && tokens.length == 2)
-		 	response = this.chatService.make_admin(client, tokens[1]);
+		 	response = this.chatService.operator(client, tokens[1]);
 		else if (tokens[0] == "/kick" && tokens.length == 2)
 			response = this.chatService.kick(client, tokens[1]);
 		else if (tokens[0] == "/ban" && tokens.length == 2)
@@ -88,6 +88,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			response = this.chatService.unset(client, tokens[1]);
 		else if (tokens[0] == "/unblock" && tokens.length == 2)
 			response = await this.chatService.unblock(client, tokens[1]);
+		else if (tokens[0] == "/demote" && tokens.length == 2)
+			response = this.chatService.demote(client, tokens[1])
 		else if (tokens[0][0] == '/')
 			response = this.chatService.unknown(client, tokens[0]);
 		else
