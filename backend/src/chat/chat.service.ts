@@ -174,6 +174,7 @@ export class ChatService {
 		return [recipient, sender, message_body];
 	}
 
+	// TODO cannot join banned room
 	join(client: Socket, channel_id: string, passwd: string): [string, string, string] {
 		this.reapeEmptyChannels();
 		let user = this.getUserFromSocket(client);
@@ -189,6 +190,12 @@ export class ChatService {
 			recipient = user.getSocket().id;
 			sender = "Error: ";
 			message_body = "no such channel exists.";
+			return [recipient, sender, message_body];
+		}
+		if (channel.isBanned(user) == true) {
+			recipient = user.getSocket().id;
+			sender = "Error: ";
+			message_body = "you are banned from this channel.";
 			return [recipient, sender, message_body];
 		}
 		if (channel_id == user.getActiveChannelId()) {
@@ -346,33 +353,49 @@ export class ChatService {
 			return [recipient, sender, message_body];
 		}
 		this.leave(user.getSocket());
+		user.setPendingMessage("You have been kicked by " + admin.getUsername());
 		let recipient = channel.getChannelId();
 		let sender = "";
 		let message_body: string = user.getUsername() + " was kicked by " + admin.getUsername();
-		user.setPendingMessage("You have been kicked by " + admin.getUsername());
+		return [recipient, sender, message_body];
+	}
+
+	ban(client: Socket, username: string): [string, string, string] {
+		let admin = this.getUserFromSocket(client);
+		if (admin == undefined)
+			return console.error("Admin (user) in 'ChatService::kick' is undefined") as undefined;
+		let channel = this.channels.get(admin.getActiveChannelId());
+		if (channel == undefined)
+			return console.error("Channel in 'ChatService::kick' is undefined") as undefined;
+
+		if (channel.isAdmin(admin) == false) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = "permission denied.";
+			return [recipient, sender, message_body];
+		}
+		let user = this.findUserFromUsername(username);
+		if (user == undefined) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = "this user does not exist (yet).";
+			return [recipient, sender, message_body];
+		}
+		if (channel.isOwner(user) == true) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = "you cannot ban the owner.";
+			return [recipient, sender, message_body];
+		}
+		channel.addBanned(user);
+		this.leave(user.getSocket());
+		user.setPendingMessage("You have been banned from channel " + channel.getChannelId() + " by " + admin.getUsername());
+		let recipient = channel.getChannelId();
+		let sender = "";
+		let message_body: string = user.getUsername() + " was banned from this channel by " + admin.getUsername();
 		return [recipient, sender, message_body];
 	}
 }
-
-	// ban(client: Socket, username: string, channel_id: string): [string, string, string] {
-	// 	let admin = this.getUserFromSocket(client);
-	// 	let channel = this.channels.get(channel_id);
-
-	// 	if (admin == undefined || channel == undefined)
-	// 		return;
-	// 	if (channel.isAdmin(admin) == false)
-	// 		return;
-	// 	let user = this.findUserFromUsername(username);
-	// 	if (user != undefined && channel.isOwner(user) == false) {
-	// 		channel.addBanned(user);
-	// 		// TODO emit to banned player
-	// 		return;// TODO return success message to command-user
-	// 	}
-	// 	let recipient = client.id;
-	// 	let sender = "";
-	// 	let message_body: string = "failed to ban " + user.getUsername();
-	// 	return;// TODO return error message to command-user
-	// }
 
 	// mute(client: Socket, username: string, duration: number, channel_id: string): [string, string, string] {
 	// 	//check if client is admin && username is not owner
@@ -470,7 +493,7 @@ export class Channel {
 	private admins:	Array<User> = [this.owner];
 	private chat_history: [username: string, message: string][] = [["", ""]];;
 	// private muted: [user: User, epoch_seconds: number][] = [[undefined, 0]];
-	// private banned: Array<User> = [undefined];// NOTE is this the correct datatype? or User[]?
+	private banned: Array<User> = [undefined];// NOTE is this the correct datatype? or User[]?
 	// private invited: Array<User> = [undefined];
 
 	public isGhostChannel(): boolean {
@@ -504,6 +527,8 @@ export class Channel {
 	public isPrivate(): boolean { if (this.open == true) return false; else return true; }
 
 	public isProtected(): boolean { if (this.password != undefined) return true; else return false; }
+
+	public isBanned(user: User): boolean { if (this.banned.find(element => element == user) != undefined) return true; return false; }
 
 	public getChannelId(): string { return this.channel_id; }
 
@@ -542,13 +567,13 @@ export class Channel {
 	// 		entry[1] = epoch_seconds;
 	// }
 
-	// /**
-	//  * Adds user to banned array if not already present.
-	//  */
-	// public addBanned(user: User) {
-	// 	if (this.banned.find(element => element == user) == undefined)
-	// 		this.banned.push(user);
-	// }
+	/**
+	 * Adds user to banned array if not already present.
+	 */
+	public addBanned(user: User) {
+		if (this.banned.find(element => element == user) == undefined)
+			this.banned.push(user);
+	}
 
 	// /**
 	//  * Adds user to invited array if not already present.

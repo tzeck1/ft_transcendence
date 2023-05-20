@@ -67,6 +67,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		 	response = this.chatService.make_admin(client, tokens[1]);
 		else if (tokens[0] == "/kick" && tokens.length == 2)
 			response = this.chatService.kick(client, tokens[1]);
+		else if (tokens[0] == "/ban" && tokens.length == 2)
+			response = this.chatService.ban(client, tokens[1]);
 		else if (tokens[0][0] == '/')
 			response = this.chatService.unknown(client, tokens[0]);
 		else
