@@ -515,8 +515,47 @@ export class ChatService {
 				message_body = "this channel was set to public.";
 			return [recipient, sender, message_body];
 		}
-		// TODO else if option for password
+		else if (option == "password") {
+			if (value.length < 3) {
+				let recipient = client.id;
+				let sender = "Error: ";
+				let message_body = "password is too short.";
+				return [recipient, sender, message_body];
+			}
+			let recipient = admin.getActiveChannelId();
+			let sender = "Floppy: ";
+			let message_body = "This cahnnels password was changed by " + admin.getUsername();
+			if (value.length > 42)
+				message_body = "This cahnnels password was changed by " + admin.getUsername() + "\n Good luck remembering it";
+			return [recipient, sender, message_body];
+		}
 		return undefined;
+	}
+
+	unset(client: Socket, password: string): [string, string, string] {
+		let admin = this.getUserFromSocket(client);
+		if (admin == undefined)
+			return console.error("Admin (user) in 'ChatService::unset' is undefined") as undefined;
+		let channel = this.channels.get(admin.getActiveChannelId());
+		if (channel == undefined)
+			return console.error("Channel in 'ChatService::unset' is undefined") as undefined;
+
+		if (channel.isAdmin(admin) == false) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = "permission denied.";
+			return [recipient, sender, message_body];
+		}
+		if (password == "password") {
+			let recipient = admin.getActiveChannelId();
+			let sender = "Floppy: ";
+			let message_body = "This channels password was removed by " + admin.getUsername();
+			return [recipient, sender, message_body];
+		}
+		let recipient = client.id;
+		let sender = "Floppy: ";
+		let message_body = "Please type exactly '/unset password' to remove the password.";
+		return [recipient, sender, message_body];
 	}
 
 	// TODO make unblock command

@@ -66,7 +66,7 @@
 	const lastMessages = ref<[string, string][]>([]);
 	const inputFocus = ref(false);
 	const isIntro = computed(() => route.path === '/');
-	var blocked_users: string[];
+	//var blocked_users: string[];
 
 	watch( () => userStore.intra, (newVal, oldVal) => {
 		if (newVal != undefined) {
