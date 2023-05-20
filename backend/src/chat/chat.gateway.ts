@@ -7,7 +7,7 @@ import {
 	SubscribeMessage,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { ChatService, Channel } from './chat.service';
+import { ChatService, type Channel, type User} from './chat.service';
 import { Users } from '../user/user.service';
 
 
@@ -62,6 +62,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			response = this.chatService.leave(client);
 		else if (tokens[0] == "/operator" && tokens.length == 2)
 		 	response = this.chatService.make_admin(client, tokens[1]);
+		else if (tokens[0] == "/kick" && tokens.length == 2)
+			response = this.chatService.kick(client, tokens[1]);
 		else if (tokens[0][0] == '/')
 			response = this.chatService.unknown(client, tokens[0]);
 		else
@@ -76,16 +78,16 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	@SubscribeMessage("requestChatHistory")
 	handleRequestChatHistory(client: Socket, ...args: any[]) {
-		//console.log("RECEIVING event requestChatHistory on server");
 		let channel_id = args[0];
-		let channel = this.chatService.getChannelFromId(channel_id);
-		//if (channel == undefined) {
-		//	console.log("But channel is undefined with channelId:", channel_id);
-		//}
+		let channel: Channel = this.chatService.getChannelFromId(channel_id);
 		if (channel != undefined) {
+			let user: User = this.chatService.getUserFromSocket(client)
+			let pending_message: string;
+			if (user != undefined && user.getPendingMessage() != undefined)
+				pending_message = user.getPendingMessage();
 			let chat_history: [string, string][] = channel.getChatHistory();
-			//console.log("Channel is not undefined and following chat_history is emitted:", chat_history);
-			client.emit("ChatHistory", chat_history);
+			client.emit("ChatHistory", chat_history, pending_message);
+			user.setPendingMessage(undefined);
 		}
 	}
 }

@@ -78,7 +78,9 @@
 				active_channel.value = new_channel_placeholder;
 				userStore.socket!.emit("requestChatHistory", new_channel_id);
 			})
-			userStore.socket.on("ChatHistory", (chat_history: [username: string, message: string][]) => {
+			userStore.socket.on("ChatHistory", (chat_history: [username: string, message: string][], pending_message: string) => {
+				if (pending_message != undefined)
+					chat_history.push(["", pending_message]);
 				lastMessages.value = chat_history.reverse();
 			});
 		}

@@ -227,6 +227,7 @@ export class ChatService {
 	// TODO messages in form of '/dm username message' do not get put into any channels history
 	// TODO messages in form of '/dm username message' allow [message] to only be one word
 	//	=> '/dm username lorem ipsum' throws an error
+	// TODO set message_body on success as pending_message
 	dm(client: Socket, username: string, message_body: string): [string, string, string] {
 		let user = this.getUserFromSocket(client);
 		let recipient: string, sender: string;
@@ -265,6 +266,7 @@ export class ChatService {
 		return [recipient, sender, message_body];
 	}
 
+	// TODO set message_body on success as pending_message
 	leave(client: Socket): [string, string, string] {
 		let user = this.getUserFromSocket(client);
 		let old_channel_id = user.getActiveChannelId();
@@ -280,6 +282,7 @@ export class ChatService {
 		return [recipient, sender, message_body];
 	}
 
+	// TODO make another command to remove admin from someone '/demote [username]'
 	make_admin(client: Socket, username: string): [string, string, string] {
 		let admin = this.getUserFromSocket(client);
 		if (admin == undefined)
@@ -314,27 +317,42 @@ export class ChatService {
 		user.getSocket().emit("messageToClient", sender, "You recieved adminhood.");
 		return [recipient, sender, message_body];
 	}
+
+	kick(client: Socket, username: string): [string, string, string] {
+		let admin = this.getUserFromSocket(client);
+		if (admin == undefined)
+			return console.error("Admin (user) in 'ChatService::kick' is undefined") as undefined;
+		let channel = this.channels.get(admin.getActiveChannelId());
+		if (channel == undefined)
+			return console.error("Channel in 'ChatService::kick' is undefined") as undefined;
+
+		if (channel.isAdmin(admin) == false) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = "permission denied.";
+			return [recipient, sender, message_body];
+		}
+		let user = this.findUserFromUsername(username);
+		if (user == undefined) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = "this user does not exist (yet).";
+			return [recipient, sender, message_body];
+		}
+		if (channel.isOwner(user) == true) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = "you cannot kick the owner.";
+			return [recipient, sender, message_body];
+		}
+		this.leave(user.getSocket());
+		let recipient = channel.getChannelId();
+		let sender = "";
+		let message_body: string = user.getUsername() + " was kicked by " + admin.getUsername();
+		user.setPendingMessage("You have been kicked by " + admin.getUsername());
+		return [recipient, sender, message_body];
+	}
 }
-
-	// kick(client: Socket, username: string, channel_id: string): [string, string, string] {
-	// 	let admin = this.getUserFromSocket(client);
-	// 	let channel = this.channels.get(channel_id);
-
-	// 	if (admin == undefined || channel == undefined)
-	// 		return;
-	// 	if (channel.isAdmin(admin) == false)
-	// 		return;
-	// 	let user = this.findUserFromUsername(username);
-	// 	if (user != undefined && channel.isOwner(user) == false) {
-	// 		// TODO make user leave channel
-	// 		// TODO emit to kicked player
-	// 		return;// TODO return success message to command-user
-	// 	}
-	// 	let recipient = client.id;
-	// 	let sender = "";
-	// 	let message_body: string = user.getUsername() + " was kicked by " + client;
-	// 	return [recipient, sender, message_body];// TODO return error message to command-user
-	// }
 
 	// ban(client: Socket, username: string, channel_id: string): [string, string, string] {
 	// 	let admin = this.getUserFromSocket(client);
@@ -420,7 +438,8 @@ export class User {
 		private          active_channel: string,
 	){}
 
-	private username:	string;
+	private username: string;
+	private pending_message: string = undefined;
 
 	public async updateUserData() {
 		this.username = await this.users.getUsernameByIntra(this.intraname);
@@ -430,8 +449,10 @@ export class User {
 	public getActiveChannelId(): string { return this.active_channel; }
 	public getUsername(): string { this.updateUserData(); return this.username; }
 	public getIntra(): string { return this.intraname; }
+	public getPendingMessage(): string { return this.pending_message; }
 
 	public setActiveChannel(channel: string) { this.active_channel = channel; }
+	public setPendingMessage(message: string) { this.pending_message = message; }
 }
 
 
