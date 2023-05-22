@@ -112,7 +112,7 @@ export class ChatService {
 			sender = "[" + user.getUsername() + "]: ";
 			channel.addMessageToHistory(user.getUsername(), message_body);
 			client.emit("messageToClient", sender, message_body);
-			return this.dm(client, channel.getOtherDmUsername(user.getIntra()), message_body);
+			return this.dm(client, channel.getOtherDmUsername(user.getIntra()), message_body, message_body);
 		}
 		if (channel.isMuted(user) == true) {
 			recipient = client.id;
@@ -252,25 +252,24 @@ export class ChatService {
 	}
 
 	// TODO do not allow empty message body
-	// TODO messages in form of '/dm username message' do not get put into any channels history
-	// TODO messages in form of '/dm username message' allow [message] to only be one word
-	//	=> '/dm username lorem ipsum' throws an error
-	dm(client: Socket, username: string, message_body: string): [string, string, string] {
+	dm(client: Socket, username: string, message_begin: string,  prompt: string): [string, string, string] {
 		let user = this.getUserFromSocket(client);
-		let recipient: string, sender: string;
+		if (user == undefined)
+			return console.error("user in 'ChatService::dm' is undefined") as undefined;
 		let other_user = this.findUserFromUsername(username);
 		if (other_user == undefined) {
-			sender = "Floppy: ";
-			message_body = "this user does not exist (yet).";
+			let recipient = client.id;
+			let sender = "Floppy: ";
+			let message_body = "this user does not exist (yet).";
 			return [client.id, sender, message_body];
 		}
 		if (client.id == other_user.getSocket().id) {
-			recipient = other_user.getSocket().id;
-			sender = "Floppy: ";
-			message_body = "stop talking to yourself and start playing Pong.";
+			let recipient = other_user.getSocket().id;
+			let sender = "Floppy: ";
+			let message_body = "stop talking to yourself and start playing Pong.";
 			return [recipient, sender, message_body];
 		}
-		if (message_body == undefined) {
+		if (message_begin == undefined) {
 			let channel = this.channels.get("DM" + user.getIntra() + other_user.getIntra());
 			if (channel == undefined)
 				channel = this.channels.get("DM" + other_user.getIntra() + user.getIntra());
@@ -286,8 +285,20 @@ export class ChatService {
 			user.setPendingMessage("Floppy: You slided into the DMs of " + other_user.getUsername());
 			return undefined;
 		}
-		recipient = other_user.getSocket().id;
-		sender = "[" + user.getUsername() + "]: ";
+		let channel = this.channels.get("DM" + user.getIntra() + other_user.getIntra());
+		if (channel == undefined)
+			channel = this.channels.get("DM" + other_user.getIntra() + user.getIntra());
+		if (channel == undefined) {
+			let channel_id = "DM" + user.getIntra() + other_user.getIntra();
+			channel = this.addChannel(channel_id, undefined, false, undefined);
+			channel.addMember(user);
+			channel.addMember(other_user);
+		}
+		let index = prompt.indexOf(message_begin);
+		let message_body = prompt.slice(index);
+		channel.addMessageToHistory(user.getUsername(), message_body);
+		let recipient = other_user.getSocket().id;
+		let sender = "[" + user.getUsername() + "]: ";
 		return [recipient, sender, message_body];
 	}
 
