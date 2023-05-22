@@ -144,7 +144,7 @@ export class ChatService {
 		if (command == undefined || command == "help") {
 			message_body = message_body.concat("*┄┄┄┄┄┄┄ HELP ┄┄┄┄┄┄┄*\n");
 			message_body = message_body.concat("[mandatory] (optional)\n\n");
-			message_body = message_body.concat("/help (command) {wip}\n");
+			message_body = message_body.concat("/help (command)\n");
 			message_body = message_body.concat("/create [name] (passwd)\n");
 			message_body = message_body.concat("/join [channel] (passwd)\n");
 			message_body = message_body.concat("/leave\n");
