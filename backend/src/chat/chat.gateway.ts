@@ -99,7 +99,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		let recipient = response[0];
 		let sender = response[1]
 		let message_body = response[2];
-		this.server.to(recipient).emit("messageToClient", sender, message_body);
+		this.server.to(recipient).emit("messageToClient", sender, message_body, this.chatService.getIntraFromSocket(client));
 	}
 
 	@SubscribeMessage("requestChatHistory")
@@ -112,7 +112,24 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			if (user != undefined && user.getPendingMessage() != undefined)
 				pending_message = user.getPendingMessage();
 			let chat_history: [string, string][] = channel.getChatHistory();
-			client.emit("ChatHistory", chat_history, pending_message);
+
+			let new_chat_history: [string, string][] = [["", ""]];
+			let blocked_users = user.getBlocks();
+			for (let blocked_intra of blocked_users) {
+				let username = this.chatService.getUserFromIntra(blocked_intra).getUsername();
+				for (let tuple of chat_history) {
+					if (tuple[0] == username + ": ") {
+						console.log("Continue by", blocked_intra);
+						continue;
+					}
+					new_chat_history.push(tuple);
+				}
+			}
+			new_chat_history.shift();
+			if (blocked_users == undefined || blocked_users.length == 0) 
+				client.emit("ChatHistory", chat_history, pending_message);
+			else
+				client.emit("ChatHistory", new_chat_history, pending_message);
 			user.setPendingMessage(undefined);
 		}
 	}

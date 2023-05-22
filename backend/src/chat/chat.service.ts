@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { Users } from '../user/user.service';
-import { truncate } from 'fs';
-import { PassThrough } from 'stream';
 
 @Injectable()
 export class ChatService {
@@ -78,6 +76,8 @@ export class ChatService {
 		}
 		return undefined;
 	}
+
+	public getUserFromIntra(intra: string): User { return this.members.get(intra); }
 
 	public getChannelFromId(channel_id_to_find: string) {
 		for (let [channel_id, channel] of this.channels) {
@@ -316,7 +316,6 @@ export class ChatService {
 		return undefined;
 	}
 
-	// TODO when owner leaves, a new user has to become owner
 	operator(client: Socket, username: string): [string, string, string] {
 		let admin = this.getUserFromSocket(client);
 		if (admin == undefined)
@@ -544,7 +543,6 @@ export class ChatService {
 		return [recipient, sender, message_body];
 	}
 
-	// TODO some issues with password setting, not sure what exactly fails => more testing
 	set(client: Socket, option: string, value: string): [string, string, string] {
 		let owner = this.getUserFromSocket(client);
 		if (owner == undefined)
@@ -590,7 +588,6 @@ export class ChatService {
 			let old_password = channel.getPassword();
 			if (old_password == undefined)
 				change = "set";
-			console.log("new password would be [%s]", value);
 			channel.setPassword(value);
 			let recipient = owner.getActiveChannelId();
 			let sender = "Floppy: ";
@@ -700,26 +697,10 @@ export class User {
 	private blocked_users: string[];
 
 	public async updateUserData() {
-		//let old_username = this.username;
 		this.username = await this.users.getUsernameByIntra(this.intraname);
-		//if (this.username != old_username)
-		//	this.updateBlockedUsers();
 		this.blocked_users = await this.users.getBlocksByIntra(this.intraname);
+		this.socket.emit("updateBlockedUsers", this.blocked_users);
 	}
-
-	//public updateBlockedUsers() {
-	//	let blocked_usernames = this.getBlockedUsernames();
-	//	this.socket.emit("updateBlockedUsers", blocked_usernames);
-	//}
-
-	//public getBlockedUsernames(): string[] {
-	//	let blocked_usernames: string[] = (undefined);
-	//	this.blocked_users.forEach( async (intra) => {
-	//		let username = await this.users.getUsernameByIntra(intra);
-	//		blocked_usernames.push(username);
-	//	});
-	//	return blocked_usernames;
-	//}
 
 	public getSocket(): Socket { return this.socket; }
 	public getActiveChannelId(): string { return this.active_channel; }
@@ -735,6 +716,7 @@ export class User {
 		this.updateUserData();
 		this.blocked_users.push(intra);
 		this.users.setBlocks(this.intraname, this.blocked_users);
+		this.socket.emit("updateBlockedUsers", this.blocked_users);
 	}
 
 	public removeBlockedUser(intra: string){
@@ -742,6 +724,7 @@ export class User {
 		let index = this.blocked_users.indexOf(intra);
 		this.blocked_users.splice(index, 1);
 		this.users.setBlocks(this.intraname, this.blocked_users);
+		this.socket.emit("updateBlockedUsers", this.blocked_users);
 	}
 
 	public isAlreadyBlocked(intra: string): boolean { if (this.blocked_users.indexOf(intra) == -1) return false; else return true;}

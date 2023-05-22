@@ -66,13 +66,14 @@
 	const lastMessages = ref<[string, string][]>([]);
 	const inputFocus = ref(false);
 	const isIntro = computed(() => route.path === '/');
-	//var blocked_users: string[];
+	var blocked_users: string[];
 
 	watch( () => userStore.intra, (newVal, oldVal) => {
 		if (newVal != undefined) {
 			userStore.socket = io(`${location.hostname}:3000/chat_socket`, {query: {intra: userStore.intra}});
-			userStore.socket.on("messageToClient", (sender: string, message: string) => {
-				lastMessages.value.unshift([sender, message]);
+			userStore.socket.on("messageToClient", (sender: string, message: string, intra: string) => {
+				if (blocked_users == undefined || blocked_users.indexOf(intra) == -1)
+					lastMessages.value.unshift([sender, message]);
 			});
 			userStore.socket.on("changeInputPlaceholder", (new_channel_placeholder: string, new_channel_id: string) => {
 				active_channel.value = new_channel_placeholder;
@@ -86,27 +87,12 @@
 			userStore.socket.on("sendToProfile", (intra: string) => {
 				router.push('/profile/' + intra);
 			});
-			//userStore.socket.on("updateBlockedUsers", (new_blocked_users: string[]) => {
-			//	blocked_users = new_blocked_users;
-			//})
+			userStore.socket.on("updateBlockedUsers", (new_blocked_users: string[]) => {
+				blocked_users = new_blocked_users;
+				console.log("Blocked Users:", blocked_users);
+			});
 		}
 	})
-
-	//function eraseBlockedUserMessages() {
-	//	let indeciesToRemove: number[] = [-1];
-	//	lastMessages.value.forEach((tuple, i) => {
-	//		blocked_users.forEach((username) => {
-	//			if (username != undefined && (tuple[1] == username + ": " || tuple[1] == "[" + username + "]: "))
-	//				indeciesToRemove.push(i);
-	//		});
-	//	});
-	//	while (indeciesToRemove.length != 0) {
-	//		let index: number = indeciesToRemove.pop() as number;
-	//		if (index == -1)
-	//			continue;
-	//		lastMessages.value.splice(index, 1);
-	//	}
-	//}
 
 	function loadIntro() {
 		const cookies = document.cookie.split(";");
