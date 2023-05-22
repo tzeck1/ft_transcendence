@@ -40,6 +40,8 @@ export class ChatService {
 		if (old_channel.getChannelId().indexOf("DM") != 0)
 			old_channel.removeMember(user);
 		client.leave(user.getActiveChannelId());
+		if (old_channel.isOwner(user) == true)
+			old_channel.changeOwner();
 		user.setActiveChannel(channel_id);
 		client.join(user.getActiveChannelId());
 		if (new_channel.isOwner(user) == false && new_channel.getChannelId().indexOf("DM") != 0)
@@ -591,9 +593,9 @@ export class ChatService {
 			channel.setPassword(option);
 			let recipient = admin.getActiveChannelId();
 			let sender = "Floppy: ";
-			let message_body = "This cahnnels password was " + change + " by " + admin.getUsername();
+			let message_body = "This channels password was " + change + " by " + admin.getUsername();
 			if (value.length > 42)
-				message_body = "This cahnnels password was " + change + " by " + admin.getUsername() + "\n Good luck remembering it";
+				message_body = "This channels password was " + change + " by " + admin.getUsername() + "\n Good luck remembering it";
 			return [recipient, sender, message_body];
 		}
 		return undefined;
@@ -884,4 +886,32 @@ export class Channel {
 	}
 
 	public setOpen(open: boolean) { this.open = open; }
+
+	public changeOwner() {
+		let recipient: User;
+		let sender = "Floppy: ";
+		let message_body = "You are now the owner of this channel.";
+		let old_owner = this.owner;
+		for (let admin of this.admins) {
+			if (admin != this.owner && admin.getActiveChannelId() == this.channel_id) {
+				this.owner = admin;
+				recipient = admin;
+				break;
+			}
+		}
+		if (this.owner == old_owner) {
+			for (let member of this.members) {
+				if (member != this.owner && member.getActiveChannelId() == this.channel_id) {
+					this.owner = member;
+					this.admins.push(member);
+					recipient = member;
+					break;
+				}
+			}
+		}
+		if (this.owner == old_owner)
+			this.owner = undefined;
+		else
+			recipient.getSocket().emit("messageToClient", sender, message_body);
+	}
 }
