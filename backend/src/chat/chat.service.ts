@@ -133,7 +133,6 @@ export class ChatService {
 		return [recipient, sender, message_body];
 	}
 
-	// TODO make '/help (command)' possible
 	help(client: Socket, command: string): [string, string, string] {
 		let user = this.getUserFromSocket(client);
 		if (user == undefined)
@@ -143,30 +142,157 @@ export class ChatService {
 		let sender = "";
 		let message_body = "\n";
 		if (command == undefined || command == "help") {
-			message_body = message_body.concat("*┄┄┄┄┄┄┄ HELP ┄┄┄┄┄┄┄*\n");					 
-			message_body = message_body.concat("[mandatory] (optional)\n\n");					 
+			message_body = message_body.concat("*┄┄┄┄┄┄┄ HELP ┄┄┄┄┄┄┄*\n");
+			message_body = message_body.concat("[mandatory] (optional)\n\n");
 			message_body = message_body.concat("/help (command) {wip}\n");
 			message_body = message_body.concat("/create [name] (passwd)\n");
 			message_body = message_body.concat("/join [channel] (passwd)\n");
-			message_body = message_body.concat("/dm [username] (message)\n");
 			message_body = message_body.concat("/leave\n");
-			message_body = message_body.concat("/operator [username]\n");
-			message_body = message_body.concat("/kick [username]\n");
-			message_body = message_body.concat("/ban [username]\n");
+			message_body = message_body.concat("/dm [username] (message)\n");
 			message_body = message_body.concat("/mute [username] [sec]\n");
 			message_body = message_body.concat("/unmute [username]\n");
+			message_body = message_body.concat("/block [username]\n");
+			message_body = message_body.concat("/unblock [username]\n");
 			message_body = message_body.concat("/visit [username]\n");
+			message_body = message_body.concat("/operator [username]\n");
+			message_body = message_body.concat("/demote [username]\n");
 			message_body = message_body.concat("/invite [username]\n");
 			message_body = message_body.concat("/set [option] [value]\n");
-			message_body = message_body.concat("/block [username]\n");
 			message_body = message_body.concat("/unset password\n");
-			message_body = message_body.concat("/unblock [username]\n");
-			message_body = message_body.concat("/demote [username]\n");
+			message_body = message_body.concat("/kick [username]\n");
+			message_body = message_body.concat("/ban [username]\n");
+			message_body = message_body.concat("\nDo '/help [command]' to get specific info about a command\n");
 			message_body = message_body.concat("*┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄*\n");
 		} else if (command == "create") {
-			message_body = message_body.concat("*┄┄┄┄┄┄ CREATE ┄┄┄┄┄┄*\n");					 
-			message_body = message_body.concat("*┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄*\n");
-
+			message_body = message_body.concat("┄┄┄┄┄┄ CREATE ┄┄┄┄┄┄\n");
+			message_body = message_body.concat("/create [name] (password)\n\n");
+			message_body = message_body.concat("Description:\n");
+			message_body = message_body.concat("Unleash your inner creator and forge a chat room with a unique [name]. To protect your creation, you can add a (password) and make it a secret haven for a select few.\n\n");
+			message_body = message_body.concat("Could also interest you:\n");
+			message_body = message_body.concat("'/help join'\n");
+			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
+		} else if (command == "join") {
+			message_body = message_body.concat("*┄┄┄┄┄┄ JOIN ┄┄┄┄┄┄*\n");
+			message_body = message_body.concat("/join [channel] (password)\n\n");
+			message_body = message_body.concat("Description:\n");
+			message_body = message_body.concat("Feeling like a nomad in the digital world? Use this command to join an existing chat room and connect with fellow wanderers. Just type '/join' followed by the [channel] name, and voila! You'll be transported to a realm of conversations, camaraderie, and perhaps even some mild chaos. If the chat room is password protected, you can whisper the secret (password) to gain entry. But shhh, don't let it slip to the wrong hands!\n\n");
+			message_body = message_body.concat("Could also interest you:\n");
+			message_body = message_body.concat("'/help create'\n");
+			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄");
+		} else if (command == "dm") {
+			message_body = message_body.concat("┄┄┄┄┄┄ JOIN ┄┄┄┄┄┄\n");
+			message_body = message_body.concat("/join [channel] (password)\n\n");
+			message_body = message_body.concat("Description:\n");
+			message_body = message_body.concat("Feeling like a nomad in the digital world? Use this command to join an existing chat room and connect with fellow wanderers. Just type '/join' followed by the [channel] name, and voila! You'll be transported to a realm of conversations, camaraderie, and perhaps even some mild chaos. If the chat room is password protected, you can whisper the secret (password) to gain entry. But shhh, don't let it slip to the wrong hands!\n\n");
+			message_body = message_body.concat("Could also interest you:\n");
+			message_body = message_body.concat("'/help create'\n");
+			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
+		} else if (command == "leave") {
+			message_body = message_body.concat("┄┄┄┄┄┄ LEAVE ┄┄┄┄┄┄\n");
+			message_body = message_body.concat("/leave\n\n");
+			message_body = message_body.concat("Description:\n");
+			message_body = message_body.concat("Ready to bid farewell to the current channel? Use the '/leave' command to gracefully exit and return to the global channel. It's like closing one door and opening another, as you venture into new conversations and experiences.\n\n");
+			message_body = message_body.concat("Could also interest you:\n");
+			message_body = message_body.concat("'/help join'\n");
+			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
+		} else if (command == "mute") {
+			message_body = message_body.concat("┄┄┄┄┄┄ MUTE ┄┄┄┄┄┄\n");
+			message_body = message_body.concat("/mute [username] [duration]\n\n");
+			message_body = message_body.concat("Description:\n");
+			message_body = message_body.concat("Silence! The power of the '/mute' command allows you to temporarily strip [username] of their voice in the current channel. Specify the duration in seconds, and witness as their words evaporate into the digital void. Use this command wisely to maintain harmony and give them a moment of quiet contemplation. Remember, even silence can speak volumes.\n\n");
+			message_body = message_body.concat("Could also interest you:\n");
+			message_body = message_body.concat("'/help kick' - Learn how to remove users from the channel when silence is not enough.\n");
+			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
+		} else if (command == "unmute") {
+			message_body = message_body.concat("┄┄┄┄┄┄ UNMUTE ┄┄┄┄┄┄\n");
+			message_body = message_body.concat("/unmute [username]\n\n");
+			message_body = message_body.concat("Description:\n");
+			message_body = message_body.concat("Release the shackles of silence with the command '/unmute'. If you've previously imposed a temporary muting upon [username], it's time to grant them the freedom to speak once again. By using this command, you lift the veil of silence, allowing their voice to resonate in the channel once more. Embrace the power of second chances and let the words flow.\n\n");
+			message_body = message_body.concat("Could also interest you:\n");
+			message_body = message_body.concat("'/help mute' - Discover the command that bestows temporary silence upon users when needed.\n");
+			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
+		} else if (command == "block") {
+			message_body = message_body.concat("┄┄┄┄┄┄ BLOCK ┄┄┄┄┄┄\n");
+			message_body = message_body.concat("/block [username]\n\n");
+			message_body = message_body.concat("Description:\n");
+			message_body = message_body.concat("Some words are best left unsaid, and some users are best left unseen. With the power of the '/block' command, you can shield yourself from unwanted messages and rid your digital realm of a particular [username]. Once blocked, their words will be lost to the void, as if they never existed. Protect your peace and reclaim your chat experience with this command.\n\n");
+			message_body = message_body.concat("Could also interest you:\n");
+			message_body = message_body.concat("'/help unblock' - Learn how to undo the act of blocking and restore visibility to the previously blocked [username].\n");
+			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
+		} else if (command == "unblock") {
+			message_body = message_body.concat("┄┄┄┄┄┄ UNBLOCK ┄┄┄┄┄┄\n");
+			message_body = message_body.concat("/unblock [username]\n\n");
+			message_body = message_body.concat("Description:\n");
+			message_body = message_body.concat("It's time to lift the veil of invisibility. Reconsider your decision to block a user and welcome them back into your digital domain with the '/unblock' command. Once removed from the blocklist, their messages shall once again grace your screen, breathing new life into your chat experience. Restore harmony and give them a second chance to be heard.\n\n");
+			message_body = message_body.concat("Could also interest you:\n");
+			message_body = message_body.concat("'/help block' - Master the art of blocking users when the need arises.\n");
+			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
+		} else if (command == "visit") {
+			message_body = message_body.concat("┄┄┄┄┄┄ VISIT ┄┄┄┄┄┄\n");
+			message_body = message_body.concat("/visit [username]\n\n");
+			message_body = message_body.concat("Description:\n");
+			message_body = message_body.concat("Curiosity piqued? Satiate your desire to learn more about a fellow chatter by using the '/visit' command. Simply enter the username of the person you wish to know better, and like a magical portal, their profile page will appear before you. Discover their interests, achievements, and contributions, and forge new connections in the vast digital realm.\n\n");
+			message_body = message_body.concat("Could also interest you:\n");
+			message_body = message_body.concat("/help profile' - Learn more about managing and customizing your own profile.\n");
+			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
+		} else if (command == "operator") {
+			message_body = message_body.concat("┄┄┄┄┄┄ OPERATOR ┄┄┄┄┄┄\n");
+			message_body = message_body.concat("/operator [username]\n\n");
+			message_body = message_body.concat("Description:\n");
+			message_body = message_body.concat("Operator rights needed. Become the master of the chat room with the '/operator' command. Only those with operator rights can wield this power. Grant the coveted operator status to [username] and watch them soar to new heights of authority and responsibility. But be wise in your choices, for with great operator powers comes the duty to maintain order and keep the trolls at bay.\n\n");
+			message_body = message_body.concat("Could also interest you:\n");
+			message_body = message_body.concat("'/help create' - Create your own chat room and be the ruler of your digital kingdom.\n");
+			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
+		} else if (command == "demote") {
+			message_body = message_body.concat("┄┄┄┄┄┄ DEMOTE ┄┄┄┄┄┄\n");
+			message_body = message_body.concat("/demote [username]\n\n");
+			message_body = message_body.concat("Description:\n");
+			message_body = message_body.concat("Operator rights needed. The power of operator can both elevate and diminish. Wield the '/demote' command to remove operator rights from [username]. But be cautious! This command cannot be used on the channel owner, the one who first breathed life into the chat room. Choose wisely, for once an operator, now a mere participant. The tides of power are ever shifting in the digital realm.\n\n");
+			message_body = message_body.concat("Could also interest you:\n");
+			message_body = message_body.concat("'/help operator' - Learn more about the commands that grant and revoke operator rights.\n");
+			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
+		} else if (command == "invite") {
+			message_body = message_body.concat("┄┄┄┄┄┄ INVITE ┄┄┄┄┄┄\n");
+			message_body = message_body.concat("/invite [username]\n\n");
+			message_body = message_body.concat("Description:\n");
+			message_body = message_body.concat("Operator rights needed. Expand the reach of your current channel and extend a warm invitation to [username] with the '/invite' command. By invoking this command, you beckon them to join your channel and become part of the ongoing conversations. Even if the channel is private or protected by a password, they can join effortlessly using '/join [channelname]'. Build a vibrant community and foster meaningful interactions with the power of invitation.\n\n");
+			message_body = message_body.concat("Could also interest you:\n");
+			message_body = message_body.concat("'/help set' - Explore the various options you can set to customize your channel and make it truly unique.\n");
+			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
+		} else if (command == "set") {
+			message_body = message_body.concat("┄┄┄┄┄┄ SET ┄┄┄┄┄┄\n");
+			message_body = message_body.concat("/set [option] [value]\n\n");
+			message_body = message_body.concat("Description:\n");
+			message_body = message_body.concat("Owner rights needed. Embrace the power to mold your chat channel with the '/set' command. Choose your desired [option] and set its corresponding [value] to unleash a new wave of customization. For the 'password' [option], you hold the key to a secret world. Specify the [value] as the new channel password, allowing only those who possess the secret phrase to gain entry. Keep it safe from prying eyes and share it with trusted allies. As for the 'private' [option], you become the gatekeeper. Set the [value] to 'true' to cloak your channel in exclusivity. Only those who receive an invitation from someone within the channel can join the privileged ranks. Set the [value] to 'false' to welcome the masses back into the public domain. Experiment with these options, shape your channel to your liking, and watch it thrive in its uniqueness.\n\n");
+			message_body = message_body.concat("Could also interest you:\n");
+			message_body = message_body.concat("'/help create' - Lay the foundation for your customized chat room and let your imagination run wild.\n");
+			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
+		} else if (command == "unset password") {
+			message_body = message_body.concat("┄┄┄┄┄┄ UNSET PASSWORD ┄┄┄┄┄┄\n");
+			message_body = message_body.concat("/unset password\n\n");
+			message_body = message_body.concat("Description:\n");
+			message_body = message_body.concat("Owner rights needed. Ready to break free from the shackles of a password-protected channel? Worry not, for the '/unset password' command is here to grant you liberation. With a single stroke of your digital quill, you remove the password from the channel, opening its doors wide for all to enter. Let the words flow freely once again as the channel returns to its inclusive roots.\n\n");
+			message_body = message_body.concat("Could also interest you:\n");
+			message_body = message_body.concat("'/help set' - Explore the various options you can set to customize your channel and make it truly unique.\n");
+			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
+		} else if (command == "kick") {
+			message_body = message_body.concat("┄┄┄┄┄┄ KICK ┄┄┄┄┄┄\n");
+			message_body = message_body.concat("/kick [username]\n\n");
+			message_body = message_body.concat("Description:\n");
+			message_body = message_body.concat("Operator rights needed. Flex your operator muscles and bring down the mighty hammer of justice with the '/kick' command. As an operator, you have the power to show [username] the virtual exit door. Kick them out of the current channel, ensuring they no longer participate in the ongoing conversations. Use this command wisely and sparingly, for it carries the weight of consequences.\n\n");
+			message_body = message_body.concat("Could also interest you:\n");
+			message_body = message_body.concat("'/help operator' - Explore other commands that empower you as the mighty operator of the chat room.\n");
+			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
+		} else if (command == "ban") {
+			message_body = message_body.concat("┄┄┄┄┄┄ BAN ┄┄┄┄┄┄\n");
+			message_body = message_body.concat("/ban [username]\n\n");
+			message_body = message_body.concat("Description:\n");
+			message_body = message_body.concat("Operator rights needed. Take control over who enters the realm of your chat channel with the almighty '/ban' command. As an operator, you possess the authority to banish [username] from the channel indefinitely. They shall wander the digital wilderness, unable to return to the banished lands. Wield this power with caution and ensure your banhammer strikes only when necessary.\n\n");
+			message_body = message_body.concat("Could also interest you:\n");
+			message_body = message_body.concat("/help kick' - Discover the art of removing unwanted guests from your chat channel.\n");
+			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
+		} else {
+			message_body = message_body.concat("Unknown command. Try '/help' to get back on track\n");
 		}
 		return [recipient, sender, message_body];
 	}
