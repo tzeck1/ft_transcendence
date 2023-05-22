@@ -93,7 +93,7 @@
 		}
 		//establish connection
 		if (!isLooking.value) { // need to add mode sent to the server, so it can check if the ones looking are searching both in the same mode
-			socket = io(`${location.hostname}:3000`);
+			socket = io(`${location.hostname}:3000/game_socket`);
 			gameStore.setSocket(socket);
 			socket.on('connect', function() {
 				console.log('Connected');

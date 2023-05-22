@@ -9,7 +9,9 @@ export declare class Users {
     }, never, false>;
     createNewUser(name: string, photo: string): Promise<void>;
     getUsername(id: number): Promise<string>;
+    getIntraByUsername(username: string): Promise<string>;
     getUsernameByIntra(intra_name: string): Promise<string>;
+    getBlocksByIntra(intra_name: string): Promise<string[]>;
     getAvatarByIntra(intra_name: string): Promise<string>;
     getIntraName(id: number): Promise<string>;
     getId(intra_name: string): Promise<number>;
@@ -20,4 +22,5 @@ export declare class Users {
     setAvatar(intra: string, picture: string): Promise<void>;
     set2FASecret(intra: string, secret: string): Promise<import(".prisma/client").users>;
     setTFA(intra: string, state: boolean): Promise<import(".prisma/client").users>;
+    setBlocks(intra: string, blocked_users: string[]): Promise<import(".prisma/client").users>;
 }

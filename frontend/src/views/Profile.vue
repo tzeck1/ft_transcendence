@@ -53,6 +53,7 @@
 	import QrcodeVue from 'qrcode.vue';
 	import { storeToRefs } from 'pinia';
 	import router from '@/router';
+	import { io } from 'socket.io-client';
 
 	const userStore = useUserStore();
 	const { username } = storeToRefs(userStore);
@@ -133,8 +134,7 @@
 	onMounted(async () => {
 		try {
 			const cookie_username = getUsernameFromCookie();
-			if (!cookie_username)
-			{
+			if (!cookie_username) {
 				router.push('/'); //do we need to return after that?
 				return ;
 			}

@@ -11,6 +11,7 @@ import { GameService, Room, Player } from './game.service';
 import { Users } from '../user/user.service';
 
 @WebSocketGateway({
+	namespace: '/game_socket',
 	cors: {
 		origin: '*',
 	},
@@ -30,16 +31,16 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	@WebSocketServer() server: Server;
 
 	afterInit(server: Server) {
-		console.log('Initialized');
+		console.log('Game Initialized');
 		//create a lobby socket.io room
 	}
 
 	handleDisconnect(client: Socket) {
-		console.log(`Client Disconnected: ${client.id}`);
+		console.log(`Game Client Disconnected: ${client.id}`);
 	}
 
 	handleConnection(client: Socket, ...args: any[]) {
-		console.log(`Client Connected: ${client.id}`);
+		console.log(`Game Client Connected: ${client.id}`);
 	}
 
 	@SubscribeMessage("createOrJoinMode")
@@ -140,7 +141,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		}
 		room.moveBoth(player, enemy, data);
 	}
-
 
 	@SubscribeMessage("iAmReady")
 	handleIAmReady(client: Socket, room_id: string) {

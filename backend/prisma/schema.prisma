@@ -20,7 +20,7 @@ model users {
 	tfa_enabled		Boolean	@default(false)
 	twoFactorSecret	String?
 	friends			Int[]
-	blocks			Int[]
+	blocks			String[]
 
 }
 

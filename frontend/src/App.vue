@@ -36,34 +36,62 @@
 			<router-link to="/"></router-link>
 			<router-view/>
 		</main>
-		<div class="chat-box" v-if="!isIntro">
+		<div class="chat-box" v-if="!isIntro" :class="{'blur': inputFocus === true}">
 			<div class="chat-input-container">
 				<div class="chat-history" v-show="inputFocus">
 					<div class="flex-grow"></div>
-					<p v-for="(msg, index) in [...lastMessages].reverse()" :key="index">{{ userStore.username + ': ' + msg }}</p>
+					<p v-for="(tuple, index) in [...lastMessages].reverse()" :key="index">{{ tuple[0] + tuple[1] }}</p>
 				</div>
 				<div class="chat-input-button-container">
-					<input type="text" v-model="message" class="chat-input" @focus="inputFocus=true" @blur="inputFocus=false" @keyup.enter="sendMessage()" placeholder="Type your message...">
+					<input type="text" v-model="message" class="chat-input" @focus="inputFocus=true" @blur="inputFocus=false" @keyup.enter="sendMessage()" :placeholder="active_channel" :maxlength="250">
 					<button class="chat-send" @click="sendMessage()">Send</button>
 				</div>
 			</div>
 		</div>
 	</div>
 </template>
-
+ 
 <script setup lang="ts">
-	import { ref, computed, watch, nextTick } from 'vue';
+	import { ref, computed, watch } from 'vue';
 	import { useRouter, useRoute } from 'vue-router';
 	import { useUserStore } from './stores/UserStore';
+	import { io } from 'socket.io-client';
 
 	const router = useRouter();
 	const route = useRoute();
 	const dropdownVisible = ref(false);
 	const userStore = useUserStore();
 	const message = ref('');
-	const lastMessages = ref<string[]>([]);
+	const active_channel = ref('');
+	const lastMessages = ref<[string, string][]>([]);
 	const inputFocus = ref(false);
 	const isIntro = computed(() => route.path === '/');
+	var blocked_users: string[];
+
+	watch( () => userStore.intra, (newVal, oldVal) => {
+		if (newVal != undefined) {
+			userStore.socket = io(`${location.hostname}:3000/chat_socket`, {query: {intra: userStore.intra}});
+			userStore.socket.on("messageToClient", (sender: string, message: string, intra: string) => {
+				if (blocked_users == undefined || blocked_users.indexOf(intra) == -1)
+					lastMessages.value.unshift([sender, message]);
+			});
+			userStore.socket.on("changeInputPlaceholder", (new_channel_placeholder: string, new_channel_id: string) => {
+				active_channel.value = new_channel_placeholder;
+				userStore.socket!.emit("requestChatHistory", new_channel_id);
+			});
+			userStore.socket.on("ChatHistory", (chat_history: [username: string, message: string][], pending_message: string) => {
+				if (pending_message != undefined)
+					chat_history.push(["", pending_message]);
+				lastMessages.value = chat_history.reverse();
+			});
+			userStore.socket.on("sendToProfile", (intra: string) => {
+				router.push('/profile/' + intra);
+			});
+			userStore.socket.on("updateBlockedUsers", (new_blocked_users: string[]) => {
+				blocked_users = new_blocked_users;
+			});
+		}
+	})
 
 	function loadIntro() {
 		const cookies = document.cookie.split(";");
@@ -86,28 +114,13 @@
 	}
 
 	function sendMessage() {
-		console.log(message.value);
-		lastMessages.value.unshift(message.value);
+		if (userStore.socket != undefined) {
+			message.value = message.value.trim();
+			if (message.value.length > 0)
+				userStore.socket.emit("messageToServer", message.value);
+		}
 		message.value = '';
 	}
-
-	// async function sendMessage() {
-	// 	if (message.value.trim() === '') {
-	// 		return;
-	// 	}
-	// 	const newMessage = message.value.trim();
-	// 	message.value = '';
-	// 	const messageChars = newMessage.split('');
-	// 	let index = 0;
-	// 	const typingInterval = setInterval(() => {
-	// 		if (index < messageChars.length) {
-	// 			lastMessages.value[0] += messageChars[index];
-	// 			index++;
-	// 		} else {
-	// 			clearInterval(typingInterval);
-	// 		}
-	// 	}, 50);
-	// }
 
 </script>
 
@@ -200,9 +213,10 @@
 	}
 
 	.chat-history {
-		@apply overflow-auto break-words h-60 flex flex-col bg-transparent bg-opacity-10 rounded p-2 mb-2;
+		@apply overflow-auto break-words h-60 flex flex-col bg-transparent bg-opacity-10 rounded-2xl p-2 mb-2;
 		scrollbar-width: thin;
 		scrollbar-color: transparent transparent;
+		white-space: pre-wrap;
 	}
 
 	.chat-history::-webkit-scrollbar { /* Chrome, Safari and Edge */
@@ -219,6 +233,9 @@
 
 	.flex-grow {
 		flex-grow: 1;
+	}
+	.blur {
+		backdrop-filter: blur(5px);
 	}
 
 </style>

@@ -68,11 +68,20 @@ class Room {
     getRoomId() { return this.room_id; }
     getLeftPlayer() { return this.left_player; }
     getRightPlayer() { return this.right_player; }
-    movePlayer(player, inputPayload) {
-        if (inputPayload.up == true)
-            player.getSocket().emit('enemyPaddleUp');
-        else if (inputPayload.down == true)
-            player.getSocket().emit('enemyPaddleDown');
+    moveBoth(player, enemy, inputPayload) {
+        let player_socket = player.getSocket();
+        let enemy_socket = enemy.getSocket();
+        if (inputPayload.up == true) {
+            player_socket.emit('myPaddleUp');
+            enemy_socket.emit("enemyPaddleUp");
+        }
+        else if (inputPayload.down == true) {
+            player_socket.emit('myPaddleDown');
+            enemy_socket.emit("enemyPaddleDown");
+        }
+    }
+    setNewBallData(x, y, velocity, speed) {
+        this.right_player.getSocket().emit('newBallData', x, y, velocity, speed);
     }
     isRoomReady() {
         if (this.left_player_status && this.right_player_status)
