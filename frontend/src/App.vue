@@ -89,7 +89,6 @@
 			});
 			userStore.socket.on("updateBlockedUsers", (new_blocked_users: string[]) => {
 				blocked_users = new_blocked_users;
-				console.log("Blocked Users:", blocked_users);
 			});
 		}
 	})
@@ -116,7 +115,9 @@
 
 	function sendMessage() {
 		if (userStore.socket != undefined) {
-			userStore.socket.emit("messageToServer", message.value);
+			message.value = message.value.trim();
+			if (message.value.length > 0)
+				userStore.socket.emit("messageToServer", message.value);
 		}
 		message.value = '';
 	}

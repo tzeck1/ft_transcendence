@@ -53,8 +53,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			input = input.substring(0, 249);
 		let tokens: string[] = input.split(' ');
 		let response: [string, string, string];
-		if (tokens[0] == "/help" && tokens.length == 1)
-			response = this.chatService.help(client);
+		if (tokens[0] == "/help" && (tokens.length == 1 || tokens.length == 2))
+			response = this.chatService.help(client, tokens[1]);
 		else if (tokens[0] == "/create" && (tokens.length == 2 || tokens.length == 3))
 			response = this.chatService.create(client, tokens[1], tokens[2]);
 		else if (tokens[0] == "/join" && (tokens.length == 2 || tokens.length == 3))

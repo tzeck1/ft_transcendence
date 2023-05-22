@@ -134,30 +134,40 @@ export class ChatService {
 	}
 
 	// TODO make '/help (command)' possible
-	help(client: Socket): [string, string, string] {
+	help(client: Socket, command: string): [string, string, string] {
 		let user = this.getUserFromSocket(client);
+		if (user == undefined)
+			return console.error("user in 'ChatService::help' is undefined") as undefined;
+
 		let recipient = user.getSocket().id;
-		let sender = "\n";
-		let message_body = 				   "*┄┄┄┄┄┄┄ HELP ┄┄┄┄┄┄┄*\n";
-		message_body = message_body.concat("[mandatory] (optional)\n\n");					 
-		message_body = message_body.concat("/help (command) {wip}\n");
-		message_body = message_body.concat("/create [name] (passwd)\n");
-		message_body = message_body.concat("/join [channel] (passwd)\n");
-		message_body = message_body.concat("/dm [username] (message)\n");
-		message_body = message_body.concat("/leave\n");
-		message_body = message_body.concat("/operator [username]\n");
-		message_body = message_body.concat("/kick [username]\n");
-		message_body = message_body.concat("/ban [username]\n");
-		message_body = message_body.concat("/mute [username] [sec]\n");
-		message_body = message_body.concat("/unmute [username]\n");
-		message_body = message_body.concat("/visit [username]\n");
-		message_body = message_body.concat("/invite [username]\n");
-		message_body = message_body.concat("/set [option] [value]\n");
-		message_body = message_body.concat("/block [username]\n");
-		message_body = message_body.concat("/unset password\n");
-		message_body = message_body.concat("/unblock [username]\n");
-		message_body = message_body.concat("/demote [username]\n");
-		message_body = message_body.concat("*┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄*\n");
+		let sender = "";
+		let message_body = "\n";
+		if (command == undefined || command == "help") {
+			message_body = message_body.concat("*┄┄┄┄┄┄┄ HELP ┄┄┄┄┄┄┄*\n");					 
+			message_body = message_body.concat("[mandatory] (optional)\n\n");					 
+			message_body = message_body.concat("/help (command) {wip}\n");
+			message_body = message_body.concat("/create [name] (passwd)\n");
+			message_body = message_body.concat("/join [channel] (passwd)\n");
+			message_body = message_body.concat("/dm [username] (message)\n");
+			message_body = message_body.concat("/leave\n");
+			message_body = message_body.concat("/operator [username]\n");
+			message_body = message_body.concat("/kick [username]\n");
+			message_body = message_body.concat("/ban [username]\n");
+			message_body = message_body.concat("/mute [username] [sec]\n");
+			message_body = message_body.concat("/unmute [username]\n");
+			message_body = message_body.concat("/visit [username]\n");
+			message_body = message_body.concat("/invite [username]\n");
+			message_body = message_body.concat("/set [option] [value]\n");
+			message_body = message_body.concat("/block [username]\n");
+			message_body = message_body.concat("/unset password\n");
+			message_body = message_body.concat("/unblock [username]\n");
+			message_body = message_body.concat("/demote [username]\n");
+			message_body = message_body.concat("*┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄*\n");
+		} else if (command == "create") {
+			message_body = message_body.concat("*┄┄┄┄┄┄ CREATE ┄┄┄┄┄┄*\n");					 
+			message_body = message_body.concat("*┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄*\n");
+
+		}
 		return [recipient, sender, message_body];
 	}
 
@@ -234,13 +244,13 @@ export class ChatService {
 			message_body = "this channel is private.";
 			return [recipient, sender, message_body];
 		}
-		if (channel.isProtected() == true && passwd == undefined) {
+		if (channel.isProtected() == true && passwd == undefined && channel.isInvited(user) == false) {
 			recipient = user.getSocket().id;
 			sender = "Error: ";
 			message_body = "this channel is password protected.";
 			return [recipient, sender, message_body];
 		}
-		if (channel.isProtected() == true && channel.rightPassword(passwd) == false) {
+		if (channel.isProtected() == true && channel.rightPassword(passwd) == false && channel.isInvited(user) == false) {
 			recipient = user.getSocket().id;
 			sender = "Error: ";
 			message_body = "wrong password.";
@@ -536,7 +546,7 @@ export class ChatService {
 			return [recipient, sender, message_body];
 		}
 		channel.addInvited(user);
-		user.getSocket().emit("messageToClient", "Floppy: ", "You have been invited to " + channel.getChannelId() + ". Type '/join " + channel.getChannelId() + " ' to join.");
+		user.getSocket().emit("messageToClient", "Floppy: ", "You have been invited to " + channel.getChannelId() + ". Type '/join " + channel.getChannelId() + "' to join.");
 		let recipient = client.id;
 		let sender = "Floppy: ";
 		let message_body = "you invited " + username + " to this channel.";
@@ -596,7 +606,10 @@ export class ChatService {
 				message_body = "This channels password was " + change + " by " + owner.getUsername() + "\n Good luck remembering it";
 			return [recipient, sender, message_body];
 		}
-		return undefined;
+		let recipient = client.id;
+		let sender = "Error: ";
+		let message_body = "unknown option. Type '/help set' for more info.";
+		return [recipient, sender, message_body];
 	}
 
 	unset(client: Socket, password: string): [string, string, string] {
