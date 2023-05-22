@@ -546,14 +546,14 @@ export class ChatService {
 
 	// TODO some issues with password setting, not sure what exactly fails => more testing
 	set(client: Socket, option: string, value: string): [string, string, string] {
-		let admin = this.getUserFromSocket(client);
-		if (admin == undefined)
-			return console.error("Admin (user) in 'ChatService::set' is undefined") as undefined;
-		let channel = this.channels.get(admin.getActiveChannelId());
+		let owner = this.getUserFromSocket(client);
+		if (owner == undefined)
+			return console.error("owner (user) in 'ChatService::set' is undefined") as undefined;
+		let channel = this.channels.get(owner.getActiveChannelId());
 		if (channel == undefined)
 			return console.error("Channel in 'ChatService::set' is undefined") as undefined;
 
-		if (channel.isAdmin(admin) == false) {
+		if (channel.isOwner(owner) == false) {
 			let recipient = client.id;
 			let sender = "Error: ";
 			let message_body = "permission denied.";
@@ -590,12 +590,13 @@ export class ChatService {
 			let old_password = channel.getPassword();
 			if (old_password == undefined)
 				change = "set";
-			channel.setPassword(option);
-			let recipient = admin.getActiveChannelId();
+			console.log("new password would be [%s]", value);
+			channel.setPassword(value);
+			let recipient = owner.getActiveChannelId();
 			let sender = "Floppy: ";
-			let message_body = "This channels password was " + change + " by " + admin.getUsername();
+			let message_body = "This channels password was " + change + " by " + owner.getUsername();
 			if (value.length > 42)
-				message_body = "This channels password was " + change + " by " + admin.getUsername() + "\n Good luck remembering it";
+				message_body = "This channels password was " + change + " by " + owner.getUsername() + "\n Good luck remembering it";
 			return [recipient, sender, message_body];
 		}
 		return undefined;
