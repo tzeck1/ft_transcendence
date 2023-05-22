@@ -43,14 +43,29 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		console.log(`Game Client Connected: ${client.id}`);
 	}
 
-	@SubscribeMessage("createOrJoin")
-	async handleCreateOrJoin(client: Socket, intra: string) {
-		if (intra == '') //store problem
-			return;
-		let searching_player = new Player(client, intra, this.users);
+	@SubscribeMessage("createOrJoinMode")
+	async handleCreateOrJoinMode(client: Socket, data: any) {
+		let searching_player = new Player(client, data[0], this.users, data[1]);
 		await searching_player.updateUserData();
 		for (let [intraname, lobby_player] of this.lobby) {
-			if (lobby_player.getScore() - this.threshold < searching_player.getScore() && searching_player.getScore() < lobby_player.getScore() + this.threshold) {
+			if (searching_player.getMode() == lobby_player.getMode()) {
+				this.createAndJoinRoom(searching_player, lobby_player);
+				return;
+			}
+			console.log("curent players mode: ", searching_player.getMode());
+			console.log("possible players mode: ", lobby_player.getMode());
+		}
+		searching_player.getSocket().join("lobby");
+		console.log("the intra is ", data[0], "and the socket is ", client.id);
+		this.lobby.set(data[0], searching_player);
+		searching_player.getSocket().emit("noOpponent");
+	}
+	@SubscribeMessage("createOrJoin")
+	async handleCreateOrJoin(client: Socket, intra: string) {
+		let searching_player = new Player(client, intra, this.users, "");
+		await searching_player.updateUserData();
+		for (let [intraname, lobby_player] of this.lobby) {
+			if (lobby_player.getMode() == "" && lobby_player.getScore() - this.threshold < searching_player.getScore() && searching_player.getScore() < lobby_player.getScore() + this.threshold) {
 				this.createAndJoinRoom(searching_player, lobby_player);
 				return;
 			}

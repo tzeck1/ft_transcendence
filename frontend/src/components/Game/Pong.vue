@@ -20,6 +20,7 @@
 			height: 1080,
 			parent: "game",
 			transparent: true,
+			title: "testadwa",
 			physics: {
 				default: 'arcade',
 				arcade: {
