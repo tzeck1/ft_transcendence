@@ -149,8 +149,6 @@ export class ChatService {
 			message_body = message_body.concat("/join [channel] (passwd)\n");
 			message_body = message_body.concat("/leave\n");
 			message_body = message_body.concat("/dm [username] (message)\n");
-			message_body = message_body.concat("/mute [username] [sec]\n");
-			message_body = message_body.concat("/unmute [username]\n");
 			message_body = message_body.concat("/block [username]\n");
 			message_body = message_body.concat("/unblock [username]\n");
 			message_body = message_body.concat("/visit [username]\n");
@@ -159,6 +157,8 @@ export class ChatService {
 			message_body = message_body.concat("/invite [username]\n");
 			message_body = message_body.concat("/set [option] [value]\n");
 			message_body = message_body.concat("/unset password\n");
+			message_body = message_body.concat("/mute [username] [sec]\n");
+			message_body = message_body.concat("/unmute [username]\n");
 			message_body = message_body.concat("/kick [username]\n");
 			message_body = message_body.concat("/ban [username]\n");
 			message_body = message_body.concat("\nDo '/help [command]' to get specific info about a command\n");
@@ -179,14 +179,6 @@ export class ChatService {
 			message_body = message_body.concat("Could also interest you:\n");
 			message_body = message_body.concat("'/help create'\n");
 			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄");
-		} else if (command == "dm") {
-			message_body = message_body.concat("┄┄┄┄┄┄ JOIN ┄┄┄┄┄┄\n");
-			message_body = message_body.concat("/join [channel] (password)\n\n");
-			message_body = message_body.concat("Description:\n");
-			message_body = message_body.concat("Feeling like a nomad in the digital world? Use this command to join an existing chat room and connect with fellow wanderers. Just type '/join' followed by the [channel] name, and voila! You'll be transported to a realm of conversations, camaraderie, and perhaps even some mild chaos. If the chat room is password protected, you can whisper the secret (password) to gain entry. But shhh, don't let it slip to the wrong hands!\n\n");
-			message_body = message_body.concat("Could also interest you:\n");
-			message_body = message_body.concat("'/help create'\n");
-			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
 		} else if (command == "leave") {
 			message_body = message_body.concat("┄┄┄┄┄┄ LEAVE ┄┄┄┄┄┄\n");
 			message_body = message_body.concat("/leave\n\n");
@@ -194,22 +186,6 @@ export class ChatService {
 			message_body = message_body.concat("Ready to bid farewell to the current channel? Use the '/leave' command to gracefully exit and return to the global channel. It's like closing one door and opening another, as you venture into new conversations and experiences.\n\n");
 			message_body = message_body.concat("Could also interest you:\n");
 			message_body = message_body.concat("'/help join'\n");
-			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
-		} else if (command == "mute") {
-			message_body = message_body.concat("┄┄┄┄┄┄ MUTE ┄┄┄┄┄┄\n");
-			message_body = message_body.concat("/mute [username] [duration]\n\n");
-			message_body = message_body.concat("Description:\n");
-			message_body = message_body.concat("Silence! The power of the '/mute' command allows you to temporarily strip [username] of their voice in the current channel. Specify the duration in seconds, and witness as their words evaporate into the digital void. Use this command wisely to maintain harmony and give them a moment of quiet contemplation. Remember, even silence can speak volumes.\n\n");
-			message_body = message_body.concat("Could also interest you:\n");
-			message_body = message_body.concat("'/help kick' - Learn how to remove users from the channel when silence is not enough.\n");
-			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
-		} else if (command == "unmute") {
-			message_body = message_body.concat("┄┄┄┄┄┄ UNMUTE ┄┄┄┄┄┄\n");
-			message_body = message_body.concat("/unmute [username]\n\n");
-			message_body = message_body.concat("Description:\n");
-			message_body = message_body.concat("Release the shackles of silence with the command '/unmute'. If you've previously imposed a temporary muting upon [username], it's time to grant them the freedom to speak once again. By using this command, you lift the veil of silence, allowing their voice to resonate in the channel once more. Embrace the power of second chances and let the words flow.\n\n");
-			message_body = message_body.concat("Could also interest you:\n");
-			message_body = message_body.concat("'/help mute' - Discover the command that bestows temporary silence upon users when needed.\n");
 			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
 		} else if (command == "block") {
 			message_body = message_body.concat("┄┄┄┄┄┄ BLOCK ┄┄┄┄┄┄\n");
@@ -231,7 +207,7 @@ export class ChatService {
 			message_body = message_body.concat("┄┄┄┄┄┄ VISIT ┄┄┄┄┄┄\n");
 			message_body = message_body.concat("/visit [username]\n\n");
 			message_body = message_body.concat("Description:\n");
-			message_body = message_body.concat("Curiosity piqued? Satiate your desire to learn more about a fellow chatter by using the '/visit' command. Simply enter the username of the person you wish to know better, and like a magical portal, their profile page will appear before you. Discover their interests, achievements, and contributions, and forge new connections in the vast digital realm.\n\n");
+			message_body = message_body.concat("Curiosity piqued? Satiate your desire to learn more about a fellow chatter by using the '/visit' command. Simply enter the username of the person you wish to know better, and like a magical portal, their profile page will appear before you. Discover their match history and achievements and forge new connections in the vast digital realm.\n\n");
 			message_body = message_body.concat("Could also interest you:\n");
 			message_body = message_body.concat("/help profile' - Learn more about managing and customizing your own profile.\n");
 			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
@@ -274,6 +250,22 @@ export class ChatService {
 			message_body = message_body.concat("Owner rights needed. Ready to break free from the shackles of a password-protected channel? Worry not, for the '/unset password' command is here to grant you liberation. With a single stroke of your digital quill, you remove the password from the channel, opening its doors wide for all to enter. Let the words flow freely once again as the channel returns to its inclusive roots.\n\n");
 			message_body = message_body.concat("Could also interest you:\n");
 			message_body = message_body.concat("'/help set' - Explore the various options you can set to customize your channel and make it truly unique.\n");
+			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
+		} else if (command == "mute") {
+			message_body = message_body.concat("┄┄┄┄┄┄ MUTE ┄┄┄┄┄┄\n");
+			message_body = message_body.concat("/mute [username] [duration]\n\n");
+			message_body = message_body.concat("Description:\n");
+			message_body = message_body.concat("Operator rights needed. Silence! The power of the '/mute' command allows you to temporarily strip [username] of their voice in the current channel. Specify the duration in seconds, and witness as their words evaporate into the digital void. Use this command wisely to maintain harmony and give them a moment of quiet contemplation. Remember, even silence can speak volumes.\n\n");
+			message_body = message_body.concat("Could also interest you:\n");
+			message_body = message_body.concat("'/help kick' - Learn how to remove users from the channel when silence is not enough.\n");
+			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
+		} else if (command == "unmute") {
+			message_body = message_body.concat("┄┄┄┄┄┄ UNMUTE ┄┄┄┄┄┄\n");
+			message_body = message_body.concat("/unmute [username]\n\n");
+			message_body = message_body.concat("Description:\n");
+			message_body = message_body.concat("Operator rights needed. Release the shackles of silence with the command '/unmute'. If you've previously imposed a temporary muting upon [username], it's time to grant them the freedom to speak once again. By using this command, you lift the veil of silence, allowing their voice to resonate in the channel once more. Embrace the power of second chances and let the words flow.\n\n");
+			message_body = message_body.concat("Could also interest you:\n");
+			message_body = message_body.concat("'/help mute' - Discover the command that bestows temporary silence upon users when needed.\n");
 			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
 		} else if (command == "kick") {
 			message_body = message_body.concat("┄┄┄┄┄┄ KICK ┄┄┄┄┄┄\n");
