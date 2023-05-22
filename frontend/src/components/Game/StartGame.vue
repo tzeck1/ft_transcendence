@@ -2,7 +2,7 @@
 	<div class="startgame">
 		<div class="slideshow" :class="{ blur: showCount }">
 			<div :class="['block-style', compSetClass]">
-				<button class="set-button" @click="search_game" v-if="compBlockSelected">
+				<button class="set-button" @click="search_game(false)" v-if="compBlockSelected">
 						<span v-show="!isLooking">Queue</span>
 						<span v-show="isLooking">Cancel</span>
 				</button>
@@ -17,7 +17,14 @@
 				<span class="block-title">Fun Mode</span>
 			</div>
 			<div :class="['block-style', funSetClass]">
-				<span class="block-title">Settings</span>
+				<button class="set-button" @click="search_game(true)" v-if="funBlockSelected">
+						<span v-show="!isLooking">Queue</span>
+						<span v-show="isLooking">Cancel</span>
+				</button>
+				<select name="mode" id="mode" multiple>
+  					<option value="speed">Speed pong</option>
+  					<option value="dodge">Dodge ball</option>
+				</select>
 			</div>
 		</div>
 		<div class="countdown-overlay" v-if="showCount">
@@ -39,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-	import { ref, computed, defineComponent } from 'vue'
+	import { ref, computed, defineComponent, vModelCheckbox } from 'vue'
 	import { useUserStore } from '../../stores/UserStore';
 	import { io, Socket } from 'socket.io-client';
 	import { storeToRefs } from 'pinia';
@@ -74,10 +81,18 @@
 		}
 	}
 
-	function search_game()
+	function search_game(fun: boolean)
 	{
+		gameStore.setMode("");
+		if (fun == true)
+		{
+			let tmp = document.getElementById("mode");
+			if (tmp.value == "") //no mode selcted
+				return ;
+			gameStore.setMode(tmp.value);
+		}
 		//establish connection
-		if (!isLooking.value) {
+		if (!isLooking.value) { // need to add mode sent to the server, so it can check if the ones looking are searching both in the same mode
 			socket = io(`${location.hostname}:3000`);
 			gameStore.setSocket(socket);
 			socket.on('connect', function() {
@@ -97,7 +112,10 @@
 			socket.on('noOpponent', function() {
 				console.log("No fitting opponent in matchmaking, waiting...");
 			});
-			socket.emit("createOrJoin", userStore.intra);
+			if (gameStore.mode == "")
+				socket.emit("createOrJoin", userStore.intra);
+			else
+				socket.emit("createOrJoinMode", userStore.intra, gameStore.mode);
 
 			isLooking.value = true;
 		}

@@ -13,6 +13,7 @@ export class Player {
 		private readonly socket: Socket,
 		private readonly intraname: string,
 		private readonly users: Users,
+		private readonly mode: string = "",
 	){}
 
 	private username: string;
@@ -27,6 +28,7 @@ export class Player {
 
 	getSocket(): Socket { return this.socket; }
 	getIntraname(): string { return this.intraname; }
+	getMode(): string { return this.mode; }
 	getUsername(): string { if (this.username == undefined) this.updateUserData(); return this.username; }
 	getPicture(): string { if (this.picture == undefined) this.updateUserData(); return this.picture; }
 	getScore(): number { if (this.score == undefined) this.updateUserData(); return this.score; }

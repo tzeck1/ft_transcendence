@@ -77,6 +77,8 @@ export default class Pong extends Phaser.Scene {
 /********************************** CREATE *************************************/
 
 	create() {
+		if (this.gameStore.mode == "speed")
+			this.paddle_velocity = 32;
 		if (this.input.keyboard == undefined)
 			console.error("Keyboard is ", this.input.keyboard);
 		this.cursors = this.input.keyboard!.createCursorKeys();
@@ -128,6 +130,8 @@ export default class Pong extends Phaser.Scene {
 				fill: true,
 		} }).setScale(this.right_score_scale);
 
+		this.left_player.name = "left";
+		this.right_player.name = "right";
 		this.left_collider = this.physics.add.collider(this.left_player, this.ball, () => this.calculateRebound(this.left_player), undefined, this);
 		this.right_collider = this.physics.add.collider(this.right_player, this.ball, () => this.calculateRebound(this.right_player), undefined, this);
 
@@ -157,6 +161,11 @@ export default class Pong extends Phaser.Scene {
 			}
 		})
 		this.socket.on("spawnBall", (y_position, x_velocity, y_velocity) => {
+			if (this.gameStore.mode != "")
+			{
+				x_velocity = 2000;
+				y_velocity *= 4;
+			}
 			this.ball.setPosition(this.width / 2, y_position);
 			this.ball.setVelocity(x_velocity, y_velocity);
 			this.ball.alpha = 1;
@@ -186,8 +195,8 @@ export default class Pong extends Phaser.Scene {
 			this.socket.emit("paddleMovement", this.inputPayload);
 
 		/*  Scoring condition  */
-		if (this.ball.body.onWall() && this.left_player.body.touching.none && this.right_player.body.touching.none) {
-			this.player_scored();
+		if (this.ball.body.onWall() && this.left_player.body.touching.none && this.right_player.body.touching.none && this.gameStore.mode != "dodge") {
+			this.player_scored("");
 			this.old_time = time;
 		}
 
@@ -208,6 +217,11 @@ export default class Pong extends Phaser.Scene {
 /********************************* METHODS *************************************/
 
 	calculateRebound(player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) {
+		if (this.gameStore.mode == "dodge")
+		{
+			this.player_scored(player.name);
+			return ;
+		}
 		let distance = Phaser.Math.Distance.Between(1, player.y, 1, this.ball.y);
 		let angle = 0;
 		if (distance > 128)
@@ -226,11 +240,11 @@ export default class Pong extends Phaser.Scene {
 		this.ball.body.velocity.scale(this.ball_velocity_scale);
 	}
 
-	player_scored() {
+	player_scored(player_name: string) {
 		if (this.left_score == this.winning_score || this.right_score == this.winning_score)
 			return;
 		let left_player_scored = false;
-		if (this.ball.body.blocked.right)
+		if (this.ball.body.blocked.right || player_name == "right")
 			left_player_scored = true;
 		this.socket.emit('scoreRequest', {left_player_scored: left_player_scored, room: this.room_id});
 		/* ending game in 'newScore' listener now */
