@@ -381,7 +381,6 @@ export class ChatService {
 		return [recipient, sender, message_body];
 	}
 
-	// TODO do not allow empty message body
 	dm(client: Socket, username: string, message_begin: string,  prompt: string): [string, string, string] {
 		let user = this.getUserFromSocket(client);
 		if (user == undefined)
@@ -807,6 +806,28 @@ export class ChatService {
 		return [recipient, sender, message_body];
 	}
 
+	// Game invite TODO:
+	// - message to the player who was invited {chat.service.ts + App.vue}
+	// - third argument for gamemode {chat.gateway.ts + chat.service.ts + StartGame.vue + game.gateway.ts}
+	// - help entry for /ping and /pong commands {chat.service.ts}
+	// - other_players profile picture is not loading (username eventually too) {game.gateway.ts::56}
+	// - the invites work only if both players are in Game (component) {chat.service.ts + App.vue}
+	// - game socket deletion is not working (refresh is a unwanted work around) {GameStore.ts + EndGame.vue + StartGame.vue}
+	// - handle cancel (ingame status)
+	//
+	// General TODO
+	// - game performance (both player calulate the game state and the server only checks for sync) + (true right player game state tracking)
+	// - node-modules + dist out of repo
+	// - differentiate between game mode for stats tracking (only MatchMaking)
+	// - rework matchmatking
+	// - if player disconnects from game, he looses
+	// - disable authentication on second tab or invalidate first tab
+	// - onlin/ingame/offline status
+	// - playagain (for fun mode)
+	// - friend request
+	// - DB password
+	// - check for latests stable versions
+	// - testing in production mode
 	public ping(client: Socket, username: string): [string, string, string] {
 		let user = this.getUserFromSocket(client);
 		if (user == undefined)

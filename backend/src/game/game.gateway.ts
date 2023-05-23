@@ -50,7 +50,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		// console.log("event 'invitePlay' was triggered. I am", client.id);
 		let intra = args[0].intra;
 		let other_intra = args[0].other_intra;
-		let player = new Player(client, intra, this.users, "");
+		let player = new Player(client, intra, this.users);
 		let other_player = this.searchInviteArray(intra, other_intra);
 		if (other_player != undefined) {// This is executed when the second player gets into handleInvitePlay
 			player.updateUserData();
@@ -103,7 +103,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	@SubscribeMessage("createOrJoin")
 	async handleCreateOrJoin(client: Socket, intra: string) {
-		let searching_player = new Player(client, intra, this.users, "");
+		let searching_player = new Player(client, intra, this.users);
 		await searching_player.updateUserData();
 		for (let [intraname, lobby_player] of this.lobby) {
 			if (lobby_player.getMode() == "" && lobby_player.getScore() - this.threshold < searching_player.getScore() && searching_player.getScore() < lobby_player.getScore() + this.threshold) {
