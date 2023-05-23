@@ -4,7 +4,7 @@
 		<div class="achievements-list">
 			<div class="achievements-item" :class="{'completed': gamesWon}">
 				<div class="logo">
-					<img src="../../assets/joystick.png"/>
+					<img src="../../assets/achievements/joystick.png"/>
 				</div>
 				<div class="text">
 					<h1>Champion in the Making</h1>
@@ -14,7 +14,7 @@
 			</div>
 			<div class="achievements-item" :class="{'completed': friends}">
 				<div class="logo">
-					<img src="../../assets/addfriend.png" class="friend-logo"/>
+					<img src="../../assets/achievements/addfriend.png" class="friend-logo"/>
 				</div>
 				<div class="text">
 					<h1>Zuckerberg in Training</h1>
@@ -24,7 +24,7 @@
 			</div>
 			<div class="achievements-item" :class="{'completed': ladder}">
 				<div class="logo">
-					<img src="../../assets/trophy.png"/>
+					<img src="../../assets/achievements/trophy.png"/>
 				</div>
 				<div class="text" :class="{'rainbow_text_animated': ladder}">
 					<h1>Ascend to the Elite</h1>
@@ -34,7 +34,7 @@
 			</div>
 			<div class="achievements-item" :class="{'completed': hackerman}">
 				<div class="logo">
-					<img src="../../assets/hackerman.png"/>
+					<img src="../../assets/achievements/hackerman.png"/>
 				</div>
 				<div class="text" :class="{'rainbow_text_animated': hackerman}">
 					<h1>Hackerman</h1>
