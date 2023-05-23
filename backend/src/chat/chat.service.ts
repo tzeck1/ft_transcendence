@@ -830,13 +830,45 @@ export class ChatService {
 			let message_body = other_user.getUsername() + " is currently ingame.";
 			return [recipient, sender, message_body];
 		}
-		user.getSocket().emit("gameInvite", user.getIntra(), other_user.getIntra());
+		// user.getSocket().emit("gameInvite", user.getIntra(), other_user.getIntra());
 		other_user.getSocket().emit("gameInvite", other_user.getIntra(), user.getIntra());
 		let recipient = client.id;
 		let sender = "Floppy: ";
 		let message_body = "You invited " + other_user.getUsername();
 		return [recipient, sender, message_body];
 	}
+
+	public pong(client: Socket, username: string): [string, string, string] {
+		let user = this.getUserFromSocket(client);
+		if (user == undefined)
+			return console.error("User in 'ChatService::ping' is undefined") as undefined;
+		let other_user = this.findUserFromUsername(username);
+		if (other_user == undefined) {
+			let recipient = client.id;
+			let sender = "Floppy: ";
+			let message_body = "This user is not online.";
+			return [recipient, sender, message_body];
+		}
+		if (user.getIngameStatus() == true) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = "You are currently ingame.";
+			return [recipient, sender, message_body];
+		}
+		if (other_user.getIngameStatus() == true) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = other_user.getUsername() + " is currently ingame.";
+			return [recipient, sender, message_body];
+		}
+		// user.getSocket().emit("gameInvite", user.getIntra(), other_user.getIntra());
+		other_user.getSocket().emit("gameInvite", other_user.getIntra(), user.getIntra());
+		let recipient = client.id;
+		let sender = "Floppy: ";
+		let message_body = "You accepted the invite of " + other_user.getUsername();
+		return [recipient, sender, message_body];
+	}
+
 }
 
 

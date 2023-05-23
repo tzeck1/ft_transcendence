@@ -76,18 +76,18 @@
 				gameStore.socket!.on("privatePlayReady", (username: string, pic: string, room_id: string) => {
 					console.log("executing privatePlayReady");
 					gameStore.setIntra(userStore.intra);
-   		     		gameStore.setEnemyName(username);
-   		     		gameStore.setEnemyPicture(pic);
+					gameStore.setEnemyName(username);
+					gameStore.setEnemyPicture(pic);
 					gameStore.setRoomId(room_id);
-	   	     		showCount.value = true;
-	   	     		countdown();
+					showCount.value = true;
+					countdown();
 				});
 				console.log("emitting inviteplay");
 				gameStore.socket!.emit("invitePlay", {intra: intra, other_intra: other_intra});
 			});
 		}
 	});
-//
+
 	function countdown() {
 		timeLeft.value--;
 		if (timeLeft.value > 0)
