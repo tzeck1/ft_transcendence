@@ -87,6 +87,9 @@
 			userStore.socket.on("sendToProfile", (intra: string) => {
 				router.push('/profile/' + intra);
 			});
+			userStore.socket.on("sendToGame", () => {
+				router.push('/game/');
+			});
 			userStore.socket.on("updateBlockedUsers", (new_blocked_users: string[]) => {
 				blocked_users = new_blocked_users;
 			});

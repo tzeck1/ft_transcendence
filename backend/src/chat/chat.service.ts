@@ -161,6 +161,8 @@ export class ChatService {
 			message_body = message_body.concat("/unmute [username]\n");
 			message_body = message_body.concat("/kick [username]\n");
 			message_body = message_body.concat("/ban [username]\n");
+			message_body = message_body.concat("/ping [username] [mode]\n");
+			message_body = message_body.concat("/pong [username]\n");
 			message_body = message_body.concat("\nDo '/help [command]' to get specific info about a command\n");
 			message_body = message_body.concat("*┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄*\n");
 		} else if (command == "create") {
@@ -281,7 +283,23 @@ export class ChatService {
 			message_body = message_body.concat("Description:\n");
 			message_body = message_body.concat("Operator rights needed. Take control over who enters the realm of your chat channel with the almighty '/ban' command. As an operator, you possess the authority to banish [username] from the channel indefinitely. They shall wander the digital wilderness, unable to return to the banished lands. Wield this power with caution and ensure your banhammer strikes only when necessary.\n\n");
 			message_body = message_body.concat("Could also interest you:\n");
-			message_body = message_body.concat("/help kick' - Discover the art of removing unwanted guests from your chat channel.\n");
+			message_body = message_body.concat("'/help kick' - Discover the art of removing unwanted guests from your chat channel.\n");
+			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
+		} else if (command == "ping") {
+			message_body = message_body.concat("┄┄┄┄┄┄ PING ┄┄┄┄┄┄\n");
+			message_body = message_body.concat("/ping [username] [mode]\n\n");
+			message_body = message_body.concat("Description:\n");
+			message_body = message_body.concat("Invite other players to a friendly game. The mode determines the type of game you choose (either speed or dodge)\n\n");
+			message_body = message_body.concat("Could also interest you:\n");
+			message_body = message_body.concat("'/help pong' - Learn how to accept incoming invites.\n");
+			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
+		} else if (command == "pong") {
+			message_body = message_body.concat("┄┄┄┄┄┄ PONG ┄┄┄┄┄┄\n");
+			message_body = message_body.concat("/pong [username]\n\n");
+			message_body = message_body.concat("Description:\n");
+			message_body = message_body.concat("Accept incoming game invites from a user\n\n");
+			message_body = message_body.concat("Could also interest you:\n");
+			message_body = message_body.concat("'/help ping' - Master inviting other players.\n");
 			message_body = message_body.concat("┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄\n\n");
 		} else {
 			message_body = message_body.concat("Unknown command. Try '/help' to get back on track\n");
@@ -806,14 +824,13 @@ export class ChatService {
 		return [recipient, sender, message_body];
 	}
 
-	// Game invite TODO:
-	// - message to the player who was invited {chat.service.ts + App.vue}
+	// Game invite TODO: //Didn't do that much because I was alone
 	// - third argument for gamemode {chat.gateway.ts + chat.service.ts + StartGame.vue + game.gateway.ts}
-	// - help entry for /ping and /pong commands {chat.service.ts}
 	// - other_players profile picture is not loading (username eventually too) {game.gateway.ts::56}
-	// - the invites work only if both players are in Game (component) {chat.service.ts + App.vue}
+	// - the invites work only if both players are in Game (component) {chat.service.ts + App.vue} //fucked it up
 	// - game socket deletion is not working (refresh is a unwanted work around) {GameStore.ts + EndGame.vue + StartGame.vue}
 	// - handle cancel (ingame status)
+	// - what happens if a player queues and accept the invite while in a queue?
 	//
 	// General TODO
 	// - game performance (both player calulate the game state and the server only checks for sync) + (true right player game state tracking)
@@ -833,7 +850,7 @@ export class ChatService {
 		if (user == undefined)
 			return console.error("User in 'ChatService::ping' is undefined") as undefined;
 		let other_user = this.findUserFromUsername(username);
-		if (other_user == undefined) {
+		if (other_user == undefined || other_user.getIntra() == user.getIntra()) {
 			let recipient = client.id;
 			let sender = "Floppy: ";
 			let message_body = "This user is not online.";
@@ -853,6 +870,7 @@ export class ChatService {
 		}
 		// user.getSocket().emit("gameInvite", user.getIntra(), other_user.getIntra());
 		other_user.getSocket().emit("gameInvite", other_user.getIntra(), user.getIntra());
+		other_user.getSocket().emit("messageToClient", "Floppy: ", user.getUsername() + " invited you to a game", other_user.getIntra());
 		let recipient = client.id;
 		let sender = "Floppy: ";
 		let message_body = "You invited " + other_user.getUsername();
@@ -864,7 +882,7 @@ export class ChatService {
 		if (user == undefined)
 			return console.error("User in 'ChatService::ping' is undefined") as undefined;
 		let other_user = this.findUserFromUsername(username);
-		if (other_user == undefined) {
+		if (other_user == undefined || other_user.getIntra() == user.getIntra()) {
 			let recipient = client.id;
 			let sender = "Floppy: ";
 			let message_body = "This user is not online.";
@@ -883,6 +901,8 @@ export class ChatService {
 			return [recipient, sender, message_body];
 		}
 		// user.getSocket().emit("gameInvite", user.getIntra(), other_user.getIntra());
+		user.getSocket().emit("sendToGame");
+		other_user.getSocket().emit("sendToGame");
 		other_user.getSocket().emit("gameInvite", other_user.getIntra(), user.getIntra());
 		let recipient = client.id;
 		let sender = "Floppy: ";
