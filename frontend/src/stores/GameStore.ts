@@ -29,6 +29,12 @@ export const useGameStore = defineStore({
 		},
 		setMode(newMode: string) {
 			this.mode = newMode;
+		},
+		disconnectSocket() {
+			if (this.socket != null) {
+				this.socket.disconnect();
+				this.socket = null as (Socket | null);
+			}
 		}
 	},
 });

@@ -8,9 +8,11 @@
 <script setup lang="ts">
 
 	import { useGameStore } from '@/stores/GameStore';
+	import { useUserStore } from '@/stores/UserStore';
 
 	const emit = defineEmits(["start-match", "show-start"]);
 	const gameStore = useGameStore();
+	const userStore = useUserStore();
 
 
 	function playAgain() {
@@ -18,7 +20,8 @@
 	}
 
 	function quit() {
-		gameStore.socket?.disconnect();
+		gameStore.disconnectSocket();
+		userStore.socket?.emit("setIngameStatus", false);
 		emit("show-start");
 	}
 

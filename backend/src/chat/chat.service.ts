@@ -806,12 +806,39 @@ export class ChatService {
 		let message_body = "you unblocked " + username;
 		return [recipient, sender, message_body];
 	}
+
+	public ping(client: Socket, username: string): [string, string, string] {
+		let user = this.getUserFromSocket(client);
+		if (user == undefined)
+			return console.error("User in 'ChatService::ping' is undefined") as undefined;
+		let other_user = this.findUserFromUsername(username);
+		if (other_user == undefined) {
+			let recipient = client.id;
+			let sender = "Floppy: ";
+			let message_body = "This user is not online.";
+			return [recipient, sender, message_body];
+		}
+		if (user.getIngameStatus() == true) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = "You are currently ingame.";
+			return [recipient, sender, message_body];
+		}
+		if (other_user.getIngameStatus() == true) {
+			let recipient = client.id;
+			let sender = "Error: ";
+			let message_body = other_user.getUsername() + " is currently ingame.";
+			return [recipient, sender, message_body];
+		}
+		user.getSocket().emit("gameInvite", user.getIntra(), other_user.getIntra());
+		other_user.getSocket().emit("gameInvite", other_user.getIntra(), user.getIntra());
+		let recipient = client.id;
+		let sender = "Floppy: ";
+		let message_body = "You invited " + other_user.getUsername();
+		return [recipient, sender, message_body];
+	}
 }
 
-	// gameInvite(client: Socket, username: string): [string, string, string] {
-	// 	//ping/pong handshake
-	// 	// TODO think about how to hold this request open
-	// }
 
 /************************************** USER ***************************************/
 
@@ -824,6 +851,7 @@ export class User {
 	){}
 
 	private username: string;
+	private ingame: boolean = false;
 	private pending_message: string = undefined;
 	private blocked_users: string[];
 
@@ -839,9 +867,11 @@ export class User {
 	public getIntra(): string { return this.intraname; }
 	public getPendingMessage(): string { return this.pending_message; }
 	public getBlocks(): string[] { this.updateUserData(); return this.blocked_users; }
+	public getIngameStatus(): boolean { return this.ingame; }
 
 	public setActiveChannel(channel: string) { this.active_channel = channel; }
 	public setPendingMessage(message: string) { this.pending_message = message; }
+	public setIngameStatus(status: boolean) { this.ingame = status; }
 
 	public addBlockedUser(intra: string) {
 		this.updateUserData();

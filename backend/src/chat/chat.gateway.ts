@@ -90,6 +90,8 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			response = await this.chatService.unblock(client, tokens[1]);
 		else if (tokens[0] == "/demote" && tokens.length == 2)
 			response = this.chatService.demote(client, tokens[1])
+		else if (tokens[0] == "/ping" && tokens.length == 2)
+			response = this.chatService.ping(client, tokens[1])
 		else if (tokens[0][0] == '/')
 			response = this.chatService.unknown(client, tokens[0]);
 		else
@@ -132,5 +134,12 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				client.emit("ChatHistory", new_chat_history, pending_message);
 			user.setPendingMessage(undefined);
 		}
+	}
+
+	@SubscribeMessage("setIngameStatus")
+	handleSetIngameStatus(client: Socket, ...args: any[]) {
+		let user = this.chatService.getUserFromSocket(client);
+		let status = args[0];
+		user.setIngameStatus(status);
 	}
 }

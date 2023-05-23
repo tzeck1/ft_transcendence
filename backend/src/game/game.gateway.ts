@@ -25,6 +25,8 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	//		key: intraname
 	private lobby: Map<string, Player> = new Map<string, Player>;
 
+	private invite_array: [string, string, Player][] = new Array<[string, string, Player]>;
+
 	private room_counter = 0;
 	private threshold = 20;
 
@@ -41,6 +43,82 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	handleConnection(client: Socket, ...args: any[]) {
 		console.log(`Game Client Connected: ${client.id}`);
+	}
+
+	@SubscribeMessage("invitePlay")
+	handleInvitePlay(client: Socket, ...args: any[]) {
+		console.log("event 'invitePlay' was triggered. I am", client.id);
+		let intra = args[0].intra;
+		let other_intra = args[0].other_intra;
+		let player = new Player(client, intra, this.users, "");
+		// existiert schon der andere spieler? => invite_arr
+		// falls nicht gehe ICH in invite_arr
+		console.log("suche nach intra:", intra, "und other_intra:", other_intra);
+		let other_player = this.searchInviteArray(intra, other_intra);
+		console.log("nach searchInviteArray");
+		if (other_player == undefined)
+			console.log("Other_player is undefined");
+		if (other_player != undefined) {
+			player.updateUserData();
+			other_player.updateUserData();
+			let index = 0;
+			//  = this.invite_array.indexOf([other_intra, intra, other_player]);//creating a new variable here, maybe that's why we can't find it
+			// if (index == -1)
+			// 	index = this.invite_array.indexOf([intra, other_intra, other_player]);
+			// if (index == -1) console.log("Error in handleInvitePlay due to invalid return from indexOf (invite_array)", other_player.getSocket().id);
+			console.log("before while index, this.invitearray.length:", index, this.invite_array.length);
+			while (index < this.invite_array.length) {
+				console.log("comparing intra, other_intra, player.intra:", intra, other_intra, other_player.getIntraname());
+				console.log("with index[0], index[1], index[2].intra:", this.invite_array[index][0], this.invite_array[index][1], (this.invite_array[index][2]).getIntraname());
+				if (this.invite_array[index][0] == intra && this.invite_array[index][1] == other_intra && this.invite_array[index][2] == other_player){
+					console.log("Found index first!");
+					break;
+				}
+				if (this.invite_array[index][1] == intra && this.invite_array[index][0] == other_intra && this.invite_array[index][2] == other_player) {
+					console.log("Found index second!");
+					break;
+				}
+				index++;
+			}
+			console.log("after while index, this.invitearray.length:", index, this.invite_array.length);
+			if (index == this.invite_array.length) 
+				index = -1;
+			if (index == -1)
+				console.log("Error in handleInvitePlay due to invalid return from indexOf (invite_array)", other_player.getSocket().id);
+			this.invite_array.splice(index, 1);
+			console.log("after splice");
+			this.room_counter += 1;
+			let room_id = "game" + this.room_counter.toString();
+			let room = new Room(room_id, player, other_player);
+			console.log("room id:", room.getRoomId());
+			this.rooms.set(room_id, room);
+			player.getSocket().join(room_id);
+			other_player.getSocket().join(room_id);
+			console.log("emitting privatePlayReady now. I am", client.id);
+			player.getSocket().emit("privatePlayReady", other_player.getUsername(), other_player.getPicture(), room_id);
+			other_player.getSocket().emit("privatePlayReady", player.getUsername(), player.getPicture(), room_id);
+		} else {
+			if (player == undefined) console.log("PLAYER is UNDEFINED");
+			this.invite_array.push([args[0].intra, args[0].other_intra, player]);
+			console.log("args:",args[0].intra);
+			console.log("args:",args[0].other_intra);
+			console.log(player.getIntraname());
+			console.log("I am the first to enter this event handler, I am", client.id);
+		}
+
+		// falls ja holen wir uns den spieler und erstellen einen raum
+		// und der andere verlaesst invite_arr
+
+	}
+
+	private searchInviteArray(intra: string, other_intra: string): Player {
+		console.log(this.invite_array);
+		for (let tuple of this.invite_array) {
+			if ((tuple[0] == intra || tuple[1] == intra) && (tuple[0] == other_intra || tuple[1] == other_intra)) {
+				return tuple[2];
+			}
+		}
+		return undefined;
 	}
 
 	@SubscribeMessage("createOrJoinMode")
@@ -60,6 +138,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		this.lobby.set(data[0], searching_player);
 		searching_player.getSocket().emit("noOpponent");
 	}
+
 	@SubscribeMessage("createOrJoin")
 	async handleCreateOrJoin(client: Socket, intra: string) {
 		let searching_player = new Player(client, intra, this.users, "");
@@ -98,7 +177,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		let player = this.lobby.get(intra);
 		client.leave("lobby");
 		this.lobby.delete(player.getIntraname());
-		client.disconnect(true);
+		//client.disconnect(true);
 	}
 
 	@SubscribeMessage("scoreRequest")

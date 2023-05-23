@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-	import { ref, computed, defineComponent, vModelCheckbox } from 'vue'
+	import { ref, computed, onMounted, defineComponent, vModelCheckbox, watch } from 'vue'
 	import { useUserStore } from '../../stores/UserStore';
 	import { io, Socket } from 'socket.io-client';
 	import { storeToRefs } from 'pinia';
@@ -69,6 +69,25 @@
 	const { enemy_picture } = storeToRefs(gameStore);
 	const emit = defineEmits(["start-match"]);
 
+	watch( () => userStore.socket, (newVal, oldVal) => {
+		if (newVal != undefined) {
+			userStore.socket!.on("gameInvite", (intra: string, other_intra: string) => {
+				gameStore.setSocket(io(`${location.hostname}:3000/game_socket`, {autoConnect: false}));
+				gameStore.socket!.on("privatePlayReady", (username: string, pic: string, room_id: string) => {
+					console.log("executing privatePlayReady");
+					gameStore.setIntra(userStore.intra);
+   		     		gameStore.setEnemyName(username);
+   		     		gameStore.setEnemyPicture(pic);
+					gameStore.setRoomId(room_id);
+	   	     		showCount.value = true;
+	   	     		countdown();
+				});
+				console.log("emitting inviteplay");
+				gameStore.socket!.emit("invitePlay", {intra: intra, other_intra: other_intra});
+			});
+		}
+	});
+//
 	function countdown() {
 		timeLeft.value--;
 		if (timeLeft.value > 0)
@@ -94,6 +113,8 @@
 		//establish connection
 		if (!isLooking.value) { // need to add mode sent to the server, so it can check if the ones looking are searching both in the same mode
 			socket = io(`${location.hostname}:3000/game_socket`);
+			if (socket != undefined)
+				userStore.socket?.emit("setIngameStatus", true);
 			gameStore.setSocket(socket);
 			socket.on('connect', function() {
 				console.log('Connected');
@@ -123,6 +144,7 @@
 			console.log("store.intra is: ", userStore.intra);
 			socket.emit("cancelQueue", userStore.intra);
 			isLooking.value = false;
+			gameStore.disconnectSocket();
 		}
 	}
 
