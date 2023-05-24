@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import type { Socket } from 'socket.io-client';
 
 export const useUserStore = defineStore({
 	id: 'UserStore',
@@ -8,6 +9,7 @@ export const useUserStore = defineStore({
 		username: '',
 		profile_picture: '',
 		tfa_enabled: false,
+		socket: null as (Socket | null),
 	}),
 	actions: {
 		setIntra(newIntra: string) {
@@ -22,12 +24,18 @@ export const useUserStore = defineStore({
 		setTFA(state: boolean) {
 			this.tfa_enabled = state;
 		},
+		setSocket(socket: Socket) {
+			this.socket = socket;
+		},
 		delContent() {
+			console.log("deleteContent was called");
 			this.id = -1;
 			this.intra = '';
 			this.username = '';
 			this.profile_picture = '';
 			this.tfa_enabled = false;
+			this.socket?.disconnect();
+			this.socket = null;
 		}
 	},
 });
@@ -38,4 +46,5 @@ interface State {
 	username: string;
 	profile_picture: string;
 	tfa_enabled: boolean;
+	socket: Socket;
 }

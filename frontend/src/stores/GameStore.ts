@@ -9,6 +9,8 @@ export const useGameStore = defineStore({
 		room_id: "",
 		enemy_name: "",
 		enemy_picture: "",
+		room_id: "",
+		mode: "",
 	}),
 	actions: {
 		setIntra(newIntra: string) {
@@ -26,6 +28,18 @@ export const useGameStore = defineStore({
 		setEnemyPicture(newEnemyPicture: string) {
 			this.enemy_picture = newEnemyPicture;
 		},
+		setRoomId(newRoomId: string) {
+			this.room_id = newRoomId;
+		},
+		setMode(newMode: string) {
+			this.mode = newMode;
+		},
+		disconnectSocket() {
+			if (this.socket != null) {
+				this.socket.disconnect();
+				this.socket = null as (Socket | null);
+			}
+		}
 	},
 });
 
@@ -35,4 +49,6 @@ interface State {
 	room_id: string;
 	enemy_name: string;
 	enemy_picture: string;
+	room_id: string;
+	mode: string;
 }

@@ -2,7 +2,7 @@
 	<div class="startgame">
 		<div class="slideshow" :class="{ blur: showCount }">
 			<div :class="['block-style', compSetClass]">
-				<button class="set-button" @click="search_game" v-if="compBlockSelected">
+				<button class="set-button" @click="search_game(false)" v-if="compBlockSelected">
 						<span v-show="!isLooking">Queue</span>
 						<span v-show="isLooking">Cancel</span>
 				</button>
@@ -17,7 +17,14 @@
 				<span class="block-title">Fun Mode</span>
 			</div>
 			<div :class="['block-style', funSetClass]">
-				<span class="block-title">Settings</span>
+				<button class="set-button" @click="search_game(true)" v-if="funBlockSelected">
+						<span v-show="!isLooking">Queue</span>
+						<span v-show="isLooking">Cancel</span>
+				</button>
+				<select name="mode" id="mode" multiple>
+  					<option value="speed">Speed pong</option>
+  					<option value="dodge">Dodge ball</option>
+				</select>
 			</div>
 		</div>
 		<div class="countdown-overlay" v-if="showCount">
@@ -39,12 +46,14 @@
 </template>
 
 <script setup lang="ts">
-	import { ref, computed, defineComponent } from 'vue'
+	import { ref, computed, onMounted, defineComponent, vModelCheckbox, watch } from 'vue'
 	import { useUserStore } from '../../stores/UserStore';
 	import { io, Socket } from 'socket.io-client';
 	import { storeToRefs } from 'pinia';
 	import { useGameStore } from '../../stores/GameStore';
 	import Game from '../../views/Game.vue'
+	import endGame from '../Game/EndGame.vue'
+	import router from '@/router';
 
 	const userStore = useUserStore();
 	const gameStore = useGameStore();
@@ -60,7 +69,91 @@
 	const { profile_picture } = storeToRefs(userStore);
 	const { enemy_name } = storeToRefs(gameStore);
 	const { enemy_picture } = storeToRefs(gameStore);
-	const emit = defineEmits(["start-match"]);
+	const emit = defineEmits(["start-match", "show-end", "show-start"]);
+
+	document.addEventListener("visibilitychange", () => {
+		if (document.hidden) {
+			console.log("page is hidden!");
+			userStore.socket?.emit("")
+			if (gameStore.socket != null) {
+				console.log("user was ingame and changed tab!");
+
+				if (isLooking.value == true){
+					search_game(false);
+					console.log("isLooking is", isLooking.value);
+				} else {//user is ingame, not only in queue
+					//if inside an actual game room, let the other user know their enemy left the game and it counts as a win
+					userStore.socket!.emit("setIngameStatus", false);
+					gameStore.disconnectSocket();
+					router.push('/profile');
+					//quit the game, save the game data to database
+				}
+			}
+		} else {//document.hidden != true
+			console.log("page is visible");
+		}
+	});
+
+	// redundancy (watch and onMounted) because watch is needed when page is reloaded on game page (new socket created),
+	// and onMounted is needed when just switching to game page
+	watch( () => userStore.socket, (newVal, oldVal) => {
+		// console.log("triggered watch, userStore.socket changed to", newVal, "from", oldVal);
+		if (newVal != undefined) {
+			if (userStore.socket?.hasListeners("gameInvite") == false) {
+				// console.log("setup listener for gameInvite");
+				userStore.socket!.on("gameInvite", (intra: string, other_intra: string, mode: string) => {
+					// console.log("executing gameInvite");
+					gameStore.setMode(mode);
+					gameStore.setSocket(io(`${location.hostname}:3000/game_socket`, {autoConnect: false}));
+					if (gameStore.socket!.hasListeners("privatePlayReady") == false) {
+						// console.log("setup listener for privatePlayReady");
+						gameStore.socket!.on("privatePlayReady", (username: string, pic: string, room_id: string) => {
+							// console.log("executing privatePlayReady");
+							gameStore.setIntra(userStore.intra);
+							gameStore.setEnemyName(username);
+							gameStore.setEnemyPicture(pic);
+							gameStore.setRoomId(room_id);
+							showCount.value = true;
+							countdown();
+						});
+					}
+					// console.log("emitting inviteplay");
+					gameStore.socket!.emit("invitePlay", {intra: intra, other_intra: other_intra});
+				});
+			}
+		}
+		else
+			console.log("newVal was undefined in the watch function");//does this ever happen?
+	});
+
+	// redundancy (watch and onMounted) because watch is needed when page is reloaded on game page (new socket created),
+	// and onMounted is needed when just switching to game page
+	onMounted(() => {
+		console.log("onmounted of startGame.vue");
+		if (userStore.socket?.hasListeners("gameInvite") == false) {
+			// console.log("setup listener for gameInvite");
+			userStore.socket!.on("gameInvite", (intra: string, other_intra: string, mode: string) => {
+				// console.log("executing gameInvite");
+				gameStore.setMode(mode);
+				gameStore.setSocket(io(`${location.hostname}:3000/game_socket`, {autoConnect: false}));
+				if (gameStore.socket!.hasListeners("privatePlayReady") == false) {
+					// console.log("setup listener for privatePlayReady");
+					gameStore.socket!.on("privatePlayReady", (username: string, pic: string, room_id: string) => {
+						// console.log("executing privatePlayReady");
+						gameStore.setIntra(userStore.intra);
+						gameStore.setEnemyName(username);
+						gameStore.setEnemyPicture(pic);
+						gameStore.setRoomId(room_id);
+						showCount.value = true;
+						countdown();
+					});
+				}
+				// console.log("emitting inviteplay");
+				gameStore.socket!.emit("invitePlay", {intra: intra, other_intra: other_intra});
+			});
+
+		}
+	});
 
 	function countdown() {
 		timeLeft.value--;
@@ -74,11 +167,21 @@
 		}
 	}
 
-	function search_game()
+	function search_game(fun: boolean)
 	{
+		gameStore.setMode("");
+		if (fun == true)
+		{
+			let tmp = document.getElementById("mode");
+			if (tmp.value == "") //no mode selcted
+				return ;
+			gameStore.setMode(tmp.value);
+		}
 		//establish connection
 		if (!isLooking.value) {
-			socket = io(`${location.hostname}:3000`);
+			socket = io(`${location.hostname}:3000/game_socket`);
+			if (socket != undefined)
+				userStore.socket?.emit("setIngameStatus", true);
 			gameStore.setSocket(socket);
 			socket.on('connect', function() {
 				console.log('Connected');
@@ -87,17 +190,21 @@
 				console.log('Disconnected');
 			});
 			socket.on('foundOpponent', function(username: string, pic: string, room_id: string) {
+				isLooking.value = false;
 				gameStore.setIntra(userStore.intra);
-        		gameStore.setEnemyName(username);
-        		gameStore.setEnemyPicture(pic);
+				gameStore.setEnemyName(username);
+				gameStore.setEnemyPicture(pic);
 				gameStore.setRoomId(room_id);
-        		showCount.value = true;
-        		countdown();
+				showCount.value = true;
+				countdown();
 			});
 			socket.on('noOpponent', function() {
 				console.log("No fitting opponent in matchmaking, waiting...");
 			});
-			socket.emit("createOrJoin", userStore.intra);
+			if (gameStore.mode == "")
+				socket.emit("createOrJoin", userStore.intra);
+			else
+				socket.emit("createOrJoinMode", userStore.intra, gameStore.mode);
 
 			isLooking.value = true;
 		}
@@ -105,6 +212,7 @@
 			console.log("store.intra is: ", userStore.intra);
 			socket.emit("cancelQueue", userStore.intra);
 			isLooking.value = false;
+			gameStore.disconnectSocket();
 		}
 	}
 

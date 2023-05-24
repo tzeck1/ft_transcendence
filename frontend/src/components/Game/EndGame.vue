@@ -60,7 +60,8 @@
 	};
 
 	function quit() {
-		gameStore.socket?.disconnect();
+		gameStore.disconnectSocket();
+		userStore.socket?.emit("setIngameStatus", false);
 		emit("show-start");
 	};
 

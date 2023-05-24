@@ -11,6 +11,7 @@ import { Games, Room, Player } from './game.service';
 import { Users } from '../user/user.service';
 
 @WebSocketGateway({
+	namespace: '/game_socket',
 	cors: {
 		origin: '*',
 	},
@@ -24,32 +25,88 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	//		key: intraname
 	private lobby: Map<string, Player> = new Map<string, Player>;
 
+	private invite_array: [string, string, Player][] = new Array<[string, string, Player]>;
+
 	private room_counter = 0;
 	private threshold = 20;
 
 	@WebSocketServer() server: Server;
 
 	afterInit(server: Server) {
-		console.log('Initialized');
+		console.log('Game Initialized');
 		//create a lobby socket.io room
 	}
 
 	handleDisconnect(client: Socket) {
-		console.log(`Client Disconnected: ${client.id}`);
+		console.log(`Game Client Disconnected: ${client.id}`);
 	}
 
 	handleConnection(client: Socket, ...args: any[]) {
-		console.log(`Client Connected: ${client.id}`);
+		console.log(`Game Client Connected: ${client.id}`);
+	}
+
+	@SubscribeMessage("invitePlay")
+	handleInvitePlay(client: Socket, ...args: any[]) {
+		// console.log("event 'invitePlay' was triggered. I am", client.id);
+		let intra = args[0].intra;
+		let other_intra = args[0].other_intra;
+		let player = new Player(client, intra, this.users);
+		let other_player = this.searchInviteArray(intra, other_intra);
+		if (other_player != undefined) {// This is executed when the second player gets into handleInvitePlay
+			player.updateUserData();
+			other_player.updateUserData();
+			let index = this.invite_array.indexOf([other_intra, intra, other_player]);
+			if (index == -1)
+				index = this.invite_array.indexOf([intra, other_intra, other_player]);
+			if (index == -1)
+				console.log("Error in handleInvitePlay due to invalid return from indexOf (invite_array)", other_player.getSocket().id);
+			this.invite_array.splice(index, 1);
+			this.room_counter += 1;
+			let room_id = "game" + this.room_counter.toString();
+			let room = new Room(room_id, player, other_player);
+			this.rooms.set(room_id, room);
+			player.getSocket().join(room_id);
+			other_player.getSocket().join(room_id);
+			player.getSocket().emit("privatePlayReady", other_player.getUsername(), other_player.getPicture(), room_id);
+			other_player.getSocket().emit("privatePlayReady", player.getUsername(), player.getPicture(), room_id);
+		} else // This is executed when the first player gets into handleInvitePlay
+			this.invite_array.push([args[0].intra, args[0].other_intra, player]);
+	}
+
+	private searchInviteArray(intra: string, other_intra: string): Player {
+		console.log(this.invite_array);
+		for (let tuple of this.invite_array) {
+			if ((tuple[0] == intra || tuple[1] == intra) && (tuple[0] == other_intra || tuple[1] == other_intra)) {
+				return tuple[2];
+			}
+		}
+		return undefined;
+	}
+
+	@SubscribeMessage("createOrJoinMode")
+	async handleCreateOrJoinMode(client: Socket, data: any) {
+		let searching_player = new Player(client, data[0], this.users, data[1]);
+		await searching_player.updateUserData();
+		for (let [intraname, lobby_player] of this.lobby) {
+			if (searching_player.getMode() == lobby_player.getMode()) {
+				this.createAndJoinRoom(searching_player, lobby_player);
+				return;
+			}
+			console.log("curent players mode: ", searching_player.getMode());
+			console.log("possible players mode: ", lobby_player.getMode());
+		}
+		searching_player.getSocket().join("lobby");
+		console.log("the intra is ", data[0], "and the socket is ", client.id);
+		this.lobby.set(data[0], searching_player);
+		searching_player.getSocket().emit("noOpponent");
 	}
 
 	@SubscribeMessage("createOrJoin")
 	async handleCreateOrJoin(client: Socket, intra: string) {
-		if (intra == '') //store problem
-			return;
 		let searching_player = new Player(client, intra, this.users);
 		await searching_player.updateUserData();
 		for (let [intraname, lobby_player] of this.lobby) {
-			if (lobby_player.getScore() - this.threshold < searching_player.getScore() && searching_player.getScore() < lobby_player.getScore() + this.threshold) {
+			if (lobby_player.getMode() == "" && lobby_player.getScore() - this.threshold < searching_player.getScore() && searching_player.getScore() < lobby_player.getScore() + this.threshold) {
 				this.createAndJoinRoom(searching_player, lobby_player);
 				return;
 			}
@@ -82,7 +139,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		let player = this.lobby.get(intra);
 		client.leave("lobby");
 		this.lobby.delete(player.getIntraname());
-		client.disconnect(true);
+		//client.disconnect(true);
 	}
 
 	@SubscribeMessage("scoreRequest")
@@ -125,7 +182,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		}
 		room.moveBoth(player, enemy, data);
 	}
-
 
 	@SubscribeMessage("iAmReady")
 	handleIAmReady(client: Socket, room_id: string) {
