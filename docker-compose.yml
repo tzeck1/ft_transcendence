@@ -12,6 +12,9 @@ services:
       - './backend:/app'
     #   - '/app/node_modules'
     command: npm run start:dev
+    networks:
+      - backend-net
+      - db-net
 
   frontend:
     container_name: frontend
@@ -23,6 +26,9 @@ services:
       - './frontend/public:/app/public'
       - './frontend/vite.config.ts:/app/vite.config.ts'
     command: npm run dev
+    networks:
+      - internet
+      - backend-net
 
   db:
     container_name: database
@@ -35,7 +41,13 @@ services:
       - 'v_database:/var/lib/postgresql/data'
     ports:
       - "5432:5432"
+    networks:
+      - db-net
 
 volumes:
   v_database:
-  v_frontend:
+
+networks:
+  internet:
+  backend-net:
+  db-net:

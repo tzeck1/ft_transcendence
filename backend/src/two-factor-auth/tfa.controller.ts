@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Post, Request, UseGuards, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards, Query } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { TwoFactorAuthService } from './tfa.service';
 import { Users } from '../user/user.service';
+import { Response } from '@nestjs/common';
 
 @Controller('2fa')
 export class TwoFactorAuthController {
@@ -11,7 +12,7 @@ export class TwoFactorAuthController {
 		private readonly userService: Users,
 	) {}
 
-	// @UseGuards(JwtAuthGuard)
+	@UseGuards(JwtAuthGuard)
 	@Get('enable')
 	async enable2FA(@Query('intra') intra: string) {
 		console.log(`2fa enable called with intra [${intra}]`);
@@ -23,7 +24,7 @@ export class TwoFactorAuthController {
 		return { qrCode };
 	}
 
-	// @UseGuards(JwtAuthGuard)
+	@UseGuards(JwtAuthGuard)
 	@Post('verify')
 	async verify2FA(@Body('intra') intra: string, @Body('token') token: string) {
 		console.log(token);
@@ -36,7 +37,7 @@ export class TwoFactorAuthController {
 		return { message: '2FA token verified successfully' };
 	}
 
-	// @UseGuards(JwtAuthGuard)
+	@UseGuards(JwtAuthGuard)
 	@Get('disable')
 	async disable2FA(@Query('intra') intra: string) {
 		await this.userService.set2FASecret(intra, null);

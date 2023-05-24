@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { Socket } from 'socket.io';
 import { Users } from '../user/user.service';
+import prisma from 'src/prisma';
 import { SubscribeMessage } from '@nestjs/websockets';
 
 @Injectable()
-export class GameService {
+export class Games {
 	constructor( readonly users: Users ) {}
 }
 
@@ -149,4 +150,118 @@ export class Room {
 		this.left_score_status = false;
 		this.right_score_status = false;
 	}
+}
+
+@Injectable()
+export class Game {
+
+	/*	========== SETTER ==========	*/
+	async setGameData(intra: string, player: string, enemy: string, player_score: number, enemy_score: number, ranked: boolean, paddle_hits_e: number, paddle_hits_m: number) {
+		const newUsersEntry = await prisma.games.create( {
+			data: {
+				intra:				intra,
+				player:				player,
+				enemy:				enemy,
+				player_score:		player_score,
+				enemy_score:		enemy_score,
+				ranked:				ranked,
+				date:				new Date(),
+				paddle_hits_e:		paddle_hits_e,
+				paddle_hits_m:		paddle_hits_m,
+			},
+		});
+		if (player_score > enemy_score) {
+			await prisma.users.update({
+				where: {
+					intra_name: intra,
+				},
+				data: {
+					rank: { increment: 1},
+					games_won: { increment: 1 }
+				}
+			})
+		}
+		else {
+			const user = await prisma.users.findUnique({
+				where: {
+				  intra_name: intra,
+				},
+			});
+			if (user && user.rank > 0) {
+				await prisma.users.update({
+					where: {
+						intra_name: intra,
+					},
+					data: {
+						rank: { decrement: 1},
+						games_lost: { increment: 1 }
+					}
+				})
+			}
+		}
+		await prisma.users.update({
+			where: {
+				intra_name: intra,
+			},
+			data: {
+				games_played: { increment: 1}
+			}
+		})
+	}
+
+	/*	========== GETTER ==========	*/
+	async getLastGame(intra: string) {
+		const latestGame = await prisma.games.findFirst({
+			where: {
+				intra: intra,
+			},
+			orderBy: {
+				date: 'desc',
+			},
+		});
+		return latestGame;
+	}
+
+	async getUserGames(intra: string) {
+		const userGames = await prisma.games.findMany({
+			where: {
+				intra: intra,
+			},
+			orderBy: {
+				date: 'desc',
+			},
+		});
+
+		userGames.forEach(game => {
+			(game as any).formattedDate = formatDate(game.date);
+		});
+
+		return userGames;
+	}
+
+	async getUserGamesAsc(intra: string) {
+		const userGames = await prisma.games.findMany({
+			where: {
+				intra: intra,
+			},
+			orderBy: {
+				date: 'asc',
+			},
+		});
+
+		userGames.forEach(game => {
+			(game as any).formattedDate = formatDate(game.date);
+		});
+
+		return userGames;
+	}
+
+}
+
+function formatDate(date: Date) {
+	const day = date.getDate();
+	const month = date.getMonth() + 1;
+	const year = date.getFullYear().toString().substr(-2);
+
+	return `${day}/${month}/${year}`;
 }

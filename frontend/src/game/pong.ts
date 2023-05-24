@@ -1,7 +1,9 @@
 import Phaser from 'phaser';
 import { useGameStore } from '@/stores/GameStore';
+import { useUserStore } from '@/stores/UserStore';
 import { Socket } from 'socket.io-client';
 import pongComp from '../components/Game/Pong.vue';
+import axios from 'axios';
 
 export default class Pong extends Phaser.Scene {
 	left_player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -20,6 +22,7 @@ export default class Pong extends Phaser.Scene {
 	right_collider!: Phaser.Physics.Arcade.Collider;
 
 	gameStore = useGameStore();
+	userStore = useUserStore();
 	socket = <Socket>this.gameStore.socket;
 	room_id = this.gameStore.room_id;
 	old_time = 0;
@@ -27,7 +30,9 @@ export default class Pong extends Phaser.Scene {
 	height = 1080;
 	left_score = 0;
 	right_score = 0;
-	winning_score = 11;
+	paddle_hits_m = 0;
+	paddle_hits_e = 0;
+	winning_score = 3;
 	next_ball_spawn_left = false;
 	next_ball_spawn_right = false;
 	paddle_velocity = 16;
@@ -156,6 +161,8 @@ export default class Pong extends Phaser.Scene {
 			this.left_score_txt.text = String(this.left_score);
 			this.right_score_txt.text = String(this.right_score);
 			if (this.left_score == this.winning_score || this.right_score == this.winning_score) {
+				// save score in db
+				axios.post(`http://${location.hostname}:3000/game/setGameData`, { intra: this.gameStore.intra, player: this.userStore.username, enemy: this.gameStore.enemy_name, player_score: this.left_score, enemy_score: this.right_score, ranked: true, paddle_hits_e: this.paddle_hits_e, paddle_hits_m: this.paddle_hits_m });
 				this.game.destroy(true); //don't know if destroy is the correct way to end instance of pong
 				// TODO end game here
 			}
@@ -232,6 +239,20 @@ export default class Pong extends Phaser.Scene {
 			angle = 30;
 		else if (distance > 32)
 			angle = 15;
+		if (angle === 0) {
+			if (player === this.left_player)
+			{
+				this.paddle_hits_m++;
+				// console.log(player + 's paddle_hits_m: ' + this.paddle_hits_m)
+			}
+		}
+		else {
+			if (player === this.left_player)
+			{
+				this.paddle_hits_e++;
+				// console.log(player + 's paddle_hits_e: ' + this.paddle_hits_e)
+			}
+		}
 		if ((player.y > this.ball.y && this.ball.x < this.width / 2) || player.y < this.ball.y && this.ball.x > this.width / 2)
 			angle *= -1;
 		if (this.ball.x > this.width / 2)

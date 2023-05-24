@@ -4,30 +4,36 @@ import { Response } from 'express';
 import { CustomRequest } from './custom-request.interface';
 import { Users } from '../user/user.service';
 import { ConfigService } from '@nestjs/config';
+import { AuthService } from './auth.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 
 @Controller('auth')
 export class AuthController {
 
-	constructor(private readonly users: Users) {}
+	constructor(private readonly users: Users, private readonly authService: AuthService) {}
 
 	@Get('api42/callback')
 	@UseGuards(AuthGuard('api42'))
 	async api42Callback(@Req() req: CustomRequest, @Res() res: Response) {
 		const username = req.user.displayName;
-		const frontendUrl = `http://${process.env.HOST_IP}:8080`;
+		const frontendUrl = `http://${process.env.HOST_IP}:8080`
+		const accessToken = await this.authService.createToken(username);
+		console.log('access token created for: ', username, ', ', accessToken);
 		res.cookie('username', JSON.stringify(username), { httpOnly: false });
+		res.cookie('accessToken', accessToken, { httpOnly: false });
 		res.redirect(frontendUrl);
 	}
 
 	@Get('getUserData')
 		async getUserData(@Query('intra') intra: string): Promise<any> {
-		const userData = {
-			username: await this.users.getUsernameByIntra(intra),
-			avatarUrl: await this.users.getAvatarByIntra(intra),
-			tfa_enabled: await this.users.getTFA(intra),
-		}
-		return userData;
+		// const userData = {
+		// 	username: await this.users.getUsernameByIntra(intra),
+		// 	avatarUrl: await this.users.getAvatarByIntra(intra),
+		// 	tfa_enabled: await this.users.getTFA(intra),
+		// }
+		// return userData;
+		return this.users.getUser(intra);
 	}
 
 	@Get('api42')
