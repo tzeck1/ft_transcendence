@@ -826,8 +826,7 @@ export class ChatService {
 
 	// Game invite TODO: //Didn't do that much because I was alone
 	// - third argument for gamemode {chat.gateway.ts + chat.service.ts + StartGame.vue + game.gateway.ts}
-	// - other_players profile picture is not loading (username eventually too) {game.gateway.ts::56}
-	// - the invites work only if both players are in Game (component) {chat.service.ts + App.vue} //fucked it up
+	// - other_players profile picture and username is not loading {game.gateway.ts::56}
 	// - game socket deletion is not working (refresh is a unwanted work around) {GameStore.ts + EndGame.vue + StartGame.vue}
 	// - handle cancel (ingame status)
 	// - what happens if a player queues and accept the invite while in a queue?
@@ -839,11 +838,11 @@ export class ChatService {
 	// - rework matchmatking
 	// - if player disconnects from game, he looses
 	// - disable authentication on second tab or invalidate first tab
-	// - onlin/ingame/offline status
-	// - playagain (for fun mode)
+	// - online/ingame/offline status
+	// - play again (for fun mode)
 	// - friend request
 	// - DB password
-	// - check for latests stable versions
+	// - check for latest stable versions
 	// - testing in production mode
 	public ping(client: Socket, username: string): [string, string, string] {
 		let user = this.getUserFromSocket(client);
@@ -868,8 +867,6 @@ export class ChatService {
 			let message_body = other_user.getUsername() + " is currently ingame.";
 			return [recipient, sender, message_body];
 		}
-		// user.getSocket().emit("gameInvite", user.getIntra(), other_user.getIntra());
-		other_user.getSocket().emit("gameInvite", other_user.getIntra(), user.getIntra());
 		other_user.getSocket().emit("messageToClient", "Floppy: ", user.getUsername() + " invited you to a game", other_user.getIntra());
 		let recipient = client.id;
 		let sender = "Floppy: ";
@@ -903,6 +900,7 @@ export class ChatService {
 		// user.getSocket().emit("gameInvite", user.getIntra(), other_user.getIntra());
 		user.getSocket().emit("sendToGame");
 		other_user.getSocket().emit("sendToGame");
+		user.getSocket().emit("gameInvite", user.getIntra(), other_user.getIntra());
 		other_user.getSocket().emit("gameInvite", other_user.getIntra(), user.getIntra());
 		let recipient = client.id;
 		let sender = "Floppy: ";

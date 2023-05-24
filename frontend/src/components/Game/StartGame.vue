@@ -70,21 +70,57 @@
 	const emit = defineEmits(["start-match"]);
 
 	watch( () => userStore.socket, (newVal, oldVal) => {
+		// console.log("triggered watch, userStore.socket changed to", newVal, "from", oldVal);
 		if (newVal != undefined) {
-			userStore.socket!.on("gameInvite", (intra: string, other_intra: string) => {
-				gameStore.setSocket(io(`${location.hostname}:3000/game_socket`, {autoConnect: false}));
-				gameStore.socket!.on("privatePlayReady", (username: string, pic: string, room_id: string) => {
-					console.log("executing privatePlayReady");
-					gameStore.setIntra(userStore.intra);
-					gameStore.setEnemyName(username);
-					gameStore.setEnemyPicture(pic);
-					gameStore.setRoomId(room_id);
-					showCount.value = true;
-					countdown();
+			if (userStore.socket?.hasListeners("gameInvite") == false) {
+				// console.log("setup listener for gameInvite");
+				userStore.socket!.on("gameInvite", (intra: string, other_intra: string) => {
+					// console.log("executing gameInvite");
+					gameStore.setSocket(io(`${location.hostname}:3000/game_socket`, {autoConnect: false}));
+					if (gameStore.socket!.hasListeners("privatePlayReady") == false) {
+						// console.log("setup listener for privatePlayReady");
+						gameStore.socket!.on("privatePlayReady", (username: string, pic: string, room_id: string) => {
+							// console.log("executing privatePlayReady");
+							gameStore.setIntra(userStore.intra);
+							gameStore.setEnemyName(username);
+							gameStore.setEnemyPicture(pic);
+							gameStore.setRoomId(room_id);
+							showCount.value = true;
+							countdown();
+						});
+					}
+					// console.log("emitting inviteplay");
+					gameStore.socket!.emit("invitePlay", {intra: intra, other_intra: other_intra});
 				});
-				console.log("emitting inviteplay");
+			}
+		}
+		else
+			console.log("newVal was undefined in the watch function");//does this ever happen?
+	});
+
+	onMounted(() => {
+		// console.log("onmounted of startGame.vue");
+		if (userStore.socket?.hasListeners("gameInvite") == false) {
+			// console.log("setup listener for gameInvite");
+			userStore.socket!.on("gameInvite", (intra: string, other_intra: string) => {
+				// console.log("executing gameInvite");
+				gameStore.setSocket(io(`${location.hostname}:3000/game_socket`, {autoConnect: false}));
+				if (gameStore.socket!.hasListeners("privatePlayReady") == false) {
+					// console.log("setup listener for privatePlayReady");
+					gameStore.socket!.on("privatePlayReady", (username: string, pic: string, room_id: string) => {
+						// console.log("executing privatePlayReady");
+						gameStore.setIntra(userStore.intra);
+						gameStore.setEnemyName(username);
+						gameStore.setEnemyPicture(pic);
+						gameStore.setRoomId(room_id);
+						showCount.value = true;
+						countdown();
+					});
+				}
+				// console.log("emitting inviteplay");
 				gameStore.socket!.emit("invitePlay", {intra: intra, other_intra: other_intra});
 			});
+
 		}
 	});
 
