@@ -844,29 +844,22 @@ export class ChatService {
 	// - DB password
 	// - check for latest stable versions
 	// - testing in production mode
-	public ping(client: Socket, username: string): [string, string, string] {
+	public ping(client: Socket, username: string, mode=""): [string, string, string] {
 		let user = this.getUserFromSocket(client);
 		if (user == undefined)
 			return console.error("User in 'ChatService::ping' is undefined") as undefined;
 		let other_user = this.findUserFromUsername(username);
-		if (other_user == undefined || other_user.getIntra() == user.getIntra()) {
-			let recipient = client.id;
-			let sender = "Floppy: ";
-			let message_body = "This user is not online.";
-			return [recipient, sender, message_body];
-		}
-		if (user.getIngameStatus() == true) {
-			let recipient = client.id;
-			let sender = "Error: ";
-			let message_body = "You are currently ingame.";
-			return [recipient, sender, message_body];
-		}
-		if (other_user.getIngameStatus() == true) {
-			let recipient = client.id;
-			let sender = "Error: ";
-			let message_body = other_user.getUsername() + " is currently ingame.";
-			return [recipient, sender, message_body];
-		}
+
+		//Error handling
+		if (mode != "" && mode != "speed" && mode != "dodge")
+			return [client.id, "Error: ", mode + " is not a valid mode."];
+		else if (other_user == undefined || other_user.getIntra() == user.getIntra())
+			return [client.id, "Floppy: ", "This user is not online."];
+		else if (user.getIngameStatus() == true)
+			return [client.id, "Error: ", "You are currently ingame."];
+		else if (other_user.getIngameStatus() == true)
+			return [client.id, "Error: ", other_user.getUsername() + " is currently ingame."];
+
 		other_user.getSocket().emit("messageToClient", "Floppy: ", user.getUsername() + " invited you to a game", other_user.getIntra());
 		let recipient = client.id;
 		let sender = "Floppy: ";
@@ -879,25 +872,15 @@ export class ChatService {
 		if (user == undefined)
 			return console.error("User in 'ChatService::ping' is undefined") as undefined;
 		let other_user = this.findUserFromUsername(username);
-		if (other_user == undefined || other_user.getIntra() == user.getIntra()) {
-			let recipient = client.id;
-			let sender = "Floppy: ";
-			let message_body = "This user is not online.";
-			return [recipient, sender, message_body];
-		}
-		if (user.getIngameStatus() == true) {
-			let recipient = client.id;
-			let sender = "Error: ";
-			let message_body = "You are currently ingame.";
-			return [recipient, sender, message_body];
-		}
-		if (other_user.getIngameStatus() == true) {
-			let recipient = client.id;
-			let sender = "Error: ";
-			let message_body = other_user.getUsername() + " is currently ingame.";
-			return [recipient, sender, message_body];
-		}
-		// user.getSocket().emit("gameInvite", user.getIntra(), other_user.getIntra());
+
+		//Error handling
+		if (other_user == undefined || other_user.getIntra() == user.getIntra())
+			return [client.id, "Floppy: ", "This user is not online."];
+		else if (user.getIngameStatus() == true)
+			return [client.id, "Error: ", "You are currently ingame."];
+		else if (other_user.getIngameStatus() == true)
+			return [client.id, "Error: ", other_user.getUsername() + " is currently ingame."];
+
 		user.getSocket().emit("sendToGame");
 		other_user.getSocket().emit("sendToGame");
 		user.getSocket().emit("gameInvite", user.getIntra(), other_user.getIntra());
