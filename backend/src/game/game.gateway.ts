@@ -7,7 +7,7 @@ import {
 	SubscribeMessage,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { GameService, Room, Player } from './game.service';
+import { Games, Room, Player } from './game.service';
 import { Users } from '../user/user.service';
 
 @WebSocketGateway({
@@ -16,7 +16,7 @@ import { Users } from '../user/user.service';
 	},
 })
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-	constructor(private readonly gameService: GameService, private readonly users: Users) {}
+	constructor(private readonly games: Games, private readonly users: Users) {}
 
 	//		key: room_id
 	private rooms: Map<string, Room> = new Map<string, Room>;

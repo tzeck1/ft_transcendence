@@ -19,22 +19,30 @@ model users {
 	profile_picture	String?
 	tfa_enabled		Boolean	@default(false)
 	twoFactorSecret	String?
-	friends			Int[]
-	blocks			Int[]
-
+	games			games[]
+	rank			Int		@default(0)
+	games_played	Int		@default(0)
+	games_won		Int		@default(0)
+	games_lost		Int		@default(0)
+	hackerman		Boolean	@default(false)
+	top_three		Boolean	@default(false)
+	zucc			Boolean	@default(false)
+	ten_comp		Boolean	@default(false)
 }
 
 model games {
 
-	id		Int			@id @default(autoincrement())
-	player1	Int
-	player2	Int			//player IDs
-	score1	Int
-	score2	Int
-	ranked	Boolean		//ranked yes or no
-	begin	DateTime	//Date or Datetime when game took place?
-	end		DateTime	//Date or Datetime when game took place?
-
+	id				Int			@id @default(autoincrement())
+	intra			String
+	player			String
+	enemy			String
+	player_score	Int
+	enemy_score		Int
+	ranked			Boolean
+	date			DateTime
+	paddle_hits_e	Int			@default(0)
+	paddle_hits_m	Int			@default(0)
+	user			users @relation(fields: [intra], references: [intra_name])
 }
 
 model stats {

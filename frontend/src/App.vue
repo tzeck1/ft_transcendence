@@ -10,7 +10,9 @@
 					<router-link to="/game" v-slot="{ navigate, isActive }">
 						<button class="game-button" id="game-button" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro">Game</button>
 					</router-link>
-					<button :disabled="isIntro">Leaderboard</button>
+					<router-link to="/leaderboard" v-slot="{ navigate, isActive }">
+						<button id="leaderboardButton" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro">Leaderboard</button>
+					</router-link>
 				</div>
 				<div class="logout-button" @click="loadIntro" :disabled="isIntro">
 					<img src="./assets/logout.png" alt="Logout">
@@ -26,7 +28,9 @@
 						<router-link to="/game" v-slot="{ navigate, isActive }">
 							<button class="dropdown-buttons" @click="hideDropdown(); navigate();" :class="{'active-button': isActive}" :disabled="isIntro">Game</button>
 						</router-link>
-						<button class="dropdown-buttons" @click="hideDropdown" :disabled="isIntro">Leaderboard</button>
+						<router-link to="/leaderboard" v-slot="{ navigate, isActive }">
+							<button class="dropdown-buttons" @click="hideDropdown(); navigate();" :class="{'active-button': isActive}" :disabled="isIntro">Leaderboard</button>
+						</router-link>
 						<button class="dropdown-buttons" @click="hideDropdown(); loadIntro();" :disabled="isIntro">Logout</button>
 					</div>
 				</div>
@@ -36,7 +40,7 @@
 			<router-link to="/"></router-link>
 			<router-view/>
 		</main>
-		<div class="chat-box" v-if="!isIntro">
+		<div class="chat-box" v-if="!isIntro"  :class="{'blur': inputFocus === true}">
 			<div class="chat-input-container">
 				<div class="chat-history" v-show="inputFocus">
 					<div class="flex-grow"></div>
@@ -66,7 +70,7 @@
 	const isIntro = computed(() => route.path === '/');
 
 	function loadIntro() {
-		const cookies = document.cookie.split(";");
+		const cookies = document.cookie.split(";"); // for deleteing coockies
 		for (let i = 0; i < cookies.length; i++) {
 			const cookie = cookies[i];
 			const eqPos = cookie.indexOf("=");
@@ -119,7 +123,7 @@
 	}
 
 	nav {
-		@apply container relative mx-auto flex items-center justify-between transition-all duration-300 ease-in-out;
+		@apply container relative h-32 mx-auto flex items-center justify-between transition-all duration-300 ease-in-out;
 	}
 	.nav-buttons {
 		@apply hidden lg:flex lg:opacity-100 lg:pointer-events-auto opacity-0 pointer-events-none mt-2 items-center text-2xl space-x-4;
@@ -195,12 +199,16 @@
 		@apply outline-none;
 	}
 
+	.blur {
+		backdrop-filter: blur(5px);
+	}
+
 	.chat-send {
 		@apply p-2 rounded cursor-pointer;
 	}
 
 	.chat-history {
-		@apply overflow-auto break-words h-60 flex flex-col bg-transparent bg-opacity-10 rounded p-2 mb-2;
+		@apply overflow-auto break-words h-60 flex flex-col bg-transparent bg-opacity-10 rounded-2xl p-2 mb-2;
 		scrollbar-width: thin;
 		scrollbar-color: transparent transparent;
 	}

@@ -22,6 +22,15 @@ let UserController = class UserController {
     async getUsername(id) {
         return this.users.getUsername(id);
     }
+    async getUser(intra) {
+        return this.users.getUser(intra);
+    }
+    async getUsers() {
+        return this.users.getUsers();
+    }
+    async getPaddleStats(intra) {
+        return this.users.getPaddleStats(intra);
+    }
     async setAvatar(intra, picture) {
         console.log("Avatar changed to:", picture);
         this.users.setAvatar(intra, picture);
@@ -34,6 +43,10 @@ let UserController = class UserController {
             console.log("Username already in use.");
         return (response);
     }
+    async setHackerman(intra) {
+        console.log("setting bool for: ", intra);
+        await this.users.setHackerman(intra);
+    }
 };
 __decorate([
     (0, common_1.Get)('getUsername'),
@@ -41,6 +54,26 @@ __decorate([
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "getUsername", null);
+__decorate([
+    (0, common_1.Get)('getUser'),
+    __param(0, (0, common_1.Query)('intra')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getUser", null);
+__decorate([
+    (0, common_1.Get)('getUsers'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getUsers", null);
+__decorate([
+    (0, common_1.Get)('getPaddleStats'),
+    __param(0, (0, common_1.Query)('intra')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "getPaddleStats", null);
 __decorate([
     (0, common_1.Post)('setAvatar'),
     __param(0, (0, common_1.Body)('intra')),
@@ -57,6 +90,13 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], UserController.prototype, "setUsername", null);
+__decorate([
+    (0, common_1.Post)('setHackerman'),
+    __param(0, (0, common_1.Body)('intra')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UserController.prototype, "setHackerman", null);
 UserController = __decorate([
     (0, common_1.Controller)('users'),
     __metadata("design:paramtypes", [user_service_1.Users])

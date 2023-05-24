@@ -17,43 +17,51 @@
 					</div>
 				</div>
 				<span v-if="showUsernameError" class="username-error" >{{ error_text }}</span>
-				<img class="rank" src="../assets/ranks/floppy_2.png" alt="Rank" />
+				<span class="mt-7 font-bold">Rank</span>
+				<img class="rank" src="../assets/ranks/floppy_2.png" alt="Rank" v-if="rank < 15" />
+				<img class="rank" src="../assets/ranks/memorycard.png" alt="Rank" v-if="rank < 35 && rank > 15" />
+				<img class="ssd" src="../assets/ranks/ssd.png" alt="Rank" v-if="rank > 35" />
+				<span>{{ rank }}</span>
 				<button class="two-factor-button" @click="toggle2FA">{{ twoFactorButtonText }}</button>
 			</div>
-			<div class="grid">
-				<div class="grid-item">Match History</div>
-				<div class="grid-item">Friends</div>
-				<div class="grid-item">Achievements</div>
-				<div class="grid-item">Statistics</div>
+			<div class="feature-grid">
+				<MatchHistory class="grid-item"></MatchHistory>
+				<Stats class="grid-item">Stats</Stats>
+				<Achievements class="grid-item">Achievements</Achievements>
+				<Friends class="grid-item">Friends</Friends>
 			</div>
 		</div>
 		<div v-if="qrCodeVisible || showTFA" class="qr-code-overlay" @click="hideQRCode">
-		<div class="qr-code-container">
-			<img v-if="qrCodeVisible" :src="qrCodeValue" alt="QR Code" class="qr-code">
-			<span v-if="showTFA" class="tfa-text" >Please enter your 2FA code</span>
-			<div v-if="showTFA" class="input-container">
-				<input ref="inputField1" v-model="twoFactorCode[0]" maxlength="1" class="input-2fa" @input="handleInput(0)" @keydown="handleBackspace(0, $event)" type="text">
-				<input v-model="twoFactorCode[1]" maxlength="1" class="input-2fa" @input="handleInput(1)" @keydown="handleBackspace(1, $event)" type="text">
-				<input v-model="twoFactorCode[2]" maxlength="1" class="input-2fa" @input="handleInput(2)" @keydown="handleBackspace(2, $event)" type="text">
-				<input v-model="twoFactorCode[3]" maxlength="1" class="input-2fa" @input="handleInput(3)" @keydown="handleBackspace(3, $event)" type="text">
-				<input v-model="twoFactorCode[4]" maxlength="1" class="input-2fa" @input="handleInput(4)" @keydown="handleBackspace(4, $event)" type="text">
-				<input v-model="twoFactorCode[5]" maxlength="1" class="input-2fa" @input="handleInput(5)" @keydown="handleBackspace(5, $event)" type="text">
+			<div class="qr-code-container">
+				<img v-if="qrCodeVisible" :src="qrCodeValue" alt="QR Code" class="qr-code">
+				<span v-if="showTFA" class="tfa-text" >Please enter your 2FA code</span>
+				<div v-if="showTFA" class="input-container">
+					<input ref="inputField1" v-model="twoFactorCode[0]" maxlength="1" class="input-2fa" @input="handleInput(0)" @keydown="handleBackspace(0, $event)" type="text">
+					<input v-model="twoFactorCode[1]" maxlength="1" class="input-2fa" @input="handleInput(1)" @keydown="handleBackspace(1, $event)" type="text">
+					<input v-model="twoFactorCode[2]" maxlength="1" class="input-2fa" @input="handleInput(2)" @keydown="handleBackspace(2, $event)" type="text">
+					<input v-model="twoFactorCode[3]" maxlength="1" class="input-2fa" @input="handleInput(3)" @keydown="handleBackspace(3, $event)" type="text">
+					<input v-model="twoFactorCode[4]" maxlength="1" class="input-2fa" @input="handleInput(4)" @keydown="handleBackspace(4, $event)" type="text">
+					<input v-model="twoFactorCode[5]" maxlength="1" class="input-2fa" @input="handleInput(5)" @keydown="handleBackspace(5, $event)" type="text">
+				</div>
+				<span v-if="showTFAerror" class="tfa-error" >The 2fa token you entered is invalid!</span>
 			</div>
-			<span v-if="showTFAerror" class="tfa-error" >The 2fa token you entered is invalid!</span>
 		</div>
-</div>
-
 	</div>
 </template>
 
 <script setup lang="ts">
 	import { ref, onMounted, watch, nextTick, computed } from 'vue';
+	import MatchHistory from '@/components/Profile/MatchHistory.vue';
+	import Stats from '@/components/Profile/Stats.vue';
+	import Achievements from '@/components/Profile/Achievements.vue';
+	import Friends from '@/components/Profile/Friends.vue';
 	import axios from 'axios';
 	import { useUserStore } from '../stores/UserStore';
 	import QrcodeVue from 'qrcode.vue';
 	import { storeToRefs } from 'pinia';
 	import router from '@/router';
 
+	const rank = ref(0);
 	const userStore = useUserStore();
 	const { username } = storeToRefs(userStore);
 	const { profile_picture } = storeToRefs(userStore);
@@ -143,8 +151,9 @@
 			const response = await axios.get(`http://${location.hostname}:3000/auth/getUserData?intra=${userStore.intra}`);
 			const data = response.data;
 			userStore.setUsername(data.username);
-			userStore.setProfilePicture(data.avatarUrl);
+			userStore.setProfilePicture(data.profile_picture);
 			userStore.setTFA(data.tfa_enabled);
+			rank.value = data.rank;
 		} catch (error) {
 			console.error('Error fetching user data:', error);
 		}
@@ -265,6 +274,7 @@
 
 	.sidebar {
 		@apply flex flex-col items-center justify-start p-8 w-1/5 min-h-full;
+		width: 25vw;
 	}
 
 	.profile-picture {
@@ -272,16 +282,38 @@
 	}
 
 	.rank {
-		@apply w-16 h-auto mt-8;
+		@apply w-16 h-auto;
 	}
 
-	.grid {
-		@apply grid-cols-2 gap-4 w-4/5 h-full p-8;
-		display: grid;
+	.ssd {
+		@apply w-32 h-auto mt-1;
+	}
+
+	.feature-grid {
+		@apply grid w-4/5 max-h-full grid-cols-1 lg:grid-cols-2 grid-rows-2;
+		height: calc(100vh - 128px);
+		width: 75vw;
+		/* position: fixed;
+		right: 0px; */
+		/* @apply border border-blue-300 grid-cols-2 grid-rows-2 gap-4 w-4/5 h-full p-8; */
 	}
 
 	.grid-item {
-		@apply flex justify-center items-center bg-black bg-opacity-50 rounded-2xl text-3xl;
+		@apply overflow-auto py-10;
+		/* @apply border overflow-auto; */
+		/* h-1/4 border-red-300 flex justify-center items-center bg-black bg-opacity-50 rounded-2xl text-3xl */
+	}
+
+	.grid-item::-webkit-scrollbar { /* Chrome, Safari and Edge */
+		width: 8px;
+	}
+
+	.grid-item::-webkit-scrollbar-thumb { /* Chrome, Safari and Edge */
+		background: transparent;
+	}
+
+	.grid-item::-webkit-scrollbar-thumb:hover { /* Chrome, Safari and Edge */
+		background: #fff;
 	}
 
 	.profile {
@@ -306,19 +338,6 @@
 
 	#toggle-username {
 		@apply p-3 ml-3;
-		/* font-family: 'ibm-3270', monospace;
-		position: absolute;
-		left: 110%;
-		top: 50%;
-		transform: translateY(-50%);
-		background-color: transparent;
-		color: white;
-		border: none;
-		font-size: 3vw;
-		cursor: pointer;
-		outline: none;
-		padding: 5px;
-		margin-left: 1vw; */
 	}
 
 	#toggle-username:hover {
@@ -327,16 +346,6 @@
 
 	#edit-username {
 		@apply bg-transparent text-center outline-none;
-		/* font-family: 'ibm-3270', monospace;
-		background-color: transparent;
-		border: none;
-		color: white;
-		outline: none;
-		padding: 0;
-		margin: 0;
-		width: 1ch;
-		text-align: center;
-		animation: glowing 3s infinite; */
 	}
 
 	.profile-picture-drop-area {
@@ -356,7 +365,7 @@
 	}
 
 	.content-wrapper {
-		@apply flex flex-grow flex-shrink-0 overflow-hidden
+		@apply flex flex-grow flex-shrink-0 overflow-hidden h-full;
 	}
 
 	.blur {

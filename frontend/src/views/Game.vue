@@ -1,6 +1,6 @@
 <template>
 	<StartGame v-if="showStart" @start-match="startMatch"></StartGame>
-	<Pong v-if="showMatch" @show-end="switchToEnd"></Pong>
+	<Pong v-if="showMatch" @show-end="switchToEnd" class="pong"></Pong>
 	<EndGame v-if="showEnd" @start-match="startMatch" @show-start="switchToStart"></EndGame>
 </template>
 
@@ -43,7 +43,7 @@
 			const response = await axios.get(`http://${location.hostname}:3000/auth/getUserData?intra=${userStore.intra}`);
 			const data = response.data;
 			userStore.setUsername(data.username);
-			userStore.setProfilePicture(data.avatarUrl);
+			userStore.setProfilePicture(data.profile_picture);
 			userStore.setTFA(data.tfa_enabled);
 		} catch (error) {
 			console.error('Error fetching user data:', error);

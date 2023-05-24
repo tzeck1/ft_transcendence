@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "vite --config vite.config.ts",
+    "dev": "node --max-old-space-size=4096 node_modules/vite/bin/vite.js --config vite.config.ts",
     "build": "run-p type-check build-only",
     "preview": "vite preview",
     "build-only": "vite build",
@@ -12,6 +12,7 @@
   "dependencies": {
     "@types/vue-router": "^2.0.0",
     "autoprefixer": "^10.4.14",
+    "chart.js": "^4.3.0",
     "phaser": "^3.60.0",
     "pinia": "^2.0.0-rc.10",
     "postcss": "^8.4.23",
