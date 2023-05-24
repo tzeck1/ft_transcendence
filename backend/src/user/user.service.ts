@@ -46,7 +46,7 @@ export class Users {
 	}
 
 	async getIntraByUsername(username: string): Promise<string> {
-		const usersEntry = await this.prisma.users.findUnique( {where: {username: username}} );
+		const usersEntry = await prisma.users.findUnique( {where: {username: username}} );
 		if (usersEntry == undefined)
 			return undefined;
 		return usersEntry.intra_name;
@@ -58,7 +58,7 @@ export class Users {
 	}
 
 	async getBlocksByIntra(intra_name: string): Promise<string[]> {
-		const usersEntry = await this.prisma.users.findUnique( {where: {intra_name: intra_name}} );
+		const usersEntry = await prisma.users.findUnique( {where: {intra_name: intra_name}} );
 		return usersEntry.blocks;
 	}
 
@@ -168,7 +168,7 @@ export class Users {
 	}
 
 	async setBlocks(intra: string, blocked_users: string[]) {
-		return await this.prisma.users.update({
+		return await prisma.users.update({
 			where: { intra_name: intra },
 			data: { blocks: blocked_users },
 		});
