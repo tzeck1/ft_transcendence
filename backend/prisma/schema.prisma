@@ -25,6 +25,9 @@ model users {
 	games_won		Int		@default(0)
 	games_lost		Int		@default(0)
 	hackerman		Boolean	@default(false)
+	top_three		Boolean	@default(false)
+	zucc			Boolean	@default(false)
+	ten_comp		Boolean	@default(false)
 }
 
 model games {

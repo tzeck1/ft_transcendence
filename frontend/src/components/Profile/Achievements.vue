@@ -12,16 +12,6 @@
 				</div>
 				<span class="check" v-if="gamesWon">&#10003;</span>
 			</div>
-			<div class="achievements-item" :class="{'completed': friends}">
-				<div class="logo">
-					<img src="../../assets/achievements/addfriend.png" class="friend-logo"/>
-				</div>
-				<div class="text">
-					<h1>Zuckerberg in Training</h1>
-					<span>Connect with 5 New Friends!</span>
-				</div>
-				<span class="check" v-if="friends">&#10003;</span>
-			</div>
 			<div class="achievements-item" :class="{'completed': ladder}">
 				<div class="logo">
 					<img src="../../assets/achievements/trophy.png"/>
@@ -31,6 +21,16 @@
 					<span>Secure Your Spot in the Top 3!</span>
 				</div>
 				<span class="check" v-if="ladder">&#10003;</span>
+			</div>
+			<div class="achievements-item" :class="{'completed': friends}">
+				<div class="logo">
+					<img src="../../assets/achievements/addfriend.png" class="friend-logo"/>
+				</div>
+				<div class="text">
+					<h1>Zuckerberg in Training</h1>
+					<span>Connect with 5 New Friends!</span>
+				</div>
+				<span class="check" v-if="friends">&#10003;</span>
 			</div>
 			<div class="achievements-item" :class="{'completed': hackerman}">
 				<div class="logo">
@@ -71,6 +71,17 @@
 		return null;
 	};
 
+	async function getLadder() {
+		const users = await axios.get(`http://${location.hostname}:3000/users/getUsers`);
+		for (let i = 0; i < 3; i++) {
+			if (!users.data[i])
+				break ;
+			if (userStore.intra === users.data[i].intra_name)
+				return true;
+		}
+		return false;
+	}
+
 	onMounted(async () => {
 		const cookie_username = getUsernameFromCookie();
 		if (!cookie_username)
@@ -87,19 +98,20 @@
 		else {
 			intra = route.params.username.toString();
 		}
-		const winData = await axios.get(`http://${location.hostname}:3000/users/getUser?intra=${intra}`);
-		if (winData.data.games_won >= 10)
+		const userData = await axios.get(`http://${location.hostname}:3000/users/getUser?intra=${intra}`);
+		gamesWon.value = userData.data.ten_comp;
+		friends.value = userData.data.zucc;
+		ladder.value = userData.data.top_three;
+		hackerman.value = userData.data.hackerman;
+
+		if (!gamesWon.value && userData.data.games_won >= 10) {
+			axios.post(`http://${location.hostname}:3000/users/setTenComp`, { intra: intra });
 			gamesWon.value = true;
-		const userData = await axios.get(`http://${location.hostname}:3000/users/getUsers`);
-		for (let i = 0; i < 3; i++) {
-			if (!userData.data[i])
-				break ;
-			if (userStore.intra === userData.data[i].intra_name)
-				ladder.value = true;
 		}
-		if (winData.data.hackerman == true)
-			hackerman.value = true;
-		
+		if (!ladder.value && await getLadder()) {
+			axios.post(`http://${location.hostname}:3000/users/setTopThree`, { intra: intra });
+			ladder.value = true;
+		}
 	});
 </script>
 

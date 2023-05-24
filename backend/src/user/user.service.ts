@@ -155,6 +155,20 @@ export class Users {
 		});
 	}
 
+	async setTenComp(intra: string) {
+		return await prisma.users.update({
+			where: { intra_name: intra },
+			data: { ten_comp: true }
+		});
+	}
+
+	async setTopThree(intra: string) {
+		return await prisma.users.update({
+			where: { intra_name: intra },
+			data: { top_three: true }
+		});
+	}
+
 	async setHackerman(intra: string) {
 		return await prisma.users.update({
 			where: { intra_name: intra },

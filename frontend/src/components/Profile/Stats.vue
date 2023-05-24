@@ -134,14 +134,15 @@
 	const initLine = () => {
 		const ctx = document.getElementById('LineChart') as HTMLCanvasElement;
 		const labels = games.map((game, index) => game.formattedDate );
-		let winStreak = 0;
+		let rank = 0;
 		const data = games.map(game => {
 			if(game.player_score > game.enemy_score) {
-				winStreak++;
+				rank++;
 			} else {
-				winStreak = 0;
+				if (rank != 0)
+					rank--;
 			}
-			return winStreak;
+			return rank;
 		});
 
 		const myChart = new Chart(ctx, {
@@ -149,7 +150,7 @@
 			data: {
 				labels: labels,
 				datasets: [{
-					label: 'Winstreak',
+					label: 'Rank',
 					data: data,
 					fill: false,
 					backgroundColor: 'rgba(52, 211, 153, 0.2)',

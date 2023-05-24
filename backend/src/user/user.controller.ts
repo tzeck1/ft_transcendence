@@ -50,9 +50,20 @@ export class UserController {
 		return (response);
 	}
 
+	@UseGuards(JwtAuthGuard)
+	@Post('setTenComp')
+	async setTenComp(@Body('intra') intra: string) {
+		await this.users.setTenComp(intra);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Post('setTopThree')
+	async setTopThree(@Body('intra') intra: string) {
+		await this.users.setTopThree(intra);
+	}
+
 	@Post('setHackerman')
 	async setHackerman(@Body('intra') intra: string) {
-		console.log("setting bool for: ", intra);
 		await this.users.setHackerman(intra);
 	}
 }
