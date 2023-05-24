@@ -19,7 +19,6 @@ model users {
 	profile_picture	String?
 	tfa_enabled		Boolean	@default(false)
 	twoFactorSecret	String?
-	friends			Int[]
 	blocks			String[]
 	games			games[]
 	rank			Int		@default(0)
