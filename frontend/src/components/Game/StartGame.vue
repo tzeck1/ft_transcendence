@@ -74,8 +74,9 @@
 		if (newVal != undefined) {
 			if (userStore.socket?.hasListeners("gameInvite") == false) {
 				// console.log("setup listener for gameInvite");
-				userStore.socket!.on("gameInvite", (intra: string, other_intra: string) => {
+				userStore.socket!.on("gameInvite", (intra: string, other_intra: string, mode: string) => {
 					// console.log("executing gameInvite");
+					gameStore.setMode(mode);
 					gameStore.setSocket(io(`${location.hostname}:3000/game_socket`, {autoConnect: false}));
 					if (gameStore.socket!.hasListeners("privatePlayReady") == false) {
 						// console.log("setup listener for privatePlayReady");
@@ -102,8 +103,9 @@
 		// console.log("onmounted of startGame.vue");
 		if (userStore.socket?.hasListeners("gameInvite") == false) {
 			// console.log("setup listener for gameInvite");
-			userStore.socket!.on("gameInvite", (intra: string, other_intra: string) => {
+			userStore.socket!.on("gameInvite", (intra: string, other_intra: string, mode: string) => {
 				// console.log("executing gameInvite");
+				gameStore.setMode(mode);
 				gameStore.setSocket(io(`${location.hostname}:3000/game_socket`, {autoConnect: false}));
 				if (gameStore.socket!.hasListeners("privatePlayReady") == false) {
 					// console.log("setup listener for privatePlayReady");
@@ -147,7 +149,7 @@
 			gameStore.setMode(tmp.value);
 		}
 		//establish connection
-		if (!isLooking.value) { // need to add mode sent to the server, so it can check if the ones looking are searching both in the same mode
+		if (!isLooking.value) {
 			socket = io(`${location.hostname}:3000/game_socket`);
 			if (socket != undefined)
 				userStore.socket?.emit("setIngameStatus", true);

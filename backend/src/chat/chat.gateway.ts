@@ -90,7 +90,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			response = await this.chatService.unblock(client, tokens[1]);
 		else if (tokens[0] == "/demote" && tokens.length == 2)
 			response = this.chatService.demote(client, tokens[1])
-		else if (tokens[0] == "/ping" && (tokens.length == 2 || tokens.length == 3))
+		else if (tokens[0] == "/ping" && tokens.length == 3)
 			response = this.chatService.ping(client, tokens[1], tokens[2])
 		else if (tokens[0] == "/pong" && (tokens.length == 2))
 			response = this.chatService.pong(client, tokens[1])
