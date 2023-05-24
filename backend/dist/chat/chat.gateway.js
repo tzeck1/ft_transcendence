@@ -1,0 +1,166 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ChatGateway = void 0;
+const websockets_1 = require("@nestjs/websockets");
+const socket_io_1 = require("socket.io");
+const chat_service_1 = require("./chat.service");
+const user_service_1 = require("../user/user.service");
+let ChatGateway = class ChatGateway {
+    constructor(chatService, users) {
+        this.chatService = chatService;
+        this.users = users;
+    }
+    afterInit(server) {
+        this.chatService.addChannel("global", undefined, true, undefined);
+        console.log('Chat Initialized');
+    }
+    handleConnection(client, ...args) {
+        let intra = client.handshake.query.intra;
+        if (this.chatService.getIntraFromSocket(client) != intra) {
+            this.chatService.addUser(intra, client);
+            console.log(`Chat Client Connected: ${client.id}`);
+        }
+        else
+            client.disconnect(true);
+        let sender = "Floppy: ";
+        let message_body = "Welcome to ft_transcendence!\nType '/help' for a list of commands.";
+        client.emit("messageToClient", sender, message_body);
+    }
+    handleDisconnect(client) {
+        console.log(`Chat Client Disconnected: ${client.id}`);
+    }
+    async handleMessageToServer(client, ...args) {
+        let input = args[0];
+        if (input.length > 250)
+            input = input.substring(0, 249);
+        let tokens = input.split(' ');
+        let response;
+        if (tokens[0] == "/help" && (tokens.length == 1 || tokens.length == 2))
+            response = this.chatService.help(client, tokens[1]);
+        else if (tokens[0] == "/create" && (tokens.length == 2 || tokens.length == 3))
+            response = this.chatService.create(client, tokens[1], tokens[2]);
+        else if (tokens[0] == "/join" && (tokens.length == 2 || tokens.length == 3))
+            response = this.chatService.join(client, tokens[1], tokens[2]);
+        else if (tokens[0] == "/dm")
+            response = this.chatService.dm(client, tokens[1], tokens[2], args[0]);
+        else if (tokens[0] == "/leave" && tokens.length == 1)
+            response = this.chatService.leave(client);
+        else if (tokens[0] == "/operator" && tokens.length == 2)
+            response = this.chatService.operator(client, tokens[1]);
+        else if (tokens[0] == "/kick" && tokens.length == 2)
+            response = this.chatService.kick(client, tokens[1]);
+        else if (tokens[0] == "/ban" && tokens.length == 2)
+            response = this.chatService.ban(client, tokens[1]);
+        else if (tokens[0] == "/mute" && tokens.length == 3) {
+            if (isNaN(parseInt(tokens[2])) == true)
+                return this.server.to(client.id).emit("messageToClient", "Error: ", "please provide a valid duration.");
+            response = this.chatService.mute(client, tokens[1], parseInt(tokens[2]));
+        }
+        else if (tokens[0] == "/unmute" && tokens.length == 2)
+            response = this.chatService.mute(client, tokens[1], 0);
+        else if (tokens[0] == "/visit" && tokens.length == 2)
+            response = await this.chatService.visit(client, tokens[1]);
+        else if (tokens[0] == "/invite" && tokens.length == 2)
+            response = this.chatService.invite(client, tokens[1]);
+        else if (tokens[0] == "/set" && tokens.length == 3)
+            response = this.chatService.set(client, tokens[1], tokens[2]);
+        else if (tokens[0] == "/block" && tokens.length == 2)
+            response = await this.chatService.block(client, tokens[1]);
+        else if (tokens[0] == "/unset" && tokens.length == 2)
+            response = this.chatService.unset(client, tokens[1]);
+        else if (tokens[0] == "/unblock" && tokens.length == 2)
+            response = await this.chatService.unblock(client, tokens[1]);
+        else if (tokens[0] == "/demote" && tokens.length == 2)
+            response = this.chatService.demote(client, tokens[1]);
+        else if (tokens[0] == "/ping" && tokens.length == 3)
+            response = this.chatService.ping(client, tokens[1], tokens[2]);
+        else if (tokens[0] == "/pong" && (tokens.length == 2))
+            response = this.chatService.pong(client, tokens[1]);
+        else if (tokens[0][0] == '/')
+            response = this.chatService.unknown(client, tokens[0]);
+        else
+            response = this.chatService.message(client, input);
+        if (response == undefined)
+            return console.error("'ChatGateway::handleMessageToServer' returned without emitting with 'messageToClient' due to (response == undefined)");
+        let recipient = response[0];
+        let sender = response[1];
+        let message_body = response[2];
+        this.server.to(recipient).emit("messageToClient", sender, message_body, this.chatService.getIntraFromSocket(client));
+    }
+    handleRequestChatHistory(client, ...args) {
+        let channel_id = args[0];
+        let channel = this.chatService.getChannelFromId(channel_id);
+        if (channel != undefined) {
+            let user = this.chatService.getUserFromSocket(client);
+            let pending_message;
+            if (user != undefined && user.getPendingMessage() != undefined)
+                pending_message = user.getPendingMessage();
+            let chat_history = channel.getChatHistory();
+            let new_chat_history = [["", ""]];
+            let blocked_users = user.getBlocks();
+            for (let blocked_intra of blocked_users) {
+                let username = this.chatService.getUserFromIntra(blocked_intra).getUsername();
+                for (let tuple of chat_history) {
+                    if (tuple[0] == username + ": ") {
+                        console.log("Continue by", blocked_intra);
+                        continue;
+                    }
+                    new_chat_history.push(tuple);
+                }
+            }
+            new_chat_history.shift();
+            if (blocked_users == undefined || blocked_users.length == 0)
+                client.emit("ChatHistory", chat_history, pending_message);
+            else
+                client.emit("ChatHistory", new_chat_history, pending_message);
+            user.setPendingMessage(undefined);
+        }
+    }
+    handleSetIngameStatus(client, ...args) {
+        let user = this.chatService.getUserFromSocket(client);
+        let status = args[0];
+        user.setIngameStatus(status);
+    }
+};
+__decorate([
+    (0, websockets_1.WebSocketServer)(),
+    __metadata("design:type", socket_io_1.Server)
+], ChatGateway.prototype, "server", void 0);
+__decorate([
+    (0, websockets_1.SubscribeMessage)("messageToServer"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
+    __metadata("design:returntype", Promise)
+], ChatGateway.prototype, "handleMessageToServer", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)("requestChatHistory"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
+    __metadata("design:returntype", void 0)
+], ChatGateway.prototype, "handleRequestChatHistory", null);
+__decorate([
+    (0, websockets_1.SubscribeMessage)("setIngameStatus"),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [socket_io_1.Socket, Object]),
+    __metadata("design:returntype", void 0)
+], ChatGateway.prototype, "handleSetIngameStatus", null);
+ChatGateway = __decorate([
+    (0, websockets_1.WebSocketGateway)({
+        namespace: '/chat_socket',
+        cors: {
+            origin: '*',
+        },
+    }),
+    __metadata("design:paramtypes", [chat_service_1.ChatService, user_service_1.Users])
+], ChatGateway);
+exports.ChatGateway = ChatGateway;
+//# sourceMappingURL=chat.gateway.js.map
