@@ -69,7 +69,7 @@
 	var blocked_users: string[];
 
 	watch( () => userStore.intra, (newVal, oldVal) => {
-		if (newVal != undefined) {
+		if (newVal != undefined && newVal != "") {
 			userStore.socket = io(`${location.hostname}:3000/chat_socket`, {query: {intra: userStore.intra}});
 			userStore.socket.on("messageToClient", (sender: string, message: string, intra: string) => {
 				if (blocked_users == undefined || blocked_users.indexOf(intra) == -1)
