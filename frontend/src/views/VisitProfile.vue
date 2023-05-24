@@ -8,14 +8,17 @@
 						<h1 class="username-text">{{ username }}</h1>
 					</div>
 				</div>
-				<img class="rank" src="../assets/ranks/floppy_2.png" alt="Rank" />
+				<!-- <span class="mt-7 font-bold">Rank</span> -->
+				<img class="rank" src="../assets/ranks/floppy_2.png" alt="Rank" v-if="rank < 15" />
+				<img class="rank" src="../assets/ranks/memorycard.png" alt="Rank" v-if="rank < 35 && rank > 15" />
+				<img class="ssd" src="../assets/ranks/ssd.png" alt="Rank" v-if="rank > 35" />
 				<span>{{ rank }}</span>
 			</div>
 			<div class="feature-grid">
 				<MatchHistory class="grid-item"></MatchHistory>
-				<Stats class="grid-item">Stats</Stats>
+				<!-- <Stats class="grid-item">Stats</Stats> -->
 				<!-- <div class="grid-item">Friends</div> -->
-				<!-- <div class="grid-item">Achievements</div> -->
+				<Achievements class="grid-item"></Achievements>
 				<!-- <div class="grid-item">Statistics</div> -->
 			</div>
 		</div>
@@ -25,7 +28,7 @@
 <script setup lang="ts">
 	import { ref, onMounted, watch, nextTick, computed } from 'vue';
 	import MatchHistory from '../components/Profile/MatchHistory.vue';
-	import Stats from '@/components/Profile/Stats.vue';
+	import Achievements from '@/components/Profile/Achievements.vue';
 	import axios from 'axios';
 	import { useUserStore } from '../stores/UserStore';
 	import { storeToRefs } from 'pinia';
@@ -93,7 +96,11 @@
 	}
 
 	.rank {
-		@apply w-16 h-auto mt-8;
+		@apply w-16 h-auto mt-12;
+	}
+
+	.ssd {
+		@apply w-32 h-auto mt-12;
 	}
 
 	.feature-grid {
