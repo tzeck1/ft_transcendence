@@ -66,4 +66,9 @@ export class UserController {
 	async setHackerman(@Body('intra') intra: string) {
 		await this.users.setHackerman(intra);
 	}
+
+	@Post('setFRequest')
+	async setFRequest(@Body('intra') sendTo: string, @Body('amigo') cameFrom: string) {
+		await this.users.setFRequest(sendTo, cameFrom);
+	}
 }

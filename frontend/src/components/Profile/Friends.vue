@@ -1,8 +1,14 @@
 <template>
 	<div class="friends-container">
-		<h2 class="title">Friends List</h2>
-		<div class="friends-list">
-			
+		<h2 class="title">Friends</h2>
+		<div v-for="(friend, index) in friends" :key="friend.id" @click="showProfile(friend.intra_name)" class="friend-item" :class="{'highlight': index % 2 === 0}">
+			<div class="friend-details">
+				<div class="picture-container">
+					<img class="profile_picture" :src="friend.profile_picture"/>
+				</div>
+				<p class="username">{{ friend.username }}</p>
+				<p class="rank">Rank: {{ friend.rank }}</p>
+			</div>
 		</div>
 	</div>
 </template>
@@ -15,7 +21,20 @@
 	import { useRoute } from 'vue-router';
 	import router from '@/router';
 
+	interface Friend {
+		id: number;
+		intra_name: string;
+		username: string;
+		profile_picture: string;
+		rank: number;
+	}
+
 	const userStore = useUserStore();
+	const friends = ref<Friend[]>([]);
+
+	function showProfile(intra: string) {
+		router.push(`/profile/${intra}`);
+	}
 
 	const getUsernameFromCookie = () => {
 		const cookie = document.cookie.split(';').find(cookie => cookie.trim().startsWith('username='));
@@ -36,23 +55,69 @@
 		}
 		if (!userStore.intra)
 			userStore.setIntra(cookie_username);
+		const userData = await axios.get(`http://${location.hostname}:3000/users/getUsers`);
+		let users = userData.data;
+		for (let user in users)
+		{
+			console.log("user: " + users[user].value)
+			console.log("user friends: " + users[user].friends)
+			if (users[user].friends.includes(userStore.intra))
+				friends.value.push(users[user]);
+		}
+		console.log(friends.value);
 	});
 </script>
 
 <style scoped>
 
-.friends-container {
-	@apply flex h-full flex-col items-center justify-center;
-	scrollbar-width: thin;
-	scrollbar-color: transparent transparent;
-}
+.leaderboard-container {
+		@apply h-full text-xl overflow-auto;
+		scrollbar-width: thin;
+		scrollbar-color: transparent transparent;
+	}
 
-.title {
-	@apply flex items-center justify-center text-3xl font-bold text-center mb-8 ;
-}
+	.leaderboard-container::-webkit-scrollbar { /* Chrome, Safari and Edge */
+		width: 8px;
+	}
 
-.friends-list {
-	@apply flex flex-col items-center  w-full h-full border;
-}
+	.leaderboard-container::-webkit-scrollbar-thumb { /* Chrome, Safari and Edge */
+		background: transparent;
+	}
+
+	.leaderboard-container::-webkit-scrollbar-thumb:hover { /* Chrome, Safari and Edge */
+		background: #fff;
+	}
+
+	.title {
+		@apply flex items-center justify-center text-3xl font-bold text-center mb-8 ;
+	}
+
+	.friend-details {
+		@apply flex flex-row items-center py-2.5;
+	}
+
+	.friend-details:hover {
+		@apply cursor-pointer;
+	}
+
+	.picture-container {
+		@apply flex justify-center w-1/3;
+	}
+
+	.profile_picture {
+		@apply w-20 h-20 rounded-full object-cover;
+	}
+
+	.username {
+		@apply text-center w-1/3;
+	}
+
+	.rank {
+		@apply text-center w-1/3;
+	}
+
+	.highlight {
+		@apply bg-white bg-opacity-10;
+	}
 
 </style>

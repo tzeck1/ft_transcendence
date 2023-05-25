@@ -26,8 +26,8 @@
 			</div>
 			<div class="feature-grid">
 				<MatchHistory class="grid-item"></MatchHistory>
-				<Stats class="grid-item">Stats</Stats>
-				<Achievements class="grid-item">Achievements</Achievements>
+				<Stats class="grid-item"></Stats>
+				<Achievements class="grid-item"></Achievements>
 				<Friends class="grid-item">Friends</Friends>
 			</div>
 		</div>

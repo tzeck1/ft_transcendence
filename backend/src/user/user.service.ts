@@ -194,4 +194,12 @@ export class Users {
 			data: { hackerman: true }
 		});
 	}
+
+	async setFRequest(sendTo: string, cameFrom: string)
+	{
+		return await prisma.users.update({
+			where: { intra_name: sendTo },
+			data: { f_requests: { push: cameFrom } }
+		});
+	}
 }

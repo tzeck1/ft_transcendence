@@ -8,6 +8,7 @@
 						<h1 class="username-text">{{ username }}</h1>
 					</div>
 				</div>
+				<button class="friend-button" v-if="showAmigo" @click="amigofy">Amigo-fy Us</button>
 				<!-- <span class="mt-7 font-bold">Rank</span> -->
 				<img class="rank" src="../assets/ranks/floppy_2.png" alt="Rank" v-if="rank < 15" />
 				<img class="rank" src="../assets/ranks/memorycard.png" alt="Rank" v-if="rank < 35 && rank > 15" />
@@ -39,6 +40,9 @@
 	const userStore = useUserStore();
 	const username = ref('');
 	const profile_picture = ref('');
+	const intra	= ref('');
+	const showAmigo = ref(true);
+	const amigoPending = ref(false);
 
 	const getUsernameFromCookie = () => {
 		const cookie = document.cookie.split(';').find(cookie => cookie.trim().startsWith('username='));
@@ -59,18 +63,29 @@
 				return ;
 			}
 			const route = useRoute();
-			const intra = route.params.username.toString();
+			intra.value = route.params.username.toString();
 
 			if (!userStore.intra)
 				userStore.setIntra(cookie_username);
-			if (intra == userStore.intra)
+			if (intra.value == userStore.intra)
 				router.push('/profile');
-			const response = await axios.get(`http://${location.hostname}:3000/auth/getUserData?intra=${intra}`);
+			const response = await axios.get(`http://${location.hostname}:3000/auth/getUserData?intra=${intra.value}`);
 			if (response.data) {
 				const data = response.data;
 				username.value = data.username;
 				profile_picture.value = data.profile_picture;
 				rank.value = data.rank;
+				for (let req in data.friends)
+				{
+					if (req === userStore.intra)
+						showAmigo.value = false;
+				}
+				for (let req in data.f_requests)
+				{
+					console.log(data.f_requests[req]);
+					if (data.f_requests[req] === userStore.intra)
+						amigoPending.value = true;
+				}
 			} else {
 				router.push('/404');
 			}
@@ -78,6 +93,16 @@
 			console.error('Error fetching user data:', error);
 		}
 	});
+
+	async function amigofy() {
+		if (amigoPending.value)
+			alert("friend request still pending");
+		else
+		{
+			await axios.post(`http://${location.hostname}:3000/users/setFRequest`, { intra: intra.value, amigo: userStore.intra });
+			amigoPending.value = true;
+		}
+	}
 
 </script>
 
@@ -147,6 +172,14 @@
 
 	.content-wrapper {
 		@apply flex flex-grow flex-shrink-0 overflow-hidden h-full;
+	}
+
+	.friend-button {
+		@apply text-green-400 px-4 py-2 text-lg mt-5 bg-white bg-opacity-10;
+	}
+
+	.friend-button:hover {
+		@apply transform scale-110 transition-all duration-300 ease-in-out;
 	}
 
 </style>
