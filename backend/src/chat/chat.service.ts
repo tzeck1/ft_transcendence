@@ -831,14 +831,13 @@ export class ChatService {
 	// - other_players profile picture and username is not loading {game.gateway.ts::56}
 	// - game socket deletion is not working (refresh is a unwanted work around) {GameStore.ts + EndGame.vue + StartGame.vue}
 	// - handle cancel (ingame status)
-	// - what happens if a player queues and accept the invite while in a queue?
-	// - Dodgeball the player gets the point, after it hits the wall and him from behind (thought I fixed it)
+	// - differentiate between game mode for stats tracking (only MatchMaking) <-- NEEDS TESTING, shoud work
 	//
 	// General TODO
 	// - game performance (both player calulate the game state and the server only checks for sync) + (true right player game state tracking)
 	// - node-modules + dist out of repo
-	// - differentiate between game mode for stats tracking (only MatchMaking)
 	// - rework matchmatking
+	// - playing with yourself shouldn't work
 	// - if player disconnects from game, he looses
 	// - disable authentication on second tab or invalidate first tab
 	// - online/ingame/offline status
