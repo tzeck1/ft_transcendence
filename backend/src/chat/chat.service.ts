@@ -13,7 +13,7 @@ export class ChatService {
 	private members: Map<string, User> = new Map<string, User>;
 
 	//		key: [inviter intra, invited player intra]
-	private invites: Map<[string, string], string> = new Map<[string, string], string>;
+	private invites: Map<string, string> = new Map<string, string>;
 
 	public addChannel(channel_id: string, client: Socket, open: boolean, password: string): Channel {
 		let user = this.getUserFromSocket(client);
@@ -828,12 +828,10 @@ export class ChatService {
 	}
 
 	// Game invite TODO: //Didn't do that much because I was alone
-	// - third argument for gamemode {chat.gateway.ts + chat.service.ts + StartGame.vue + game.gateway.ts}
 	// - other_players profile picture and username is not loading {game.gateway.ts::56}
 	// - game socket deletion is not working (refresh is a unwanted work around) {GameStore.ts + EndGame.vue + StartGame.vue}
 	// - handle cancel (ingame status)
 	// - what happens if a player queues and accept the invite while in a queue?
-	// - Dodge won't get through after playing a game of speed pong per invite
 	// - Dodgeball the player gets the point, after it hits the wall and him from behind (thought I fixed it)
 	//
 	// General TODO
@@ -866,7 +864,7 @@ export class ChatService {
 			return [client.id, "Error: ", other_user.getUsername() + " is currently ingame."];
 
 		other_user.getSocket().emit("messageToClient", "Floppy: ", user.getUsername() + " invited you to a game", other_user.getIntra());
-		this.invites.set([user.getIntra(), other_user.getIntra()], mode);
+		this.invites.set(user.getIntra() + other_user.getIntra(), mode);
 		let recipient = client.id;
 		let sender = "Floppy: ";
 		let message_body = "You invited " + other_user.getUsername();
@@ -886,14 +884,14 @@ export class ChatService {
 			return [client.id, "Error: ", "You are currently ingame."];
 		else if (other_user.getIngameStatus() == true)
 			return [client.id, "Error: ", other_user.getUsername() + " is currently ingame."];
-
-		let mode = this.invites.get([other_user.getIntra(), user.getIntra()]);
-		console.log("mode from invite: ", mode);
+		let mode = this.invites.get(other_user.getIntra() + user.getIntra());
+		if (mode == undefined)
+			return [client.id, "Error: ", "could not get an invite from this user."];
 		user.getSocket().emit("sendToGame");
 		other_user.getSocket().emit("sendToGame");
 		user.getSocket().emit("gameInvite", user.getIntra(), other_user.getIntra(), mode);
 		other_user.getSocket().emit("gameInvite", other_user.getIntra(), user.getIntra(), mode);
-		this.invites.delete([other_user.getIntra(), user.getIntra()]);
+		this.invites.delete(other_user.getIntra() + user.getIntra());
 		let recipient = client.id;
 		let sender = "Floppy: ";
 		let message_body = "You accepted the invite of " + other_user.getUsername();
