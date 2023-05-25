@@ -163,10 +163,14 @@ export default class Pong extends Phaser.Scene {
 			if (this.left_score == this.winning_score || this.right_score == this.winning_score) {
 				// save score in db
 				axios.post(`http://${location.hostname}:3000/game/setGameData`, { intra: this.gameStore.intra, player: this.userStore.username, enemy: this.gameStore.enemy_name, player_score: this.left_score, enemy_score: this.right_score, ranked: true, paddle_hits_e: this.paddle_hits_e, paddle_hits_m: this.paddle_hits_m });
+				// TODO disconnect game sockets
+				this.gameStore.socket!.disconnect();
 				this.game.destroy(true); //don't know if destroy is the correct way to end instance of pong
 				// TODO end game here
 			}
 		})
+		this.socket.on("destroyGame")
+
 		this.socket.on("spawnBall", (y_position, x_velocity, y_velocity) => {
 			if (this.gameStore.mode != "")
 			{

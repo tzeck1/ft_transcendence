@@ -10,8 +10,7 @@ ps:
 db:
 	docker-compose exec db psql -U myuser -W -d mydatabase
 
-# truncate table users restart identity cascade;
-# truncate table stats restart identity;
+# truncate table users restart identity cascade; truncate table stats restart identity;
 
 npm:
 	cd backend; npm install; cd ..

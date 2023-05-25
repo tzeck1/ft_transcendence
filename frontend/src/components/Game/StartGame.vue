@@ -74,20 +74,18 @@
 	document.addEventListener("visibilitychange", () => {
 		if (document.hidden) {
 			console.log("page is hidden!");
-			userStore.socket?.emit("")
 			if (gameStore.socket != null) {
-				console.log("user was ingame and changed tab!");
 
-				if (isLooking.value == true){
-					search_game(false);
-					console.log("isLooking is", isLooking.value);
+				if (isLooking.value == true){ // in queue, so get out of there and update the isLooking flag
+					socket.emit("cancelQueue", userStore.intra);
+					isLooking.value = false;
 				} else {//user is ingame, not only in queue
-					//if inside an actual game room, let the other user know their enemy left the game and it counts as a win
-					userStore.socket!.emit("setIngameStatus", false);
-					gameStore.disconnectSocket();
+					//if inside an actual game room, disconnect and let the other player finish the game
 					router.push('/profile');
-					//quit the game, save the game data to database
 				}
+				userStore.socket?.emit("setIngameStatus", false);
+				// somehow destroy the phaser instance
+				gameStore.disconnectSocket();
 			}
 		} else {//document.hidden != true
 			console.log("page is visible");
@@ -96,6 +94,7 @@
 
 	// redundancy (watch and onMounted) because watch is needed when page is reloaded on game page (new socket created),
 	// and onMounted is needed when just switching to game page
+	// when reloading on game page, chat socket is not created fast enough for onmounted to set the listeners. so watch is needed
 	watch( () => userStore.socket, (newVal, oldVal) => {
 		// console.log("triggered watch, userStore.socket changed to", newVal, "from", oldVal);
 		if (newVal != undefined) {
@@ -108,7 +107,6 @@
 					if (gameStore.socket!.hasListeners("privatePlayReady") == false) {
 						// console.log("setup listener for privatePlayReady");
 						gameStore.socket!.on("privatePlayReady", (username: string, pic: string, room_id: string) => {
-							// console.log("executing privatePlayReady");
 							gameStore.setIntra(userStore.intra);
 							gameStore.setEnemyName(username);
 							gameStore.setEnemyPicture(pic);
@@ -117,6 +115,10 @@
 							countdown();
 						});
 					}
+					gameStore.socket!.on('disconnect', function() {
+						console.log('game socket Disconnected');
+						userStore.socket!.emit("setIngameStatus", false);
+					});
 					// console.log("emitting inviteplay");
 					gameStore.socket!.emit("invitePlay", {intra: intra, other_intra: other_intra});
 				});
@@ -128,6 +130,7 @@
 
 	// redundancy (watch and onMounted) because watch is needed when page is reloaded on game page (new socket created),
 	// and onMounted is needed when just switching to game page
+	// when reloading on game page, chat socket is not created fast enough for onmounted to set the listeners. so watch is needed
 	onMounted(() => {
 		console.log("onmounted of startGame.vue");
 		if (userStore.socket?.hasListeners("gameInvite") == false) {
@@ -148,6 +151,10 @@
 						countdown();
 					});
 				}
+				gameStore.socket!.on('disconnect', function() {
+					console.log('game socket Disconnected');
+					userStore.socket!.emit("setIngameStatus", false);
+				});
 				// console.log("emitting inviteplay");
 				gameStore.socket!.emit("invitePlay", {intra: intra, other_intra: other_intra});
 			});
@@ -184,10 +191,11 @@
 				userStore.socket?.emit("setIngameStatus", true);
 			gameStore.setSocket(socket);
 			socket.on('connect', function() {
-				console.log('Connected');
+				console.log('game socket Connected');
 			});
 			socket.on('disconnect', function() {
-				console.log('Disconnected');
+				console.log('game socket Disconnected');
+				userStore.socket!.emit("setIngameStatus", false);
 			});
 			socket.on('foundOpponent', function(username: string, pic: string, room_id: string) {
 				isLooking.value = false;
@@ -209,8 +217,9 @@
 			isLooking.value = true;
 		}
 		else {
-			console.log("store.intra is: ", userStore.intra);
+			console.log("store.intra is: ", userStore.intra, "canceling queue next");
 			socket.emit("cancelQueue", userStore.intra);
+			userStore.socket?.emit("setIngameStatus", false);
 			isLooking.value = false;
 			gameStore.disconnectSocket();
 		}

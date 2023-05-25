@@ -102,6 +102,15 @@ export class Room {
 			this.right_player_status = true;
 	}
 
+	// TODO probably gone when instant enemy win
+	invalidatePlayer(player: string) {
+		if (player == "left")
+			this.left_player_status = false;;
+		if (player == "right")
+			this.right_player_status = false;
+		// Can use this here to do stuff when a player left the game
+	}
+
 	validateScore(client: Socket) {
 		if (client == this.left_player.getSocket())
 			this.left_score_status = true;

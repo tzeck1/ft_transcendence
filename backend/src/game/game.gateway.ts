@@ -39,6 +39,18 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	handleDisconnect(client: Socket) {
 		console.log(`Game Client Disconnected: ${client.id}`);
+		// TODO probably can delete this after instant enemy win when leaving
+		for (let [room_id, room] of this.rooms) {// if the game socket that disconnected was in a room, set this room's player status to false
+			if (room.getLeftPlayer().getSocket().id == client.id) {
+				room.invalidatePlayer("left");
+				room.getLeftPlayer().getSocket().emit("setIngameStatus", false);
+			}
+			if (room.getRightPlayer().getSocket().id == client.id) {
+				room.invalidatePlayer("right");
+				room.getRightPlayer().getSocket().emit("setIngameStatus", false);
+
+			}
+		}
 	}
 
 	handleConnection(client: Socket, ...args: any[]) {
@@ -135,7 +147,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	@SubscribeMessage("cancelQueue")
 	handleCancelQueue(client: Socket, intra: string) {
-		console.log("calling handleCancel");
 		let player = this.lobby.get(intra);
 		client.leave("lobby");
 		this.lobby.delete(player.getIntraname());
