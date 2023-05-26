@@ -18,8 +18,8 @@
 				</div>
 				<span v-if="showUsernameError" class="username-error" >{{ error_text }}</span>
 				<span class="mt-7 font-bold">Rank</span>
-				<img class="rank" src="../assets/ranks/floppy_2.png" alt="Rank" v-if="rank < 15" />
-				<img class="rank" src="../assets/ranks/memorycard.png" alt="Rank" v-if="rank < 35 && rank > 15" />
+				<img class="rank" src="../assets/ranks/floppy_2.png" alt="Rank" v-if="rank <= 15" />
+				<img class="rank" src="../assets/ranks/memorycard.png" alt="Rank" v-if="rank <= 35 && rank > 15" />
 				<img class="ssd" src="../assets/ranks/ssd.png" alt="Rank" v-if="rank > 35" />
 				<span>{{ rank }}</span>
 				<button class="two-factor-button" @click="toggle2FA">{{ twoFactorButtonText }}</button>

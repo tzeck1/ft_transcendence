@@ -16,13 +16,17 @@
 				<div class="picture-container" @click="showProfile(friend.intra_name)">
 					<img class="profile_picture" :src="friend.profile_picture"/>
 				</div>
-				<p class="username" @click="showProfile(friend.intra_name)">{{ friend.username }}</p>
+				<div class="user-container">
+					<p class="username" @click="showProfile(friend.intra_name)">{{ friend.username }}</p>
+					<p class="online-status" :class="statusColor(friend.status)">&#11044; {{ friend.status }}</p>
+				</div>
 				<p class="rank" @click="showProfile(friend.intra_name)">Rank: {{ friend.rank }}</p>
 				<div class="remove-container">
 					<p class="remove" @click="killFriend(friend.intra_name)" v-if="showAccept">&#10799;</p>
 				</div>
 			</div>
 		</div>
+		<!-- <button class="p-2 ml-56 mt-24" @click="test()">test</button> -->
 	</div>
 </template>
 
@@ -40,6 +44,7 @@
 		username: string;
 		profile_picture: string;
 		rank: number;
+		status?: string;
 	}
 
 	interface F_request {
@@ -58,6 +63,15 @@
 	function showProfile(intra: string) {
 		router.push(`/profile/${intra}`);
 	}
+
+	// function test() {
+	// 	if (status.value == 'Offline' || status.value == '')
+	// 		status.value = 'Online';
+	// 	else if (status.value == 'In Game')
+	// 		status.value = 'Offline';
+	// 	else if (status.value == 'Online')
+	// 		status.value = 'In Game';
+	// }
 
 	const getUsernameFromCookie = () => {
 		const cookie = document.cookie.split(';').find(cookie => cookie.trim().startsWith('username='));
@@ -89,7 +103,21 @@
 			if (users[user].friends.includes(userStore.intra))
 				friends.value.push(users[user]);
 		}
-		console.log(friends.value);
+		userStore.socket!.on("updateFriendStatus", (intra, status) => {
+			console.log(intra, 'just went: ', status);
+			for (let i in friends.value)
+			{
+				if (friends.value[i].intra_name == intra) {
+					friends.value[i].status = status;
+				}
+			}
+		});
+		let friend_intras: string[] = new Array<string>;
+		for (let i in friends.value) {
+			let f_intra = friends.value[i].intra_name;
+			friend_intras.push(f_intra);
+		}
+		userStore.socket!.emit("getFriendStatus", friend_intras);
 	});
 
 	async function acceptRequest(amigo_intra: string) {
@@ -108,6 +136,19 @@
 	async function killFriend(amigo_intra: string) {
 		let newFriends = await axios.post(`http://${location.hostname}:3000/users/killFriend`, { intra: userStore.intra, amigo: amigo_intra });
 		friends.value = newFriends.data;
+	}
+
+	let statusColor = (status: string | undefined) => {
+		switch (status) {
+			case 'Online':
+				return 'text-green-400'
+			case 'In Game':
+				return 'text-yellow-400'
+			case 'Offline':
+				return 'text-red-400'
+			default:
+				return ''
+		}
 	}
 
 </script>
@@ -152,8 +193,16 @@
 		@apply w-20 h-20 rounded-full object-cover;
 	}
 
+	.user-container {
+		@apply w-1/4 flex flex-col;
+	}
+
 	.username {
-		@apply text-center w-1/4;
+		@apply text-center text-xl mb-1;
+	}
+
+	.online-status {
+		@apply text-center text-xs;
 	}
 
 	.rank {
