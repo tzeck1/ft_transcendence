@@ -1,6 +1,15 @@
 <template>
 	<div class="friends-container">
 		<h2 class="title">Friends</h2>
+		<div v-for="(req, index) in f_requests" :key="req.id" @click="showProfile(req.intra_name)" class="friend-item" :class="{'highlight': index % 2 === 0}">
+			<div class="friend-details">
+				<div class="picture-container">
+					<img class="profile_picture" :src="req.profile_picture"/>
+				</div>
+				<p class="username">{{ req.username }}</p>
+				<p class="accept" @click="acceptRequest(req.intra_name)" v-if="showAccept">&#10003;</p>
+			</div>
+		</div>
 		<div v-for="(friend, index) in friends" :key="friend.id" @click="showProfile(friend.intra_name)" class="friend-item" :class="{'highlight': index % 2 === 0}">
 			<div class="friend-details">
 				<div class="picture-container">
@@ -29,8 +38,18 @@
 		rank: number;
 	}
 
+	interface F_request {
+		id: number;
+		intra_name: string;
+		username: string;
+		profile_picture: string;
+		rank: number;
+	}
+
 	const userStore = useUserStore();
 	const friends = ref<Friend[]>([]);
+	const f_requests = ref<F_request[]>([]);
+	const showAccept = ref(true);
 
 	function showProfile(intra: string) {
 		router.push(`/profile/${intra}`);
@@ -55,17 +74,27 @@
 		}
 		if (!userStore.intra)
 			userStore.setIntra(cookie_username);
+		const reqs = await axios.get(`http://${location.hostname}:3000/users/getFRequests?intra=${userStore.intra}`);
+		f_requests.value = reqs.data;
 		const userData = await axios.get(`http://${location.hostname}:3000/users/getUsers`);
 		let users = userData.data;
 		for (let user in users)
 		{
-			console.log("user: " + users[user].value)
-			console.log("user friends: " + users[user].friends)
+			// console.log("user: " + users[user].value)
+			// console.log("user friends: " + users[user].friends)
 			if (users[user].friends.includes(userStore.intra))
 				friends.value.push(users[user]);
 		}
 		console.log(friends.value);
 	});
+
+	async function acceptRequest(amigo_intra: string) {
+		await axios.post(`http://${location.hostname}:3000/users/setFriends`, {intra: userStore.intra, amigo: amigo_intra});
+		showAccept.value = false;
+		f_requests.value = f_requests.value.filter((element) => element.intra_name !== amigo_intra);
+		console.log(f_requests.value);
+	}
+
 </script>
 
 <style scoped>
@@ -114,6 +143,10 @@
 
 	.rank {
 		@apply text-center w-1/3;
+	}
+
+	.accept {
+		@apply text-4xl text-green-300 text-center w-1/3;
 	}
 
 	.highlight {

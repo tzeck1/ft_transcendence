@@ -33,6 +33,12 @@ export class UserController {
 	}
 
 	@UseGuards(JwtAuthGuard)
+	@Get('getFRequests')
+	async getFRequests(@Query('intra') intra: string) {
+		return this.users.getFRequests(intra);
+	}
+
+	@UseGuards(JwtAuthGuard)
 	@Post('setAvatar')
 	async setAvatar(@Body('intra') intra: string, @Body('picture') picture: string) {
 		console.log("Avatar changed to:", picture);
@@ -67,8 +73,16 @@ export class UserController {
 		await this.users.setHackerman(intra);
 	}
 
+	@UseGuards(JwtAuthGuard)
 	@Post('setFRequest')
 	async setFRequest(@Body('intra') sendTo: string, @Body('amigo') cameFrom: string) {
 		await this.users.setFRequest(sendTo, cameFrom);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Post('setFriends')
+	async setFriends(@Body('intra') intra: string, @Body('amigo') amigo: string) {
+		await this.users.setFriend(intra, amigo);
+		await this.users.setFriend(amigo, intra);
 	}
 }

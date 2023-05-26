@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { User } from 'src/chat/chat.service';
 import prisma from 'src/prisma';
 
 @Injectable()
@@ -121,6 +122,20 @@ export class Users {
 		};
 	}
 
+	async getFRequests(intra: string) {
+		const usersEntry = await prisma.users.findUnique( {where: {intra_name: intra}} );
+		let requests = usersEntry.f_requests;
+
+		let f_requests = [];
+		for (let req in requests) {
+			let user = await prisma.users.findUnique( { where: { intra_name: requests[req] } });
+			// let req_to_push = {id: user.id, intra_name: user.intra_name, username: user.username, profile_picture: user.profile_picture, rank: user.rank}
+			// console.log(req_to_push);
+			f_requests.push(user);
+		}
+		return f_requests;
+	}
+
 	/*	========== SETTER ==========	*/
 
 	async setUsername(intra: string, new_username: string) {
@@ -200,6 +215,16 @@ export class Users {
 		return await prisma.users.update({
 			where: { intra_name: sendTo },
 			data: { f_requests: { push: cameFrom } }
+		});
+	}
+
+	async setFriend(friend1: string, friend2: string)
+	{
+		const usersEntry = await prisma.users.findUnique( {where: {intra_name: friend1}} );
+		const newReqs = usersEntry.f_requests.filter(item => item !== friend2);
+		return await prisma.users.update({
+			where: { intra_name: friend1 },
+			data: { friends: { push: friend2 }, f_requests: newReqs }
 		});
 	}
 }

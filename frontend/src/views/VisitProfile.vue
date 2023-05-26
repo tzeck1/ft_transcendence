@@ -77,7 +77,7 @@
 				rank.value = data.rank;
 				for (let req in data.friends)
 				{
-					if (req === userStore.intra)
+					if (data.friends[req] === userStore.intra)
 						showAmigo.value = false;
 				}
 				for (let req in data.f_requests)
