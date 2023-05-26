@@ -27,7 +27,7 @@ Welcome to FT_Transcendence, a unique, retro-themed multiplayer Pong game that t
 
 ## Unique Challenges and Accomplishments
 
-Despite having no prior experience in web development, our team rose to the challenge to create this immersive gaming experience. Eschirni, Rsiebert, and Mmeising focused on developing the game, implementing chat and socket connections, while Btenzlin and Tzeck worked on frontend, database, backend API and design. We tried to achieve a terminal-like design by implementing various graphics, a special font, and a unique color scheme.
+Despite having no prior experience in web development, our team rose to the challenge to create this immersive gaming experience. Elias, Roman, and Max focused on developing the game, implementing chat and socket connections, while Ben and Tom came up with the design, worked on the frontend, database and build our backend API. We tried to achieve a terminal-like design by implementing various graphics, a special font, and a unique color scheme.
 
 ## How to Install
 
