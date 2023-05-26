@@ -35,6 +35,14 @@ export const useGameStore = defineStore({
 				this.socket.disconnect();
 				this.socket = null as (Socket | null);
 			}
+		},
+		delContent() {
+			this.intra = "";
+			this.socket = null as (Socket | null);
+			this.room_id = ""
+			this.enemy_name = "";
+			this.enemy_picture = "";
+			this.mode = "";
 		}
 	},
 });

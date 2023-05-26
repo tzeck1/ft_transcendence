@@ -60,6 +60,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	@SubscribeMessage("invitePlay")
 	handleInvitePlay(client: Socket, ...args: any[]) {
 		// console.log("event 'invitePlay' was triggered. I am", client.id);
+		this.reapInactiveSocketsInvites();
 		let intra = args[0].intra;
 		let other_intra = args[0].other_intra;
 		let player = new Player(client, intra, this.users);
@@ -95,8 +96,30 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		return undefined;
 	}
 
+	reapInactiveSocketsLobby() {
+		for (let [intra, player] of this.lobby) {
+			if (player.getSocket().connected == false) {
+				this.lobby.delete(intra);
+				this.reapInactiveSocketsLobby();
+				return;
+			}
+		}
+	}
+
+	reapInactiveSocketsInvites() {
+		for (let tuple of this.invite_array) {
+			if (tuple[2].getSocket().connected == false) {
+				let index = this.invite_array.indexOf(tuple);
+				this.invite_array.splice(index, 1);
+				this.reapInactiveSocketsInvites();
+				return;
+			}
+		}
+	}
+
 	@SubscribeMessage("createOrJoinMode")
 	async handleCreateOrJoinMode(client: Socket, data: any) {
+		this.reapInactiveSocketsLobby();
 		let searching_player = new Player(client, data[0], this.users, data[1]);
 		await searching_player.updateUserData();
 		for (let [intraname, lobby_player] of this.lobby) {
@@ -115,6 +138,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	@SubscribeMessage("createOrJoin")
 	async handleCreateOrJoin(client: Socket, intra: string) {
+		this.reapInactiveSocketsLobby();
 		let searching_player = new Player(client, intra, this.users);
 		await searching_player.updateUserData();
 		for (let [intraname, lobby_player] of this.lobby) {
@@ -147,6 +171,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	@SubscribeMessage("cancelQueue")
 	handleCancelQueue(client: Socket, intra: string) {
+		console.log("cancelQueue was called");
 		let player = this.lobby.get(intra);
 		client.leave("lobby");
 		this.lobby.delete(player.getIntraname());

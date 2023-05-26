@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-	import { ref, computed, onMounted, defineComponent, vModelCheckbox, watch } from 'vue'
+	import { ref, computed, onMounted, onBeforeUnmount, defineComponent, vModelCheckbox, watch } from 'vue'
 	import { useUserStore } from '../../stores/UserStore';
 	import { io, Socket } from 'socket.io-client';
 	import { storeToRefs } from 'pinia';
@@ -159,6 +159,16 @@
 				gameStore.socket!.emit("invitePlay", {intra: intra, other_intra: other_intra});
 			});
 
+		}
+	});
+
+	onBeforeUnmount(() => {
+		console.log("onBeforeUnmount called");
+		if (isLooking.value == true) {
+			socket.emit("cancelQueue", userStore.intra);
+			userStore.socket?.emit("setIngameStatus", false);
+			gameStore.disconnectSocket();
+			isLooking.value = false;
 		}
 	});
 

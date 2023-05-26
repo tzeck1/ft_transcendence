@@ -166,8 +166,8 @@ export default class Pong extends Phaser.Scene {
 				this.gameStore.socket!.disconnect();
 				// TODO end game here
 			}
-		})
-		this.socket.on("destroyGame")
+		});
+		// this.socket.on("destroyGame")
 
 		this.socket.on("spawnBall", (y_position, x_velocity, y_velocity) => {
 			if (this.gameStore.mode != "")

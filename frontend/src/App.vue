@@ -56,15 +56,17 @@
 </template>
  
 <script setup lang="ts">
-	import { ref, computed, watch } from 'vue';
+	import { ref, computed, watch, createHydrationRenderer } from 'vue';
 	import { useRouter, useRoute } from 'vue-router';
 	import { useUserStore } from './stores/UserStore';
+	import { useGameStore } from './stores/GameStore';
 	import { io } from 'socket.io-client';
 
 	const router = useRouter();
 	const route = useRoute();
 	const dropdownVisible = ref(false);
 	const userStore = useUserStore();
+	const gameStore = useGameStore();
 	const message = ref('');
 	const active_channel = ref('');
 	const lastMessages = ref<[string, string][]>([]);
@@ -97,8 +99,12 @@
 			userStore.socket.on("updateBlockedUsers", (new_blocked_users: string[]) => {
 				blocked_users = new_blocked_users;
 			});
+			if (oldVal != undefined) {//socket was there before (page reload)
+				console.log("oldVal is defined and newVal too");
+				gameStore.socket?.emit("cancelQueue", userStore.intra);
+			}
 		}
-	})
+	});
 
 	function loadIntro() {
 		const cookies = document.cookie.split(";"); // for deleteing coockies
@@ -108,7 +114,11 @@
 			const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
 			document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
 		}
+		gameStore.socket?.emit("cancelQueue", userStore.intra);
+		userStore.socket?.emit("setIngameStatus", false);
+		gameStore.disconnectSocket();
 		userStore.delContent();
+		gameStore.delContent();
 		router.push('/');
 	}
 
