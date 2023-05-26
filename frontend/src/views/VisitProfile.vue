@@ -9,6 +9,7 @@
 					</div>
 				</div>
 				<button class="friend-button" v-if="showAmigo" @click="amigofy">Amigo-fy Us</button>
+				<span class="friend-confirmend" v-if="!showAmigo">You Are Amigos</span>
 				<!-- <span class="mt-7 font-bold">Rank</span> -->
 				<img class="rank" src="../assets/ranks/floppy_2.png" alt="Rank" v-if="rank < 15" />
 				<img class="rank" src="../assets/ranks/memorycard.png" alt="Rank" v-if="rank < 35 && rank > 15" />
@@ -99,7 +100,7 @@
 			alert("friend request still pending");
 		else
 		{
-			await axios.post(`http://${location.hostname}:3000/users/setFRequest`, { intra: intra.value, amigo: userStore.intra });
+			await axios.post(`http://${location.hostname}:3000/users/setFRequest`, { intra: intra.value, amigo: userStore.intra, sending: true });
 			amigoPending.value = true;
 		}
 	}
@@ -176,6 +177,10 @@
 
 	.friend-button {
 		@apply text-green-400 px-4 py-2 text-lg mt-5 bg-white bg-opacity-10;
+	}
+
+	.friend-confirmend {
+		@apply text-green-400 px-4 py-2 text-lg mt-5 rounded-2xl bg-white bg-opacity-10;
 	}
 
 	.friend-button:hover {

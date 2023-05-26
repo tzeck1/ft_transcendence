@@ -1,13 +1,14 @@
 <template>
 	<div class="friends-container">
 		<h2 class="title">Friends</h2>
-		<div v-for="(req, index) in f_requests" :key="req.id" @click="showProfile(req.intra_name)" class="friend-item" :class="{'highlight': index % 2 === 0}">
+		<div v-for="(req, index) in f_requests" :key="req.id" class="friend-item" :class="{'highlight': index % 2 === 0}">
 			<div class="friend-details">
-				<div class="picture-container">
+				<div class="picture-container" @click="showProfile(req.intra_name)">
 					<img class="profile_picture" :src="req.profile_picture"/>
 				</div>
-				<p class="username">{{ req.username }}</p>
+				<p class="username" @click="showProfile(req.intra_name)">{{ req.username }}</p>
 				<p class="accept" @click="acceptRequest(req.intra_name)" v-if="showAccept">&#10003;</p>
+				<p class="reject" @click="rejectRequest(req.intra_name)" v-if="showAccept">&#10799;</p>
 			</div>
 		</div>
 		<div v-for="(friend, index) in friends" :key="friend.id" @click="showProfile(friend.intra_name)" class="friend-item" :class="{'highlight': index % 2 === 0}">
@@ -95,6 +96,12 @@
 		console.log(f_requests.value);
 	}
 
+	async function rejectRequest(amigo_intra: string) {
+		await axios.post(`http://${location.hostname}:3000/users/setFRequest`, { intra: userStore.intra, amigo: amigo_intra, sending: false });
+		showAccept.value = false;
+		f_requests.value = f_requests.value.filter((element) => element.intra_name !== amigo_intra);
+	}
+
 </script>
 
 <style scoped>
@@ -146,7 +153,15 @@
 	}
 
 	.accept {
-		@apply text-4xl text-green-300 text-center w-1/3;
+		@apply text-4xl text-green-300 text-center border p-2 w-1/6 z-10;
+	}
+
+	.reject {
+		@apply text-4xl text-red-300 text-center border p-2 w-1/6 z-10;
+	}
+
+	.accept:hover {
+		@apply cursor-wait;
 	}
 
 	.highlight {

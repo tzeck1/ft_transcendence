@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs
 import { Users } from './user.service';
 import { PrismaClient } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { send } from 'process';
 
 @Controller('users')
 export class UserController {
@@ -75,8 +76,14 @@ export class UserController {
 
 	@UseGuards(JwtAuthGuard)
 	@Post('setFRequest')
-	async setFRequest(@Body('intra') sendTo: string, @Body('amigo') cameFrom: string) {
-		await this.users.setFRequest(sendTo, cameFrom);
+	async setFRequest(@Body('intra') sendTo: string, @Body('amigo') cameFrom: string, @Body('sending') sending: boolean) {
+		const amigo = await this.getUser(cameFrom);
+		if (amigo.f_requests.includes(sendTo) && sending == true)
+			await this.setFriends(sendTo, cameFrom);
+		else if (sending == true)
+			await this.users.setFRequest(sendTo, cameFrom);
+		else if (sending == false)
+			await this.users.unSetFRequest(sendTo, cameFrom);
 	}
 
 	@UseGuards(JwtAuthGuard)
