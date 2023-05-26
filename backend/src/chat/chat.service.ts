@@ -873,7 +873,7 @@ export class ChatService {
 	public pong(client: Socket, username: string): [string, string, string] {
 		let user = this.getUserFromSocket(client);
 		if (user == undefined)
-			return console.error("User in 'ChatService::ping' is undefined") as undefined;
+			return console.error("User in 'ChatService::pong' is undefined") as undefined;
 		let other_user = this.findUserFromUsername(username);
 
 		//Error handling
@@ -888,6 +888,7 @@ export class ChatService {
 			return [client.id, "Error: ", "could not get an invite from this user."];
 		user.getSocket().emit("sendToGame");
 		other_user.getSocket().emit("sendToGame");
+		console.log("emitted to sendToGame, next will emit gameInvite");
 		user.getSocket().emit("gameInvite", user.getIntra(), other_user.getIntra(), mode);
 		other_user.getSocket().emit("gameInvite", other_user.getIntra(), user.getIntra(), mode);
 		this.invites.delete(other_user.getIntra() + user.getIntra());

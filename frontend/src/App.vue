@@ -74,6 +74,8 @@
 	const isIntro = computed(() => route.path === '/');
 	var blocked_users: string[];
 
+	const emit = defineEmits(["start-match", "show-end", "show-start"]);
+
 	watch( () => userStore.intra, (newVal, oldVal) => {
 		if (newVal != undefined && newVal != "") {
 			userStore.socket = io(`${location.hostname}:3000/chat_socket`, {query: {intra: userStore.intra}});
@@ -94,6 +96,7 @@
 				router.push('/profile/' + intra);
 			});
 			userStore.socket.on("sendToGame", () => {
+				router.push('/profile');
 				router.push('/game/');
 			});
 			userStore.socket.on("updateBlockedUsers", (new_blocked_users: string[]) => {
@@ -104,6 +107,46 @@
 				gameStore.socket?.emit("cancelQueue", userStore.intra);
 			}
 		}
+	});
+
+	// redundancy (watch and onMounted) because watch is needed when page is reloaded on game page (new socket created),
+	// and onMounted is needed when just switching to game page
+	// when reloading on game page, chat socket is not created fast enough for onmounted to set the listeners. so watch is needed
+	watch( () => userStore.socket, (newVal, oldVal) => {
+		// console.log("triggered watch, userStore.socket changed to", newVal, "from", oldVal);
+		if (newVal != undefined) {
+			if (userStore.socket?.hasListeners("gameInvite") == false) {
+				console.log("setup listener for gameInvite");
+				userStore.socket!.on("gameInvite", (intra: string, other_intra: string, mode: string) => {
+					console.log("executing gameInvite");
+					gameStore.setMode(mode);
+					gameStore.setSocket(io(`${location.hostname}:3000/game_socket`, {autoConnect: false}));
+					if (gameStore.socket!.hasListeners("privatePlayReady") == false) {
+						console.log("setup listener for privatePlayReady");
+						gameStore.socket!.on("privatePlayReady", (username: string, pic: string, room_id: string) => {
+							console.log("executing privatePlayReady");
+							gameStore.setIntra(userStore.intra);
+							gameStore.setEnemyName(username);
+							gameStore.setEnemyPicture(pic);
+							gameStore.setRoomId(room_id);
+							// showCount.value = true;
+							// countdown();
+							// startMatch();
+							console.log("emitting start-match component stuff");
+							emit('start-match');
+						});
+					}
+					gameStore.socket!.on('disconnect', function() {
+						console.log('game socket Disconnected');
+						userStore.socket!.emit("setIngameStatus", false);
+					});
+					// console.log("emitting inviteplay");
+					gameStore.socket!.emit("invitePlay", {intra: intra, other_intra: other_intra});
+				});
+			}
+		}
+		else
+			console.log("newVal was undefined in the watch function");//does this ever happen?
 	});
 
 	function loadIntro() {

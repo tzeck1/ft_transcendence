@@ -120,7 +120,7 @@ export class Room {
 
 	spawn_ball() {
 		let x: number, y: number, p: number;
-		console.log("spawnball was called");
+		// console.log("spawnball was called");
 
 		if (Math.random() < 0.5)
 			p = Math.random() * (this.height / this.ball_spawn_distance);
@@ -145,11 +145,11 @@ export class Room {
 	}
 
 	playerScored(player: Player) {
-		console.log("playerScored was called from", player.getIntraname());
-		if (player == this.left_player)
-			console.log("He was true left player");
-		else
-			console.log("He was NOT the true left player");
+		// console.log("playerScored was called from", player.getIntraname());
+		// if (player == this.left_player)
+			// console.log("He was true left player");
+		// else
+			// console.log("He was NOT the true left player");
 		if (this.left_player == player)
 			this.left_score++;
 		else

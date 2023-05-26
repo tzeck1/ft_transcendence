@@ -59,20 +59,23 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	@SubscribeMessage("invitePlay")
 	handleInvitePlay(client: Socket, ...args: any[]) {
-		// console.log("event 'invitePlay' was triggered. I am", client.id);
+		console.log("event 'invitePlay' was triggered. I am", client.id);
 		this.reapInactiveSocketsInvites();
 		let intra = args[0].intra;
 		let other_intra = args[0].other_intra;
 		let player = new Player(client, intra, this.users);
 		let other_player = this.searchInviteArray(intra, other_intra);
 		if (other_player != undefined) {// This is executed when the second player gets into handleInvitePlay
+			console.log("invitePlay with second user is called");
 			player.updateUserData();
 			other_player.updateUserData();
 			let index = this.invite_array.indexOf([other_intra, intra, other_player]);
 			if (index == -1)
 				index = this.invite_array.indexOf([intra, other_intra, other_player]);
 			if (index == -1)
-				console.log("Error in handleInvitePlay due to invalid return from indexOf (invite_array)", other_player.getSocket().id);
+				console.log("!!! ERROR Error in handleInvitePlay due to invalid return from indexOf (invite_array)", other_player.getSocket().id);
+			else
+				console.log("NO ERROR THIS TIME< ALL GOOD");
 			this.invite_array.splice(index, 1);
 			this.room_counter += 1;
 			let room_id = "game" + this.room_counter.toString();
@@ -80,6 +83,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			this.rooms.set(room_id, room);
 			player.getSocket().join(room_id);
 			other_player.getSocket().join(room_id);
+			console.log("emitting privatePlayReady!");
 			player.getSocket().emit("privatePlayReady", other_player.getUsername(), other_player.getPicture(), room_id);
 			other_player.getSocket().emit("privatePlayReady", player.getUsername(), player.getPicture(), room_id);
 		} else // This is executed when the first player gets into handleInvitePlay
@@ -180,7 +184,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	@SubscribeMessage("scoreRequest")
 	handleScoreRequest(client: Socket, data: any) {
-		console.log(client.id, "sends", data.left_player_scored, "and", data.room)
+		// console.log(client.id, "sends", data.left_player_scored, "and", data.room)
 		let room = this.rooms.get(data.room);
 		let player;
 		if (data.left_player_scored == true/*client == room.getLeftPlayer().getSocket()*/)
@@ -189,7 +193,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			player = room.getRightPlayer();
 		room.validateScore(client);
 		if (/*room.isScoreTrue() == true*/client == room.getLeftPlayer().getSocket()) {
-			console.log("inside if of isScoreTrue was called");
+			// console.log("inside if of isScoreTrue was called");
 			room.playerScored(player);
 			room.spawn_ball();
 		}
