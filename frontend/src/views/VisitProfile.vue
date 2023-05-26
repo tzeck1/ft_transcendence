@@ -18,10 +18,7 @@
 			</div>
 			<div class="feature-grid">
 				<MatchHistory class="grid-item"></MatchHistory>
-				<!-- <Stats class="grid-item">Stats</Stats> -->
-				<!-- <div class="grid-item">Friends</div> -->
 				<Achievements class="grid-item"></Achievements>
-				<!-- <div class="grid-item">Statistics</div> -->
 			</div>
 		</div>
 	</div>
@@ -130,15 +127,15 @@
 	}
 
 	.feature-grid {
-		@apply grid w-4/5 max-h-full grid-cols-2;
-		height: calc(100vh - 128px);
+		@apply grid w-4/5 h-full grid-cols-2;
+		/* height: calc(100vh - 128px); */
 		/* position: fixed;
 		right: 0px; */
 		/* @apply border border-blue-300 grid-cols-2 grid-rows-2 gap-4 w-4/5 h-full p-8; */
 	}
 
 	.grid-item {
-		@apply overflow-auto p-4;
+		@apply overflow-auto p-4 h-1/2 mt-12;
 		/* @apply border overflow-auto; */
 		/* h-1/4 border-red-300 flex justify-center items-center bg-black bg-opacity-50 rounded-2xl text-3xl */
 	}

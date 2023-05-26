@@ -6,7 +6,6 @@
 						<span v-show="!isLooking">Queue</span>
 						<span v-show="isLooking">Cancel</span>
 				</button>
-				<span class="block-title">Settings</span>
 			</div>
 			<div :class="['comp-block', 'block-style', compBlockClass]" @click="selectCompBlock">
 				<img src="../../assets/pong.gif" class="block-image">
@@ -21,10 +20,14 @@
 						<span v-show="!isLooking">Queue</span>
 						<span v-show="isLooking">Cancel</span>
 				</button>
-				<select name="mode" id="mode" multiple>
+				<div class="gamemode">
+					<button class="mode" @click="speed_mode" :class="{'highlight': mode == 'speed'}">Speed Pong</button>
+					<button class="mode" @click="dodge_mode" :class="{'highlight': mode == 'dodge'}">Dodge Ball</button>
+				</div>
+				<!-- <select name="mode" id="mode" multiple>
   					<option value="speed">Speed pong</option>
   					<option value="dodge">Dodge ball</option>
-				</select>
+				</select> -->
 			</div>
 		</div>
 		<div class="countdown-overlay" v-if="showCount">
@@ -69,6 +72,7 @@
 	const { profile_picture } = storeToRefs(userStore);
 	const { enemy_name } = storeToRefs(gameStore);
 	const { enemy_picture } = storeToRefs(gameStore);
+	const	mode = ref('none');
 	const emit = defineEmits(["start-match", "show-end", "show-start"]);
 
 	document.addEventListener("visibilitychange", () => {
@@ -172,10 +176,9 @@
 		gameStore.setMode("");
 		if (fun == true)
 		{
-			let tmp = document.getElementById("mode");
-			if (tmp.value == "") //no mode selcted
+			if (mode.value == 'none') //no mode selcted
 				return ;
-			gameStore.setMode(tmp.value);
+			gameStore.setMode(mode.value);
 		}
 		//establish connection
 		if (!isLooking.value) {
@@ -214,6 +217,20 @@
 			isLooking.value = false;
 			gameStore.disconnectSocket();
 		}
+	}
+
+	function speed_mode() {
+		if (mode.value == 'none' || mode.value == 'dodge')
+			mode.value = 'speed';
+		else if (mode.value == 'speed')
+			mode.value = 'none';
+	}
+
+	function dodge_mode() {
+		if (mode.value == 'none' || mode.value == 'speed')
+			mode.value = 'dodge';
+		else if (mode.value == 'dodge')
+			mode.value = 'none';
 	}
 
 	function selectCompBlock() {
@@ -363,5 +380,17 @@
 
 	.countdown {
 		@apply text-9xl animate-ping;
+	}
+
+	.gamemode {
+		@apply flex flex-row mt-6;
+	}
+
+	.mode {
+		@apply py-4 px-4;
+	}
+
+	.highlight {
+		@apply bg-white bg-opacity-10;
 	}
 </style>

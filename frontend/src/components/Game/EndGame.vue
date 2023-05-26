@@ -17,7 +17,6 @@
 			</div>
 		</div>
 		<div class="buttons">
-			<button class="game-button" @click="playAgain" >Play Again</button>
 			<button class="quit-button" @click="quit" >Back To Start</button>
 		</div>
 	</div>
@@ -54,10 +53,6 @@
 		else
 			result.value = "Loser!";
 	});
-
-	function playAgain() {
-		emit("start-match");
-	};
 
 	function quit() {
 		gameStore.disconnectSocket();
