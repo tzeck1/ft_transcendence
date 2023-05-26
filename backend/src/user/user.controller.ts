@@ -92,4 +92,11 @@ export class UserController {
 		await this.users.setFriend(intra, amigo);
 		await this.users.setFriend(amigo, intra);
 	}
+
+	@UseGuards(JwtAuthGuard)
+	@Post('killFriend')
+	async killFriends(@Body('intra') intra: string, @Body('amigo') amigo: string) {
+		await this.users.killFriend(amigo, intra);
+		return await this.users.killFriend(intra, amigo);
+	}
 }

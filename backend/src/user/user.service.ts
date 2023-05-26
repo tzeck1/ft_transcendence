@@ -237,4 +237,15 @@ export class Users {
 			data: { friends: { push: amigo }, f_requests: newReqs }
 		});
 	}
+
+	async killFriend(intra: string, amigo: string)
+	{
+		const usersEntry = await prisma.users.findUnique( {where: {intra_name: intra}} );
+		const newFriends = usersEntry.friends.filter(item => item !== amigo);
+		await prisma.users.update({
+			where: { intra_name: intra },
+			data: { friends: newFriends }
+		});
+		return (newFriends);
+	}
 }

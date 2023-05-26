@@ -11,13 +11,16 @@
 				<p class="reject" @click="rejectRequest(req.intra_name)" v-if="showAccept">&#10799;</p>
 			</div>
 		</div>
-		<div v-for="(friend, index) in friends" :key="friend.id" @click="showProfile(friend.intra_name)" class="friend-item" :class="{'highlight': index % 2 === 0}">
+		<div v-for="(friend, index) in friends" :key="friend.id" class="friend-item" :class="{'highlight': index % 2 === 0}">
 			<div class="friend-details">
-				<div class="picture-container">
+				<div class="picture-container" @click="showProfile(friend.intra_name)">
 					<img class="profile_picture" :src="friend.profile_picture"/>
 				</div>
-				<p class="username">{{ friend.username }}</p>
-				<p class="rank">Rank: {{ friend.rank }}</p>
+				<p class="username" @click="showProfile(friend.intra_name)">{{ friend.username }}</p>
+				<p class="rank" @click="showProfile(friend.intra_name)">Rank: {{ friend.rank }}</p>
+				<div class="remove-container">
+					<p class="remove" @click="killFriend(friend.intra_name)" v-if="showAccept">&#10799;</p>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -101,6 +104,11 @@
 		showAccept.value = false;
 		f_requests.value = f_requests.value.filter((element) => element.intra_name !== amigo_intra);
 	}
+	
+	async function killFriend(amigo_intra: string) {
+		let newFriends = await axios.post(`http://${location.hostname}:3000/users/killFriend`, { intra: userStore.intra, amigo: amigo_intra });
+		friends.value = newFriends.data;
+	}
 
 </script>
 
@@ -137,7 +145,7 @@
 	}
 
 	.picture-container {
-		@apply flex justify-center w-1/3;
+		@apply flex justify-center w-1/4;
 	}
 
 	.profile_picture {
@@ -145,19 +153,31 @@
 	}
 
 	.username {
-		@apply text-center w-1/3;
+		@apply text-center w-1/4;
 	}
 
 	.rank {
-		@apply text-center w-1/3;
+		@apply text-center w-1/4;
 	}
 
 	.accept {
-		@apply text-4xl text-green-300 text-center border p-2 w-1/6 z-10;
+		@apply text-4xl text-green-300 text-center p-2 w-1/6 z-10;
 	}
 
 	.reject {
-		@apply text-4xl text-red-300 text-center border p-2 w-1/6 z-10;
+		@apply text-4xl text-red-300 text-center p-2 w-1/6 z-10;
+	}
+
+	.remove-container {
+		@apply w-1/4 flex justify-center;
+	}
+
+	.remove {
+		@apply w-1/4 text-xl text-red-400 text-opacity-70 flex justify-center;
+	}
+
+	.remove:hover {
+		@apply bg-white bg-opacity-10 rounded-lg;
 	}
 
 	.accept:hover {
