@@ -71,6 +71,7 @@
 		console.log("Phaser.vue on before unmount was called, destroying game.value now");
 		game.value?.destroy(true);
 		userStore.socket?.emit("setIngameStatus", false);
+		gameStore.socket?.disconnect();
 	});
 </script>
 
