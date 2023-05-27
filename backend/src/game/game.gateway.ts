@@ -43,18 +43,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		// i disconnect, so i should get a lose and my enemy gets a win
 		for (let [room_id, room] of this.rooms) {
 			if (room.getLeftPlayer().getSocket().id == client.id) {
-				this.gameService.setGameData(room.getLeftPlayer().getIntraname(),
-																				room.getLeftPlayer().getUsername(),
-																				room.getRightPlayer().getUsername(),
-																				0, 3,
-																				(room.getLeftPlayer().getMode() == ""),
-																				0, 0);
-				this.gameService.setGameData(room.getRightPlayer().getIntraname(),
-																				room.getRightPlayer().getUsername(),
-																				room.getLeftPlayer().getUsername(),
-																				3, 0,
-																				(room.getRightPlayer().getMode() == ""),
-																				0, 0);
+				if (room.getLeftPlayer().getMode() == "") {
+					this.gameService.setGameData(room.getLeftPlayer().getIntraname(),
+																					room.getLeftPlayer().getUsername(),
+																					room.getRightPlayer().getUsername(),
+																					0, 3,
+																					(room.getLeftPlayer().getMode() == ""),
+																					0, 0);
+					this.gameService.setGameData(room.getRightPlayer().getIntraname(),
+																					room.getRightPlayer().getUsername(),
+																					room.getLeftPlayer().getUsername(),
+																					3, 0,
+																					(room.getRightPlayer().getMode() == ""),
+																					0, 0);
+				}
 				let other_player_socket = room.getRightPlayer().getSocket();
 				other_player_socket.emit("sendToProfile");
 				this.rooms.delete(room_id);
@@ -62,18 +64,20 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				return;
 			}
 			if (room.getRightPlayer().getSocket().id == client.id) {
-				this.gameService.setGameData(room.getRightPlayer().getIntraname(),
-																				room.getRightPlayer().getUsername(),
-																				room.getLeftPlayer().getUsername(),
-																				0, 3,
-																				(room.getRightPlayer().getMode() == ""),
-																				0, 0);
-				this.gameService.setGameData(room.getLeftPlayer().getIntraname(),
-																				room.getLeftPlayer().getUsername(),
-																				room.getRightPlayer().getUsername(),
-																				3, 0,
-																				(room.getLeftPlayer().getMode() == ""),
-																				0, 0);
+				if (room.getLeftPlayer().getMode() == "") {
+					this.gameService.setGameData(room.getRightPlayer().getIntraname(),
+																					room.getRightPlayer().getUsername(),
+																					room.getLeftPlayer().getUsername(),
+																					0, 3,
+																					(room.getRightPlayer().getMode() == ""),
+																					0, 0);
+					this.gameService.setGameData(room.getLeftPlayer().getIntraname(),
+																					room.getLeftPlayer().getUsername(),
+																					room.getRightPlayer().getUsername(),
+																					3, 0,
+																					(room.getLeftPlayer().getMode() == ""),
+																					0, 0);
+				}
 				let other_player_socket = room.getLeftPlayer().getSocket();
 				other_player_socket.emit("sendToProfile");
 				this.rooms.delete(room_id);
