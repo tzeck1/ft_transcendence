@@ -40,9 +40,9 @@
 			<router-link to="/"></router-link>
 			<router-view/>
 		</main>
-		<div class="chat-box" v-if="!isIntro" :class="{'blur': inputFocus === true}">
+		<div class="chat-box" v-if="!isIntro" :class="{'blur': (inputFocus || hovering) === true}" @mouseover="hovering=true" @mouseleave="hovering=false">
 			<div class="chat-input-container">
-				<div class="chat-history" v-show="inputFocus">
+				<div class="chat-history" v-show="inputFocus || hovering" ref="chatHistory">
 					<div class="flex-grow"></div>
 					<p v-for="(tuple, index) in [...lastMessages].reverse()" :key="index">{{ tuple[0] + tuple[1] }}</p>
 				</div>
@@ -56,7 +56,7 @@
 </template>
  
 <script setup lang="ts">
-	import { ref, computed, watch } from 'vue';
+	import { ref, computed, watch, nextTick } from 'vue';
 	import { useRouter, useRoute } from 'vue-router';
 	import { useUserStore } from './stores/UserStore';
 	import { io } from 'socket.io-client';
@@ -71,6 +71,8 @@
 	const inputFocus = ref(false);
 	const isIntro = computed(() => route.path === '/');
 	var blocked_users: string[];
+	const hovering = ref(false);
+	const chatHistory = ref<HTMLElement | null>(null);
 
 	watch( () => userStore.intra, (newVal, oldVal) => {
 		if (newVal != undefined && newVal != "") {
@@ -78,6 +80,11 @@
 			userStore.socket.on("messageToClient", (sender: string, message: string, intra: string) => {
 				if (blocked_users == undefined || blocked_users.indexOf(intra) == -1)
 					lastMessages.value.unshift([sender, message]);
+				nextTick(() => {
+					if (chatHistory.value) {
+						chatHistory.value.scrollTop = chatHistory.value.scrollHeight;
+					}
+				});
 			});
 			userStore.socket.on("changeInputPlaceholder", (new_channel_placeholder: string, new_channel_id: string) => {
 				active_channel.value = new_channel_placeholder;

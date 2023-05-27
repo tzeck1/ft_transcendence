@@ -3,7 +3,9 @@
 		<div class="content-wrapper" :class="{ blur: qrCodeVisible || showTFA }">
 			<div class="sidebar">
 				<div class="profile-picture-drop-area" @dragenter.prevent.stop="highlight" @dragover.prevent.stop="highlight" @dragleave.prevent.stop="unhighlight" @drop.prevent.stop="handleDrop">
-					<img id="profile-picture" class="profile-picture" :src="profile_picture"/>
+					<div class="profile-picture-container">
+						<img id="profile-picture" class="profile-picture" :src="profile_picture"/>
+					</div>
 					<div class="drop-icon" v-show="showDropIcon">&#x21E3;</div>
 				</div>
 				<div class="name-container">
@@ -27,7 +29,7 @@
 			<div class="feature-grid">
 				<MatchHistory class="grid-item"></MatchHistory>
 				<Stats class="grid-item"></Stats>
-				<Achievements class="grid-item"></Achievements>
+				<Achievements class="grid-item-s"></Achievements>
 				<Friends class="grid-item">Friends</Friends>
 			</div>
 		</div>
@@ -277,8 +279,13 @@
 		width: 25vw;
 	}
 
+	.profile-picture-container {
+		@apply relative lg:w-48 md:w-40 sm:w-36 w-24 h-0 my-10 transition-all duration-300 ease-in-out;
+		padding-top: 100%;
+	}
+
 	.profile-picture {
-		@apply rounded-full object-cover w-48 h-48 my-10;
+		@apply rounded-full object-cover absolute top-0 left-0 w-full h-full;
 	}
 
 	.rank {
@@ -292,7 +299,7 @@
 	.feature-grid {
 		@apply grid w-4/5 max-h-full grid-cols-1 lg:grid-cols-2 grid-rows-2;
 		height: calc(100vh - 128px);
-		width: 75vw;
+		/* width: 75vw; */
 		/* position: fixed;
 		right: 0px; */
 		/* @apply border border-blue-300 grid-cols-2 grid-rows-2 gap-4 w-4/5 h-full p-8; */
@@ -302,6 +309,10 @@
 		@apply overflow-auto py-10;
 		/* @apply border overflow-auto; */
 		/* h-1/4 border-red-300 flex justify-center items-center bg-black bg-opacity-50 rounded-2xl text-3xl */
+	}
+
+	.grid-item-s {
+		@apply overflow-auto py-10 hidden lg:flex;
 	}
 
 	.grid-item::-webkit-scrollbar { /* Chrome, Safari and Edge */
@@ -321,23 +332,23 @@
 	}
 
 	.two-factor-button {
-		@apply mt-4 text-2xl;
+		@apply mt-4 text-2xl p-4;
 	}
 	
-	/* .name-container {
-		@apply flex justify-center w-full;
-	} */
+	.name-container {
+		@apply flex justify-center items-center w-full;
+	}
 
 	.username-wrapper {
-		@apply ml-14 justify-center inline-flex items-center relative text-4xl;
+		@apply md:ml-14 ml-0 justify-center inline-flex items-center relative text-4xl transition-all duration-300 ease-in-out;
 	}
 
 	.username-text {
-		@apply justify-center items-center px-2;
+		@apply lg:text-4xl md:text-3xl text-xl justify-center items-center px-2 transition-all duration-300 ease-in-out;
 	}
 
 	#toggle-username {
-		@apply p-3 ml-3;
+		@apply p-3 ml-3 md:block hidden text-4xl;
 	}
 
 	#toggle-username:hover {

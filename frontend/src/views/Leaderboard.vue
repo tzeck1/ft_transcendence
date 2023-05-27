@@ -89,7 +89,7 @@
 	}
 
 	.picture-container {
-		@apply flex justify-center w-1/5;
+		@apply flex justify-center lg:w-1/5 w-1/4 transition-all duration-300 ease-in-out;
 	}
 
 	.profile_picture {
@@ -97,19 +97,19 @@
 	}
 
 	.position {
-		@apply text-center w-1/5 text-3xl;
+		@apply text-center lg:w-1/5 w-1/4 text-3xl transition-all duration-300 ease-in-out;
 	}
 
 	.username {
-		@apply text-center w-1/5;
+		@apply text-center lg:w-1/5 w-1/4 transition-all duration-300 ease-in-out;
 	}
 
 	.rank {
-		@apply text-center w-1/5;
+		@apply text-center lg:w-1/5 w-1/4 transition-all duration-300 ease-in-out;
 	}
 
 	.played {
-		@apply text-center w-1/5;
+		@apply text-center lg:w-1/5 lg:block hidden transition-all duration-300 ease-in-out;
 	}
 
 	.highlight {

@@ -127,15 +127,15 @@
 	}
 
 	.feature-grid {
-		@apply grid w-4/5 h-full grid-cols-2;
-		/* height: calc(100vh - 128px); */
+		@apply grid w-4/5 h-full grid-cols-1 lg:grid-cols-2 grid-rows-2;
+		height: calc(100vh - 128px);
 		/* position: fixed;
 		right: 0px; */
 		/* @apply border border-blue-300 grid-cols-2 grid-rows-2 gap-4 w-4/5 h-full p-8; */
 	}
 
 	.grid-item {
-		@apply overflow-auto p-4 h-1/2 mt-12;
+		@apply overflow-auto p-4 h-full;
 		/* @apply border overflow-auto; */
 		/* h-1/4 border-red-300 flex justify-center items-center bg-black bg-opacity-50 rounded-2xl text-3xl */
 	}
@@ -177,7 +177,7 @@
 	}
 
 	.friend-confirmend {
-		@apply text-green-400 px-4 py-2 text-lg mt-5 rounded-2xl bg-white bg-opacity-10;
+		@apply text-green-400 px-4 py-2 lg:text-lg md:text-base text-xs whitespace-nowrap mt-5 rounded-2xl bg-white bg-opacity-10 transition-all duration-300 ease-in-out;
 	}
 
 	.friend-button:hover {

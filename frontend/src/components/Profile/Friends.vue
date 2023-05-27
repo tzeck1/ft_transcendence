@@ -1,17 +1,18 @@
 <template>
 	<div class="friends-container">
 		<h2 class="title">Friends</h2>
-		<div v-for="(req, index) in f_requests" :key="req.id" class="friend-item" :class="{'highlight': index % 2 === 0}">
-			<div class="friend-details">
-				<div class="picture-container" @click="showProfile(req.intra_name)">
-					<img class="profile_picture" :src="req.profile_picture"/>
+		<div v-for="(req, index) in f_requests" :key="req.id" class="friend-item highlight">
+			<div class="friend-details relative">
+				<div class="animate-ping absolute top-2 left-2 inline-flex h-3 w-3 rounded-full bg-white"></div>
+				<div class="picture-container-r" @click="showProfile(req.intra_name)">
+					<img class="profile_picture-r" :src="req.profile_picture"/>
 				</div>
-				<p class="username" @click="showProfile(req.intra_name)">{{ req.username }}</p>
+				<p class="username-r" @click="showProfile(req.intra_name)">{{ req.username }}</p>
 				<p class="accept" @click="acceptRequest(req.intra_name)" v-if="showAccept">&#10003;</p>
 				<p class="reject" @click="rejectRequest(req.intra_name)" v-if="showAccept">&#10799;</p>
 			</div>
 		</div>
-		<div v-for="(friend, index) in friends" :key="friend.id" class="friend-item" :class="{'highlight': index % 2 === 0}">
+		<div v-for="(friend, index) in friends" :key="friend.id" class="friend-item">
 			<div class="friend-details">
 				<div class="picture-container" @click="showProfile(friend.intra_name)">
 					<img class="profile_picture" :src="friend.profile_picture"/>
@@ -155,21 +156,21 @@
 
 <style scoped>
 
-.leaderboard-container {
+	.friends-container {
 		@apply h-full text-xl overflow-auto;
 		scrollbar-width: thin;
 		scrollbar-color: transparent transparent;
 	}
 
-	.leaderboard-container::-webkit-scrollbar { /* Chrome, Safari and Edge */
+	.friends-container::-webkit-scrollbar { /* Chrome, Safari and Edge */
 		width: 8px;
 	}
 
-	.leaderboard-container::-webkit-scrollbar-thumb { /* Chrome, Safari and Edge */
+	.friends-container::-webkit-scrollbar-thumb { /* Chrome, Safari and Edge */
 		background: transparent;
 	}
 
-	.leaderboard-container::-webkit-scrollbar-thumb:hover { /* Chrome, Safari and Edge */
+	.friends-container::-webkit-scrollbar-thumb:hover { /* Chrome, Safari and Edge */
 		background: #fff;
 	}
 
@@ -186,15 +187,27 @@
 	}
 
 	.picture-container {
-		@apply flex justify-center w-1/4;
+		@apply flex justify-center sm:w-1/4 w-1/3 transition-all duration-300 ease-in-out;
+	}
+
+	.picture-container-r {
+		@apply flex justify-center w-2/6 transition-all duration-300 ease-in-out;
+	}
+
+	.profile_picture-r {
+		@apply w-20 h-20 rounded-full object-cover;
 	}
 
 	.profile_picture {
 		@apply w-20 h-20 rounded-full object-cover;
 	}
 
+	.username-r {
+		@apply  w-2/6 text-center text-xl transition-all duration-300 ease-in-out;
+	}
+
 	.user-container {
-		@apply w-1/4 flex flex-col;
+		@apply sm:w-1/4 w-1/3 flex flex-col transition-all duration-300 ease-in-out;
 	}
 
 	.username {
@@ -206,7 +219,7 @@
 	}
 
 	.rank {
-		@apply text-center w-1/4;
+		@apply text-center sm:w-1/4 sm:block hidden transition-all duration-300 ease-in-out;
 	}
 
 	.accept {
@@ -218,7 +231,7 @@
 	}
 
 	.remove-container {
-		@apply w-1/4 flex justify-center;
+		@apply sm:w-1/4 w-1/3 flex justify-center transition-all duration-300 ease-in-out;
 	}
 
 	.remove {
