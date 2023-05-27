@@ -80,87 +80,16 @@
 					socket.emit("cancelQueue", userStore.intra);
 					isLooking.value = false;
 				} else {//user is ingame, not only in queue
-					//if inside an actual game room, disconnect and let the other player finish the game
 					router.push('/profile');
+					//sending other user to profile in the onDisconnect handling function
 				}
+				gameStore.disconnectSocket();//maybe need to test around with order of router.push and disconnect
 				userStore.socket?.emit("setIngameStatus", false);
-				// somehow destroy the phaser instance
-				gameStore.disconnectSocket();
 			}
 		} else {//document.hidden != true
 			console.log("page is visible");
 		}
 	});
-
-	// redundancy (watch and onMounted) because watch is needed when page is reloaded on game page (new socket created),
-	// and onMounted is needed when just switching to game page
-	// when reloading on game page, chat socket is not created fast enough for onmounted to set the listeners. so watch is needed
-	// watch( () => userStore.socket, (newVal, oldVal) => {
-	// 	// console.log("triggered watch, userStore.socket changed to", newVal, "from", oldVal);
-	// 	if (newVal != undefined) {
-	// 		if (userStore.socket?.hasListeners("gameInvite") == false) {
-	// 			// console.log("setup listener for gameInvite");
-	// 			userStore.socket!.on("gameInvite", (intra: string, other_intra: string, mode: string) => {
-	// 				// console.log("executing gameInvite");
-	// 				gameStore.setMode(mode);
-	// 				gameStore.setSocket(io(`${location.hostname}:3000/game_socket`, {autoConnect: false}));
-	// 				if (gameStore.socket!.hasListeners("privatePlayReady") == false) {
-	// 					// console.log("setup listener for privatePlayReady");
-	// 					gameStore.socket!.on("privatePlayReady", (username: string, pic: string, room_id: string) => {
-	// 						gameStore.setIntra(userStore.intra);
-	// 						gameStore.setEnemyName(username);
-	// 						gameStore.setEnemyPicture(pic);
-	// 						gameStore.setRoomId(room_id);
-	// 						showCount.value = true;
-	// 						countdown();
-	// 					});
-	// 				}
-	// 				gameStore.socket!.on('disconnect', function() {
-	// 					console.log('game socket Disconnected');
-	// 					userStore.socket!.emit("setIngameStatus", false);
-	// 				});
-	// 				// console.log("emitting inviteplay");
-	// 				gameStore.socket!.emit("invitePlay", {intra: intra, other_intra: other_intra});
-	// 			});
-	// 		}
-	// 	}
-	// 	else
-	// 		console.log("newVal was undefined in the watch function");//does this ever happen?
-	// });
-
-	// redundancy (watch and onMounted) because watch is needed when page is reloaded on game page (new socket created),
-	// and onMounted is needed when just switching to game page
-	// when reloading on game page, chat socket is not created fast enough for onmounted to set the listeners. so watch is needed
-	// onMounted(() => {
-	// 	console.log("onmounted of startGame.vue");
-	// 	if (userStore.socket?.hasListeners("gameInvite") == false) {
-	// 		// console.log("setup listener for gameInvite");
-	// 		userStore.socket!.on("gameInvite", (intra: string, other_intra: string, mode: string) => {
-	// 			// console.log("executing gameInvite");
-	// 			gameStore.setMode(mode);
-	// 			gameStore.setSocket(io(`${location.hostname}:3000/game_socket`, {autoConnect: false}));
-	// 			if (gameStore.socket!.hasListeners("privatePlayReady") == false) {
-	// 				// console.log("setup listener for privatePlayReady");
-	// 				gameStore.socket!.on("privatePlayReady", (username: string, pic: string, room_id: string) => {
-	// 					// console.log("executing privatePlayReady");
-	// 					gameStore.setIntra(userStore.intra);
-	// 					gameStore.setEnemyName(username);
-	// 					gameStore.setEnemyPicture(pic);
-	// 					gameStore.setRoomId(room_id);
-	// 					showCount.value = true;
-	// 					countdown();
-	// 				});
-	// 			}
-	// 			gameStore.socket!.on('disconnect', function() {
-	// 				console.log('game socket Disconnected');
-	// 				userStore.socket!.emit("setIngameStatus", false);
-	// 			});
-	// 			// console.log("emitting inviteplay");
-	// 			gameStore.socket!.emit("invitePlay", {intra: intra, other_intra: other_intra});
-	// 		});
-
-	// 	}
-	// });
 
 	onBeforeUnmount(() => {
 		console.log("onBeforeUnmount called");
@@ -218,6 +147,9 @@
 			});
 			socket.on('noOpponent', function() {
 				console.log("No fitting opponent in matchmaking, waiting...");
+			});
+			gameStore.socket!.on("sendToProfile", () => {
+				router.push('/profile/');
 			});
 			if (gameStore.mode == "")
 				socket.emit("createOrJoin", userStore.intra);

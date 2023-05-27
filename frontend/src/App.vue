@@ -96,7 +96,6 @@
 				router.push('/profile/' + intra);
 			});
 			userStore.socket.on("sendToGame", () => {
-				router.push('/profile');
 				router.push('/game/');
 			});
 			userStore.socket.on("updateBlockedUsers", (new_blocked_users: string[]) => {
@@ -113,7 +112,6 @@
 	// and onMounted is needed when just switching to game page
 	// when reloading on game page, chat socket is not created fast enough for onmounted to set the listeners. so watch is needed
 	watch( () => userStore.socket, (newVal, oldVal) => {
-		// console.log("triggered watch, userStore.socket changed to", newVal, "from", oldVal);
 		if (newVal != undefined) {
 			if (userStore.socket?.hasListeners("gameInvite") == false) {
 				console.log("setup listener for gameInvite");
@@ -140,7 +138,9 @@
 						console.log('game socket Disconnected');
 						userStore.socket!.emit("setIngameStatus", false);
 					});
-					// console.log("emitting inviteplay");
+					gameStore.socket!.on("sendToProfile", () => {
+						router.push('/profile/');
+					});
 					gameStore.socket!.emit("invitePlay", {intra: intra, other_intra: other_intra});
 				});
 			}

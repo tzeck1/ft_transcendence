@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-	import { ref, onMounted } from 'vue';
+	import { ref, onMounted, onBeforeUnmount } from 'vue';
 	import Phaser from 'phaser';
 	import Pong from '../../game/pong';
 	import router from '@/router';
@@ -65,6 +65,12 @@
 			console.log('Game instance destroyed!');
 			emit('show-end');
 		});
+	});
+
+	onBeforeUnmount(() => {
+		console.log("Phaser.vue on before unmount was called, destroying game.value now");
+		game.value?.destroy(true);
+		userStore.socket?.emit("setIngameStatus", false);
 	});
 </script>
 

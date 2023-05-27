@@ -7,7 +7,7 @@ import {
 	SubscribeMessage,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Games, Room, Player } from './game.service';
+import { Games, Game, Room, Player } from './game.service';
 import { Users } from '../user/user.service';
 
 @WebSocketGateway({
@@ -17,7 +17,7 @@ import { Users } from '../user/user.service';
 	},
 })
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-	constructor(private readonly games: Games, private readonly users: Users) {}
+	constructor(private readonly games: Games, private readonly users: Users, private readonly gameService: Game) {}
 
 	//		key: room_id
 	private rooms: Map<string, Room> = new Map<string, Room>;
@@ -39,16 +39,46 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	handleDisconnect(client: Socket) {
 		console.log(`Game Client Disconnected: ${client.id}`);
-		// TODO probably can delete this after instant enemy win when leaving
-		for (let [room_id, room] of this.rooms) {// if the game socket that disconnected was in a room, set this room's player status to false
+
+		// i disconnect, so i should get a lose and my enemy gets a win
+		for (let [room_id, room] of this.rooms) {
 			if (room.getLeftPlayer().getSocket().id == client.id) {
-				room.invalidatePlayer("left");
-				room.getLeftPlayer().getSocket().emit("setIngameStatus", false);
+				this.gameService.setGameData(room.getLeftPlayer().getIntraname(),
+																				room.getLeftPlayer().getUsername(),
+																				room.getRightPlayer().getUsername(),
+																				0, 3,
+																				(room.getLeftPlayer().getMode() == ""),
+																				0, 0);
+				this.gameService.setGameData(room.getRightPlayer().getIntraname(),
+																				room.getRightPlayer().getUsername(),
+																				room.getLeftPlayer().getUsername(),
+																				3, 0,
+																				(room.getRightPlayer().getMode() == ""),
+																				0, 0);
+				let other_player_socket = room.getRightPlayer().getSocket();
+				other_player_socket.emit("sendToProfile");
+				this.rooms.delete(room_id);
+				other_player_socket.disconnect();
+				return;
 			}
 			if (room.getRightPlayer().getSocket().id == client.id) {
-				room.invalidatePlayer("right");
-				room.getRightPlayer().getSocket().emit("setIngameStatus", false);
-
+				this.gameService.setGameData(room.getRightPlayer().getIntraname(),
+																				room.getRightPlayer().getUsername(),
+																				room.getLeftPlayer().getUsername(),
+																				0, 3,
+																				(room.getRightPlayer().getMode() == ""),
+																				0, 0);
+				this.gameService.setGameData(room.getLeftPlayer().getIntraname(),
+																				room.getLeftPlayer().getUsername(),
+																				room.getRightPlayer().getUsername(),
+																				3, 0,
+																				(room.getLeftPlayer().getMode() == ""),
+																				0, 0);
+				let other_player_socket = room.getLeftPlayer().getSocket();
+				other_player_socket.emit("sendToProfile");
+				this.rooms.delete(room_id);
+				other_player_socket.disconnect();
+				return;
 			}
 		}
 	}
@@ -75,7 +105,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			if (index == -1)
 				console.log("!!! ERROR Error in handleInvitePlay due to invalid return from indexOf (invite_array)", other_player.getSocket().id);
 			else
-				console.log("NO ERROR THIS TIME< ALL GOOD");
+				console.log("NO ERROR THIS TIME ALL GOOD");
 			this.invite_array.splice(index, 1);
 			this.room_counter += 1;
 			let room_id = "game" + this.room_counter.toString();
@@ -182,9 +212,14 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		//client.disconnect(true);
 	}
 
+	@SubscribeMessage("destroyRoom")
+	handleDestroyRoom(client: Socket, room_id: string) {
+		console.log("room is destroyed");
+		this.rooms.delete(room_id);
+	}
+
 	@SubscribeMessage("scoreRequest")
 	handleScoreRequest(client: Socket, data: any) {
-		// console.log(client.id, "sends", data.left_player_scored, "and", data.room)
 		let room = this.rooms.get(data.room);
 		let player;
 		if (data.left_player_scored == true/*client == room.getLeftPlayer().getSocket()*/)
@@ -193,7 +228,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			player = room.getRightPlayer();
 		room.validateScore(client);
 		if (/*room.isScoreTrue() == true*/client == room.getLeftPlayer().getSocket()) {
-			// console.log("inside if of isScoreTrue was called");
 			room.playerScored(player);
 			room.spawn_ball();
 		}
