@@ -167,6 +167,8 @@ export default class Pong extends Phaser.Scene {
 				this.game.destroy(true); //don't know if destroy is the correct way to end instance of pong
 				this.gameStore.socket!.emit("destroyRoom", this.room_id);
 				this.gameStore.socket!.disconnect();
+				if (this.gameStore.mode != "")
+					window.location.reload();
 			}
 		});
 

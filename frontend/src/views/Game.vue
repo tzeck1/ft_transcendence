@@ -49,12 +49,6 @@
 		} catch (error) {
 			console.error('Error fetching user data:', error);
 		}
-		if (gameStore.socket?.hasListeners("startFrontendMatch") == false) {
-			console.log("listener for start frontend match built in GAME");
-			gameStore.socket?.on("startFrontendMatch", () => {
-				startMatch();
-			});
-		}
 	});
 
 	function startMatch() {

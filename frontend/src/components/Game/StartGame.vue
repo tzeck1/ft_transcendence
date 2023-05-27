@@ -91,14 +91,57 @@
 		}
 	});
 
+	// redundancy (watch and onMounted) because watch is needed when page is reloaded on game page (new socket created),
+	// and onMounted is needed when just switching to game page
+	watch( () => userStore.socket, (newVal, oldVal) => {
+		// console.log("triggered watch, userStore.socket changed to", newVal, "from", oldVal);
+		if (newVal != undefined)
+			inviteListeners();
+		else
+			console.log("newVal was undefined in the watch function");//does this ever happen?
+	});
+
+	// redundancy (watch and onMounted) because watch is needed when page is reloaded on game page (new socket created),
+	// and onMounted is needed when just switching to game page
 	onMounted(() => {
-		if (gameStore.socket?.hasListeners("startFrontendMatch") == false) {
-			console.log("listener for start frontend match built in STARTGAME");
-			gameStore.socket?.on("startFrontendMatch", () => {
-				countdown();
+		console.log("onmounted of startGame.vue");
+		inviteListeners();
+	});
+
+	function inviteListeners() {
+		if (userStore.socket?.hasListeners("gameInvite") == false) {
+			// console.log("setup listener for gameInvite");
+			userStore.socket!.on("gameInvite", (intra: string, other_intra: string, mode: string) => {
+				console.log("executing gameInvite");
+				gameStore.setMode(mode);
+				gameStore.setSocket(io(`${location.hostname}:3000/game_socket`, {autoConnect: false}));
+				if (gameStore.socket!.hasListeners("privatePlayReady") == false) {
+					console.log("setup listener for privatePlayReady");
+					gameStore.socket!.on("privatePlayReady", (username: string, pic: string, room_id: string) => {
+						console.log("executing privatePlayReady");
+						gameStore.setIntra(userStore.intra);
+						gameStore.setEnemyName(username);
+						gameStore.setEnemyPicture(pic);
+						gameStore.setRoomId(room_id);
+						showCount.value = true;
+						countdown();
+					});
+				}
+				gameStore.socket!.on("disconnect", () => {
+					console.log('game socket Disconnected');
+					userStore.socket!.emit("setIngameStatus", false);
+				});
+				gameStore.socket!.on('connect', function() {
+					console.log('game socket Connected');
+				});
+				gameStore.socket!.on("sendToProfile", () => {
+					router.push('/profile/');
+				});
+				console.log("emitting inviteplay");
+				gameStore.socket!.emit("invitePlay", {intra: intra, other_intra: other_intra});
 			});
 		}
-	});
+	}
 
 	onBeforeUnmount(() => {
 		console.log("onBeforeUnmount called");

@@ -76,8 +76,6 @@
 	const hovering = ref(false);
 	const chatHistory = ref<HTMLElement | null>(null);
 
-	const emit = defineEmits(["start-match", "show-end", "show-start"]);
-
 	watch( () => userStore.intra, (newVal, oldVal) => {
 		if (newVal != undefined && newVal != "") {
 			userStore.socket = io(`${location.hostname}:3000/chat_socket`, {query: {intra: userStore.intra}});
@@ -113,52 +111,6 @@
 				gameStore.socket?.emit("cancelQueue", userStore.intra);
 			}
 		}
-	});
-
-	// redundancy (watch and onMounted) because watch is needed when page is reloaded on game page (new socket created),
-	// and onMounted is needed when just switching to game page
-	// when reloading on game page, chat socket is not created fast enough for onmounted to set the listeners. so watch is needed
-	watch( () => userStore.socket, (newVal, oldVal) => {
-		if (newVal != undefined) {
-			if (userStore.socket?.hasListeners("gameInvite") == false) {
-				console.log("setup listener for gameInvite");
-				userStore.socket!.on("gameInvite", (intra: string, other_intra: string, mode: string) => {
-					console.log("executing gameInvite");
-					gameStore.setMode(mode);
-					console.log("before io(), socket is", gameStore.socket?.id);
-					let socket_test = io(`${location.hostname}:3000/game_socket`, {autoConnect: false});
-					gameStore.setSocket(socket_test);
-					console.log("after io(), socket is", socket_test.id);
-					console.log("setup listener for privatePlayReady");
-					gameStore.socket!.on("privatePlayReady", (username: string, pic: string, room_id: string) => {
-						console.log("executing privatePlayReady, socket is", gameStore.socket!.id);
-						gameStore.setIntra(userStore.intra);
-						gameStore.setEnemyName(username);
-						gameStore.setEnemyPicture(pic);
-						gameStore.setRoomId(room_id);
-						// showCount.value = true;
-						// countdown();
-						// startMatch();
-						console.log("emitting start-match component stuff");
-						gameStore.socket?.emit("startTheMatch");
-						// emit('start-match');//does this even work yet?
-					});
-					gameStore.socket!.on('disconnect', function() {
-						console.log('game socket Disconnected');
-						userStore.socket!.emit("setIngameStatus", false);
-					});
-					gameStore.socket!.on('connect', function() {
-						console.log('game socket Connected');
-					});
-					gameStore.socket!.on("sendToProfile", () => {
-						router.push('/profile/');
-					});
-					gameStore.socket!.emit("invitePlay", {intra: intra, other_intra: other_intra});
-				});
-			}
-		}
-		else
-			console.log("newVal was undefined in the watch function");//does this ever happen?
 	});
 
 	function loadIntro() {

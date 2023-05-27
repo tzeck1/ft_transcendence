@@ -112,16 +112,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				}
 				x++;
 			}
-			// let index = this.invite_array.indexOf([other_intra, intra, other_player]);
-			// if (index == -1)
-			// 	index = this.invite_array.indexOf([intra, other_intra, other_player]);
-			// if (index == -1) {
-			// 	console.log("!!! ERROR Error in handleInvitePlay due to invalid return from indexOf (invite_array)", other_player.getSocket().id);
-			// 	console.log("invite array is", this.invite_array, "socket id is", this.invite_array[0][2].getSocket().id);
-			// }
-			// else
-			// 	console.log("NO ERROR THIS TIME ALL GOOD");
-			// this.invite_array.splice(index, 1);
 			this.room_counter += 1;
 			let room_id = "game" + this.room_counter.toString();
 			let room = new Room(room_id, player, other_player);
@@ -136,11 +126,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			console.log("player socket is connected:", player.getSocket().connected);
 			this.invite_array.push([args[0].intra, args[0].other_intra, player]);
 		}
-	}
-
-	@SubscribeMessage("startTheMatch")
-	handleStartTheMatch(client: Socket) {
-		client.emit("startFrontendMatch");
 	}
 
 	private searchInviteArray(intra: string, other_intra: string): Player {
