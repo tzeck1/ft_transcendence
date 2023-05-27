@@ -125,10 +125,13 @@
 				userStore.socket!.on("gameInvite", (intra: string, other_intra: string, mode: string) => {
 					console.log("executing gameInvite");
 					gameStore.setMode(mode);
-					gameStore.setSocket(io(`${location.hostname}:3000/game_socket`, {autoConnect: false}));
+					console.log("before io(), socket is", gameStore.socket?.id);
+					let socket_test = io(`${location.hostname}:3000/game_socket`, {autoConnect: false});
+					gameStore.setSocket(socket_test);
+					console.log("after io(), socket is", socket_test.id);
 					console.log("setup listener for privatePlayReady");
 					gameStore.socket!.on("privatePlayReady", (username: string, pic: string, room_id: string) => {
-						console.log("executing privatePlayReady");
+						console.log("executing privatePlayReady, socket is", gameStore.socket!.id);
 						gameStore.setIntra(userStore.intra);
 						gameStore.setEnemyName(username);
 						gameStore.setEnemyPicture(pic);
@@ -137,11 +140,15 @@
 						// countdown();
 						// startMatch();
 						console.log("emitting start-match component stuff");
-						emit('start-match');//does this even work yet?
+						gameStore.socket?.emit("startTheMatch");
+						// emit('start-match');//does this even work yet?
 					});
 					gameStore.socket!.on('disconnect', function() {
 						console.log('game socket Disconnected');
 						userStore.socket!.emit("setIngameStatus", false);
+					});
+					gameStore.socket!.on('connect', function() {
+						console.log('game socket Connected');
 					});
 					gameStore.socket!.on("sendToProfile", () => {
 						router.push('/profile/');

@@ -99,14 +99,25 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			console.log("invitePlay with second user is called");
 			player.updateUserData();
 			other_player.updateUserData();
-			let index = this.invite_array.indexOf([other_intra, intra, other_player]);
-			if (index == -1)
-				index = this.invite_array.indexOf([intra, other_intra, other_player]);
-			if (index == -1)
-				console.log("!!! ERROR Error in handleInvitePlay due to invalid return from indexOf (invite_array)", other_player.getSocket().id);
-			else
-				console.log("NO ERROR THIS TIME ALL GOOD");
-			this.invite_array.splice(index, 1);
+			let x = 0;
+			for (let tuple of this.invite_array) {
+				if (((tuple[0] == intra && tuple[1] == other_intra) || (tuple[1] == intra && tuple[0] == other_intra)) && tuple[2] == other_player) {
+					this.invite_array.splice(x, 1);
+					console.log("found and deleted our invite_array entry, YAY");
+					break;
+				}
+				x++;
+			}
+			// let index = this.invite_array.indexOf([other_intra, intra, other_player]);
+			// if (index == -1)
+			// 	index = this.invite_array.indexOf([intra, other_intra, other_player]);
+			// if (index == -1) {
+			// 	console.log("!!! ERROR Error in handleInvitePlay due to invalid return from indexOf (invite_array)", other_player.getSocket().id);
+			// 	console.log("invite array is", this.invite_array, "socket id is", this.invite_array[0][2].getSocket().id);
+			// }
+			// else
+			// 	console.log("NO ERROR THIS TIME ALL GOOD");
+			// this.invite_array.splice(index, 1);
 			this.room_counter += 1;
 			let room_id = "game" + this.room_counter.toString();
 			let room = new Room(room_id, player, other_player);
@@ -116,8 +127,16 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			console.log("emitting privatePlayReady!");
 			player.getSocket().emit("privatePlayReady", other_player.getUsername(), other_player.getPicture(), room_id);
 			other_player.getSocket().emit("privatePlayReady", player.getUsername(), player.getPicture(), room_id);
-		} else // This is executed when the first player gets into handleInvitePlay
+		} else { // This is executed when the first player gets into handleInvitePlay
+			console.log("invitePlay with first user is called, pushing intra:", args[0].intra, ", otherintra:", args[0].other_intra, "player.getintra:", player.getSocket().id);
+			console.log("player socket is connected:", player.getSocket().connected);
 			this.invite_array.push([args[0].intra, args[0].other_intra, player]);
+		}
+	}
+
+	@SubscribeMessage("startTheMatch")
+	handleStartTheMatch(client: Socket) {
+		client.emit("startFrontendMatch");
 	}
 
 	private searchInviteArray(intra: string, other_intra: string): Player {

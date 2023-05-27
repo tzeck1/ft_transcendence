@@ -91,6 +91,15 @@
 		}
 	});
 
+	onMounted(() => {
+		if (gameStore.socket?.hasListeners("startFrontendMatch") == false) {
+			console.log("listener for start frontend match built in STARTGAME");
+			gameStore.socket?.on("startFrontendMatch", () => {
+				countdown();
+			});
+		}
+	});
+
 	onBeforeUnmount(() => {
 		console.log("onBeforeUnmount called");
 		if (isLooking.value == true) {

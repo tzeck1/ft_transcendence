@@ -50,7 +50,7 @@ export class JwtAuthGuard implements CanActivate {
   }
 
   private extractTokenFromCookie(request: Request): string | undefined {
-    console.log("extracting token from cookie");
+    // console.log("extracting token from cookie");
     return request.cookies['accessToken'];
   }
 
