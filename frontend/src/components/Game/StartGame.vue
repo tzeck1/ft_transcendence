@@ -10,10 +10,12 @@
 			<div :class="['comp-block', 'block-style', compBlockClass]" @click="selectCompBlock">
 				<img src="../../assets/pong.gif" class="block-image">
 				<span class="block-title">Competitive</span>
+				<span class="block-help" v-show="compBlockSelected">Face off against random players globally in this thrilling mode. Each victory earns you rank points to climb the leaderboard. Skill and strategy are key</span>
 			</div>
 			<div :class="['fun-block', 'block-style', funBlockClass]" @click="selectFunBlock">
 				<img src="../../assets/pong.gif" class="block-image">
 				<span class="block-title">Fun Mode</span>
+				<span class="block-help" v-show="funBlockSelected">Queue against a random opponent for a carefree challenge. Play classic pong or spice things up with Speed Pong or Dodge Ball. Choice is yours</span>
 			</div>
 			<div :class="['block-style', funSetClass]">
 				<button class="set-button" @click="search_game(true)" v-if="funBlockSelected">
@@ -302,7 +304,7 @@
 	}
 
 	.set-button {
-		@apply flex text-2xl bg-white bg-opacity-10 px-6 py-4 mb-2;
+		@apply flex lg:text-2xl md:text-xl sm:text-lg text-base bg-white bg-opacity-10 px-6 py-4 mb-2;
 	}
 
 	.set-button:hover {
@@ -314,7 +316,7 @@
 	}
 
 	.block-title {
-		@apply block text-center mt-4 text-xl;
+		@apply mb-4 block text-center mt-4 font-extrabold lg:text-xl md:text-lg sm:text-sm text-xs transition-all duration-300 ease-in-out;
 	}
 
 	.fun-block-visible, .comp-block-visible {
@@ -383,14 +385,18 @@
 	}
 
 	.gamemode {
-		@apply flex flex-row mt-6;
+		@apply flex xl:flex-row flex-col mt-6;
 	}
 
 	.mode {
-		@apply py-4 px-4;
+		@apply py-4 px-4 lg:text-2xl md:text-xl sm:text-lg text-xs whitespace-nowrap;
 	}
 
 	.highlight {
 		@apply bg-white bg-opacity-10;
+	}
+
+	.block-help {
+		@apply lg:block hidden text-lg px-6 text-center transition-all duration-300 ease-in-out;
 	}
 </style>
