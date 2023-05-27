@@ -59,6 +59,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				}
 				let other_player_socket = room.getRightPlayer().getSocket();
 				other_player_socket.emit("sendToProfile");
+				other_player_socket.emit("reloadPage");
 				this.rooms.delete(room_id);
 				other_player_socket.disconnect();
 				return;
@@ -80,6 +81,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				}
 				let other_player_socket = room.getLeftPlayer().getSocket();
 				other_player_socket.emit("sendToProfile");
+				other_player_socket.emit("reloadPage");
 				this.rooms.delete(room_id);
 				other_player_socket.disconnect();
 				return;

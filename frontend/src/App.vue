@@ -100,6 +100,9 @@
 			userStore.socket.on("sendToProfile", (intra: string) => {
 				router.push('/profile/' + intra);
 			});
+			userStore.socket.on("reloadPage", () => {
+				window.location.reload();
+			});
 			userStore.socket.on("sendToGame", () => {
 				router.push('/game/');
 			});
