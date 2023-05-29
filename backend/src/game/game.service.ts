@@ -164,6 +164,23 @@ export class Room {
 @Injectable()
 export class Game {
 
+	calculateNewRank(rank1: number, rank2: number, win: number): number {
+		if (rank1 == -1 || rank2 == -1)
+			return 1;
+		let new_rank;
+
+		new_rank = rank1 + 50 * (win - this.calculateExpect(rank1, rank2));
+
+		console.log("calculateNewRank called with rank1:", rank1, "rank2:", rank2, "and win:", win, "new Rank is:", new_rank);
+		return new_rank;
+	}
+
+	calculateExpect(rank1: number, rank2: number) {
+		let expect = (1 / (1 + (10 ** ((rank2 - rank1) / 400))));
+		console.log("calculateExpect called with rank1:", rank1, "rank2:", rank2, "expect is:", expect);
+		return expect;
+	}
+
 	/*	========== SETTER ==========	*/
 	async setGameData(intra: string, player: string, enemy: string, player_score: number, enemy_score: number, ranked: boolean, paddle_hits_e: number, paddle_hits_m: number) {
 		const newUsersEntry = await prisma.games.create( {
@@ -180,17 +197,20 @@ export class Game {
 			},
 		});
 		if (player_score > enemy_score) {
+			console.log("user won!");
 			await prisma.users.update({
 				where: {
 					intra_name: intra,
 				},
 				data: {
-					rank: { increment: 1},
+					rank: Math.round(this.calculateNewRank(await this.getUserRankByUsername(player),
+												await this.getUserRankByUsername(enemy), 1)),
 					games_won: { increment: 1 }
 				}
 			})
 		}
 		else {
+			console.log("user lost!");
 			const user = await prisma.users.findUnique({
 				where: {
 				  intra_name: intra,
@@ -202,7 +222,8 @@ export class Game {
 						intra_name: intra,
 					},
 					data: {
-						rank: { decrement: 1},
+						rank: Math.round(this.calculateNewRank(await this.getUserRankByUsername(player),
+													await this.getUserRankByUsername(enemy), 0)),
 						games_lost: { increment: 1 }
 					}
 				})
@@ -263,6 +284,17 @@ export class Game {
 		});
 
 		return userGames;
+	}
+
+	async getUserRankByUsername(username: string) {
+		const user = await prisma.users.findUnique({
+			where: {
+				username: username,
+			},
+		});
+		if (user == undefined || user == null)
+			return (-1);
+		return user.rank;
 	}
 
 }
