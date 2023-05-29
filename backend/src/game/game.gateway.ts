@@ -59,7 +59,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				}
 				let other_player_socket = room.getRightPlayer().getSocket();
 				other_player_socket.emit("sendToProfile");
-				other_player_socket.emit("reloadPage");
+				// other_player_socket.emit("hrefProfile");
 				this.rooms.delete(room_id);
 				other_player_socket.disconnect();
 				return;
@@ -81,7 +81,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				}
 				let other_player_socket = room.getLeftPlayer().getSocket();
 				other_player_socket.emit("sendToProfile");
-				other_player_socket.emit("reloadPage");
+				// other_player_socket.emit("hrefProfile");
 				this.rooms.delete(room_id);
 				other_player_socket.disconnect();
 				return;
@@ -95,14 +95,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	@SubscribeMessage("setGameDataAndRoute")
 	handleSetGameDataAndRoute(client: Socket, ...args: any[]) {
-		//calling setGameData
-		console.log("!!! !! client is", client.connected);
-		console.log("betweend profile send and reload");
-		// client.emit("sendToProfile");
-		client.emit("reloadPage");
+		// TODO calling setGameData
+		this.gameService.setGameData(args[0].intra, args[0].player, args[0].enemy, args[0].player_score, args[0].enemy_score,
+									args[0].ranked, args[0].paddle_hits_e, args[0].paddle_hits_m);
+
+		client.emit("hrefProfile");
 		console.log("room is destroyed");
 		this.rooms.delete(args[0].room_id);
-		console.log("client disconnect in game.gateway.ts");
 		client.disconnect();
 	}
 

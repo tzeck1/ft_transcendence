@@ -98,7 +98,7 @@
 				lastMessages.value = chat_history.reverse();
 			});
 			userStore.socket.on("sendToProfile", (intra: string) => {
-				router.push('/profile/' + intra);
+				window.location.href = '/profile/' + intra;
 			});
 			userStore.socket.on("reloadPage", () => {
 				window.location.reload();
@@ -154,9 +154,8 @@
 				gameStore.socket!.on("sendToProfile", () => {
 					router.push('/profile/');
 				});
-				gameStore.socket!.on("reloadPage", () => {
-					window.location.reload();
-					console.log("reloadPage for gamesocket called");
+				gameStore.socket!.on("hrefProfile", () => {//sends to page and reloads
+					window.location.href = "/profile";
 				});
 				console.log("emitting inviteplay with socket", gameStore.socket?.connected);
 				gameStore.socket!.emit("invitePlay", {intra: intra, other_intra: other_intra});

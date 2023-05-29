@@ -656,7 +656,6 @@ export class ChatService {
 			return [recipient, sender, message_body];
 		}
 		client.emit("sendToProfile", intra);
-		client.emit("reloadPage");
 		let recipient = client.id;
 		let sender = "Floppy: ";
 		let message_body = "You are stalking " + username;

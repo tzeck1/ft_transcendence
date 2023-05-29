@@ -65,6 +65,10 @@
 		userStore.setProfilePicture(data.profile_picture);
 		userStore.setTFA(data.tfa_enabled);
 
+		document.onload = function handleLoading() {
+			console.log("CURSED Func called");
+		}
+
 		const config: Phaser.Types.Core.GameConfig = {
 			type: Phaser.AUTO,
 			width: 1920,
@@ -112,6 +116,7 @@
 		}
 		return null;
 	};
+
 </script>
 
 <style scoped>
