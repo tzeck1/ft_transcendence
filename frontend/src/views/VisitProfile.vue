@@ -13,7 +13,7 @@
 						<h1 class="username-text">{{ username }}</h1>
 					</div>
 				</div>
-				<button class="friend-button" v-if="showAmigo" @click="amigofy">Amigo-fy Us</button>
+				<button class="friend-button" v-if="showAmigo" @click="amigofy">{{ amigo_text }}</button>
 				<span class="friend-confirmend" v-if="!showAmigo">You Are Amigos</span>
 				<!-- <span class="mt-7 font-bold">Rank</span> -->
 				<img class="rank" src="../assets/ranks/floppy_2.png" alt="Rank" v-if="rank < 15" />
@@ -48,6 +48,7 @@
 	const intra	= ref('');
 	const showAmigo = ref(true);
 	const amigoPending = ref(false);
+	const amigo_text = ref('Amigo-fy Us');
 
 	onMounted(async () => {
 		try {
@@ -78,8 +79,10 @@
 				for (let req in data.f_requests)
 				{
 					console.log(data.f_requests[req]);
-					if (data.f_requests[req] === userStore.intra)
+					if (data.f_requests[req] === userStore.intra) {
+						amigo_text.value = 'Pending...';
 						amigoPending.value = true;
+					}
 				}
 			} else {
 				router.push('/404');
@@ -90,12 +93,10 @@
 	});
 
 	async function amigofy() {
-		if (amigoPending.value)
-			alert("friend request still pending");
-		else
-		{
+		if (!amigoPending.value) {
 			await axios.post(`http://${location.hostname}:3000/users/setFRequest`, { intra: intra.value, amigo: userStore.intra, sending: true });
 			amigoPending.value = true;
+			amigo_text.value = 'Pending...';
 		}
 	}
 
