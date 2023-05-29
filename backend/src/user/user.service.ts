@@ -210,6 +210,13 @@ export class Users {
 		});
 	}
 
+	async setZucc(intra: string) {
+		return await prisma.users.update({
+			where: { intra_name: intra },
+			data: { zucc: true }
+		});
+	}
+
 	async setFRequest(sendTo: string, cameFrom: string)
 	{
 		return await prisma.users.update({

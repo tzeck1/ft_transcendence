@@ -112,6 +112,10 @@
 			axios.post(`http://${location.hostname}:3000/users/setTopThree`, { intra: intra });
 			ladder.value = true;
 		}
+		if (!friends.value && userData.data.friends.length >= 5) {
+			axios.post(`http://${location.hostname}:3000/users/setZucc`, { intra: intra });
+			friends.value = true;
+		}
 	});
 </script>
 

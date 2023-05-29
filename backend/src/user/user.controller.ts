@@ -74,6 +74,11 @@ export class UserController {
 		await this.users.setHackerman(intra);
 	}
 
+	@Post('setZucc')
+	async setZucc(@Body('intra') intra: string) {
+		await this.users.setZucc(intra);
+	}
+
 	@UseGuards(JwtAuthGuard)
 	@Post('setFRequest')
 	async setFRequest(@Body('intra') sendTo: string, @Body('amigo') cameFrom: string, @Body('sending') sending: boolean) {
