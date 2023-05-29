@@ -28,9 +28,9 @@
 			</div>
 			<div class="feature-grid">
 				<MatchHistory class="grid-item"></MatchHistory>
+				<Friends class="grid-item">Friends</Friends>
 				<Stats class="grid-item"></Stats>
 				<Achievements class="grid-item-s"></Achievements>
-				<Friends class="grid-item">Friends</Friends>
 			</div>
 		</div>
 		<div v-if="qrCodeVisible || showTFA" class="qr-code-overlay" @click="hideQRCode">
@@ -299,16 +299,10 @@
 	.feature-grid {
 		@apply grid w-4/5 max-h-full grid-cols-1 lg:grid-cols-2 grid-rows-2;
 		height: calc(100vh - 128px);
-		/* width: 75vw; */
-		/* position: fixed;
-		right: 0px; */
-		/* @apply border border-blue-300 grid-cols-2 grid-rows-2 gap-4 w-4/5 h-full p-8; */
 	}
 
 	.grid-item {
 		@apply overflow-auto py-10;
-		/* @apply border overflow-auto; */
-		/* h-1/4 border-red-300 flex justify-center items-center bg-black bg-opacity-50 rounded-2xl text-3xl */
 	}
 
 	.grid-item-s {

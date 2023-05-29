@@ -3,7 +3,6 @@
 		<h2 class="title">Friends</h2>
 		<div v-for="(req, index) in f_requests" :key="req.id" class="friend-item highlight">
 			<div class="friend-details relative">
-				<div class="animate-ping absolute top-2 left-2 inline-flex h-3 w-3 rounded-full bg-white"></div>
 				<div class="picture-container-r" @click="showProfile(req.intra_name)">
 					<img class="profile_picture-r" :src="req.profile_picture"/>
 				</div>
@@ -23,7 +22,7 @@
 				</div>
 				<p class="rank" @click="showProfile(friend.intra_name)">Rank: {{ friend.rank }}</p>
 				<div class="remove-container">
-					<p class="remove" @click="killFriend(friend.intra_name)" v-if="showAccept">&#10799;</p>
+					<p class="remove" @click="killFriend(friend.intra_name)">&#10799;</p>
 				</div>
 			</div>
 		</div>
@@ -84,15 +83,9 @@
 		return null;
 	};
 
-	onMounted(async () => {
-		const cookie_username = getUsernameFromCookie();
-		if (!cookie_username)
-		{
-			router.push('/'); //do we need to return after that?
-			return ;
-		}
-		if (!userStore.intra)
-			userStore.setIntra(cookie_username);
+	async function fetchUserData() {
+		f_requests.value.length = 0;
+		friends.value.length = 0;
 		const reqs = await axios.get(`http://${location.hostname}:3000/users/getFRequests?intra=${userStore.intra}`);
 		f_requests.value = reqs.data;
 		const userData = await axios.get(`http://${location.hostname}:3000/users/getUsers`);
@@ -119,6 +112,18 @@
 			friend_intras.push(f_intra);
 		}
 		userStore.socket!.emit("getFriendStatus", friend_intras);
+	}
+
+	onMounted(async () => {
+		const cookie_username = getUsernameFromCookie();
+		if (!cookie_username)
+		{
+			router.push('/'); //do we need to return after that?
+			return ;
+		}
+		if (!userStore.intra)
+			userStore.setIntra(cookie_username);
+		fetchUserData();
 	});
 
 	async function acceptRequest(amigo_intra: string) {
@@ -126,17 +131,20 @@
 		showAccept.value = false;
 		f_requests.value = f_requests.value.filter((element) => element.intra_name !== amigo_intra);
 		console.log(f_requests.value);
+		fetchUserData();
 	}
 
 	async function rejectRequest(amigo_intra: string) {
 		await axios.post(`http://${location.hostname}:3000/users/setFRequest`, { intra: userStore.intra, amigo: amigo_intra, sending: false });
 		showAccept.value = false;
 		f_requests.value = f_requests.value.filter((element) => element.intra_name !== amigo_intra);
+		fetchUserData();
 	}
 	
 	async function killFriend(amigo_intra: string) {
 		let newFriends = await axios.post(`http://${location.hostname}:3000/users/killFriend`, { intra: userStore.intra, amigo: amigo_intra });
 		friends.value = newFriends.data;
+		fetchUserData();
 	}
 
 	let statusColor = (status: string | undefined) => {
@@ -223,11 +231,11 @@
 	}
 
 	.accept {
-		@apply text-4xl text-green-300 text-center p-2 w-1/6 z-10;
+		@apply text-5xl text-green-300 text-center p-2 w-1/6 z-10;
 	}
 
 	.reject {
-		@apply text-4xl text-red-300 text-center p-2 w-1/6 z-10;
+		@apply text-4xl text-red-400 text-center p-2 w-1/6 z-10;
 	}
 
 	.remove-container {
@@ -240,10 +248,6 @@
 
 	.remove:hover {
 		@apply bg-white bg-opacity-10 rounded-lg;
-	}
-
-	.accept:hover {
-		@apply cursor-wait;
 	}
 
 	.highlight {
