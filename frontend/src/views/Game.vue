@@ -8,7 +8,7 @@
 	import StartGame from '../components/Game/StartGame.vue'
 	import Pong from '../components/Game/Pong.vue'
 	import EndGame from '../components/Game/EndGame.vue'
-	import { onMounted, ref, watch } from 'vue';
+	import { onBeforeMount, onMounted, onBeforeUnmount, ref, watch } from 'vue';
 	import { useUserStore } from '../stores/UserStore';
 	import { useGameStore } from '../stores/GameStore';
 	import { io, Socket } from 'socket.io-client';
@@ -51,7 +51,17 @@
 		}
 	});
 
+	onBeforeUnmount(() => {
+		if (gameStore.socket?.connected == true) {
+			console.log("onbeforeunmount of game.vue is disconnecting the socket");
+			gameStore.disconnectSocket();
+		}
+		console.log("onbeforeunmount of game.vue is setting ingame status to false");
+		userStore.socket?.emit("setIngameStatus", false);
+	});
+
 	function startMatch() {
+		console.log("startMatch was called");
 		showStart.value = false;
 		showMatch.value = true;
 		showEnd.value = false;

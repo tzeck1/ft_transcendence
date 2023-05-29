@@ -113,7 +113,9 @@
 			// console.log("setup listener for gameInvite");
 			userStore.socket!.on("gameInvite", (intra: string, other_intra: string, mode: string) => {
 				console.log("executing gameInvite");
+				console.log("mode is", mode);
 				gameStore.setMode(mode);
+				console.log("and inside gamestore it's", gameStore.mode);
 				gameStore.setSocket(io(`${location.hostname}:3000/game_socket`, {autoConnect: false}));
 				if (gameStore.socket!.hasListeners("privatePlayReady") == false) {
 					console.log("setup listener for privatePlayReady");
@@ -124,7 +126,9 @@
 						gameStore.setEnemyPicture(pic);
 						gameStore.setRoomId(room_id);
 						showCount.value = true;
+						console.log("countdown!!");
 						countdown();
+						// emit('start-match');
 					});
 				}
 				gameStore.socket!.on("disconnect", () => {
@@ -146,6 +150,7 @@
 	onBeforeUnmount(() => {
 		console.log("onBeforeUnmount called");
 		if (isLooking.value == true) {
+			console.log("onbeforeunmount is also doing stuff");
 			socket.emit("cancelQueue", userStore.intra);
 			userStore.socket?.emit("setIngameStatus", false);
 			gameStore.disconnectSocket();
@@ -154,6 +159,7 @@
 	});
 
 	function countdown() {
+		console.log("countdown was called");
 		timeLeft.value--;
 		if (timeLeft.value > 0)
 			setTimeout(countdown, 1000);
@@ -161,6 +167,7 @@
 		{
 			showCount.value = false;
 			timeLeft.value = 4;
+			console.log("emitting start-match from countdown!");
 			emit('start-match');
 		}
 	}
@@ -171,9 +178,9 @@
 		if (fun == true)
 		{
 			let tmp = document.getElementById("mode");
-			if (tmp.value == "") //no mode selcted
+			if (tmp == "") //no mode selcted
 				return ;
-			gameStore.setMode(tmp.value);
+			gameStore.setMode(tmp);
 		}
 		//establish connection
 		if (!isLooking.value) {
@@ -189,6 +196,7 @@
 				userStore.socket!.emit("setIngameStatus", false);
 			});
 			socket.on('foundOpponent', function(username: string, pic: string, room_id: string) {
+				console.log("foundOpponent which also calls countdown was called");
 				isLooking.value = false;
 				gameStore.setIntra(userStore.intra);
 				gameStore.setEnemyName(username);

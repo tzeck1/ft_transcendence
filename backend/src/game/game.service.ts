@@ -196,7 +196,7 @@ export class Game {
 				paddle_hits_m:		paddle_hits_m,
 			},
 		});
-		if (player_score > enemy_score) {
+		if (ranked == true && player_score > enemy_score) {
 			console.log("user won!");
 			await prisma.users.update({
 				where: {
@@ -209,7 +209,7 @@ export class Game {
 				}
 			})
 		}
-		else {
+		else if (ranked == true && player_score < enemy_score) {
 			console.log("user lost!");
 			const user = await prisma.users.findUnique({
 				where: {

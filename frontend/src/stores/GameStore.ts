@@ -38,6 +38,7 @@ export const useGameStore = defineStore({
 		},
 		delContent() {
 			this.intra = "";
+			this.socket?.disconnect();
 			this.socket = null as (Socket | null);
 			this.room_id = ""
 			this.enemy_name = "";

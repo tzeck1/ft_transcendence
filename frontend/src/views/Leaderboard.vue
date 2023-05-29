@@ -55,6 +55,13 @@
 			router.push('/'); //do we need to return after that?
 			return ;
 		}
+		if (!userStore.intra)
+			userStore.setIntra(cookie_username);
+		const response = await axios.get(`http://${location.hostname}:3000/auth/getUserData?intra=${userStore.intra}`);
+		const data = response.data;
+		userStore.setUsername(data.username);
+		userStore.setProfilePicture(data.profile_picture);
+		userStore.setTFA(data.tfa_enabled);
 		const userData = await axios.get(`http://${location.hostname}:3000/users/getUsers`);
 		users.value = userData.data;
 	});
