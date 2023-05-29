@@ -93,6 +93,19 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		console.log(`Game Client Connected: ${client.id}`);
 	}
 
+	@SubscribeMessage("setGameDataAndRoute")
+	handleSetGameDataAndRoute(client: Socket, ...args: any[]) {
+		//calling setGameData
+		console.log("!!! !! client is", client.connected);
+		console.log("betweend profile send and reload");
+		// client.emit("sendToProfile");
+		client.emit("reloadPage");
+		console.log("room is destroyed");
+		this.rooms.delete(args[0].room_id);
+		console.log("client disconnect in game.gateway.ts");
+		client.disconnect();
+	}
+
 	@SubscribeMessage("invitePlay")
 	handleInvitePlay(client: Socket, ...args: any[]) {
 		console.log("event 'invitePlay' was triggered. I am", client.id);

@@ -887,9 +887,9 @@ export class ChatService {
 		let mode = this.invites.get(other_user.getIntra() + user.getIntra());
 		if (mode == undefined)
 			return [client.id, "Error: ", "could not get an invite from this user."];
-		user.getSocket().emit("sendToGame");
-		other_user.getSocket().emit("sendToGame");
-		console.log("emitted to sendToGame, next will emit gameInvite");
+		// user.getSocket().emit("sendToGame");
+		// other_user.getSocket().emit("sendToGame");
+		// console.log("emitted to sendToGame, next will emit gameInvite");
 		user.getSocket().emit("gameInvite", user.getIntra(), other_user.getIntra(), mode);
 		other_user.getSocket().emit("gameInvite", other_user.getIntra(), user.getIntra(), mode);
 		this.invites.delete(other_user.getIntra() + user.getIntra());

@@ -33,6 +33,7 @@
 
 	onMounted(async () => {
 		try {
+			console.log("mounting game.vue");
 			const cookie_username = getUsernameFromCookie();
 			if (!cookie_username)
 			{

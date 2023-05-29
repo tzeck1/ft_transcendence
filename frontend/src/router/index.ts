@@ -4,6 +4,7 @@ import Intro from '../views/Intro.vue';
 import Profile from '../views/Profile.vue';
 import Game from '../views/Game.vue';
 import Leaderboard from '@/views/Leaderboard.vue';
+import Invites from '@/views/Invites.vue';
 import NotFound from '../views/NotFound.vue'
 import VisitProfile from '../views/VisitProfile.vue'
 
@@ -32,6 +33,11 @@ const routes: Array<RouteRecordRaw> = [
 		path: '/leaderboard',
 		name: 'Leaderboard',
 		component: Leaderboard,
+	},
+	{
+		path: '/invites',
+		name: 'InviteGame',
+		component: Invites,
 	},
 	{
 		path: '/:pathMatch(.*)*',

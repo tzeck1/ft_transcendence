@@ -4,6 +4,7 @@ import { useUserStore } from '@/stores/UserStore';
 import { Socket } from 'socket.io-client';
 import pongComp from '../components/Game/Pong.vue';
 import axios from 'axios';
+import { useRouter, useRoute } from 'vue-router';
 
 export default class Pong extends Phaser.Scene {
 	left_player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -65,6 +66,7 @@ export default class Pong extends Phaser.Scene {
 		up: false,
 		down: false,
 	};
+	router;
 
 	constructor() {
 		super("pong");
@@ -83,6 +85,7 @@ export default class Pong extends Phaser.Scene {
 /********************************** CREATE *************************************/
 
 	create() {
+		this.router = useRouter();
 		if (this.gameStore.mode == "speed")
 			this.paddle_velocity = 32;
 		if (this.input.keyboard == undefined)
@@ -160,15 +163,17 @@ export default class Pong extends Phaser.Scene {
 			this.left_score_txt.text = String(this.left_score);
 			this.right_score_txt.text = String(this.right_score);
 			if (this.left_score == this.winning_score || this.right_score == this.winning_score) {
+				console.log("winning score!");
 				// Someone won regularly:
 				// save in database, destroy phaser thing, destroy room and disconnect socket
-				if (this.gameStore.mode == "")
-					axios.post(`http://${location.hostname}:3000/game/setGameData`, { intra: this.gameStore.intra, player: this.userStore.username, enemy: this.gameStore.enemy_name, player_score: this.left_score, enemy_score: this.right_score, ranked: (this.gameStore.mode == ""), paddle_hits_e: this.paddle_hits_e, paddle_hits_m: this.paddle_hits_m });
+				this.gameStore.socket!.emit("setGameDataAndRoute", { intra: this.gameStore.intra, player: this.userStore.username, enemy: this.gameStore.enemy_name, player_score: this.left_score, enemy_score: this.right_score, ranked: (this.gameStore.mode == ""), paddle_hits_e: this.paddle_hits_e, paddle_hits_m: this.paddle_hits_m, room_id: this.room_id });
+				// if (this.gameStore.mode == "")
+				// axios.post(`http://${location.hostname}:3000/game/setGameData`, { intra: this.gameStore.intra, player: this.userStore.username, enemy: this.gameStore.enemy_name, player_score: this.left_score, enemy_score: this.right_score, ranked: (this.gameStore.mode == ""), paddle_hits_e: this.paddle_hits_e, paddle_hits_m: this.paddle_hits_m });
 				this.game.destroy(true); //don't know if destroy is the correct way to end instance of pong
-				this.gameStore.socket!.emit("destroyRoom", this.room_id);
-				this.gameStore.socket!.disconnect();
-				if (this.gameStore.mode != "")
-					window.location.reload();
+				// this.gameStore.socket!.emit("destroyRoom", this.room_id);
+				// this.gameStore.socket!.disconnect();
+				// if (this.gameStore.mode != "")
+				// 	this.router.push('/profile');
 			}
 		});
 
