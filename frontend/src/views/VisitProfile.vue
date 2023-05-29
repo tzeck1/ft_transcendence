@@ -2,7 +2,12 @@
 	<div class="profile">
 		<div class="content-wrapper">
 			<div class="sidebar">
-				<img id="profile-picture" class="profile-picture" :src="profile_picture"/>
+				<div class="profile-picture-drop-area">
+					<div class="profile-picture-container">
+						<img id="profile-picture" class="profile-picture" :src="profile_picture"/>
+					</div>
+					<div class="drop-icon hidden">&#x21E3;</div>
+				</div>
 				<div class="name-container">
 					<div class="username-wrapper">
 						<h1 class="username-text">{{ username }}</h1>
@@ -106,9 +111,18 @@
 		@apply flex flex-col items-center justify-start p-8 w-1/5 min-h-full;
 	}
 
-	.profile-picture {
-		@apply rounded-full object-cover w-48 h-48 my-10;
+	.profile-picture-container {
+		@apply relative lg:w-48 md:w-40 sm:w-36 w-24 h-0 my-10 transition-all duration-300 ease-in-out;
+		padding-top: 100%;
 	}
+
+	.profile-picture {
+		@apply rounded-full object-cover absolute top-0 left-0 w-full h-full;
+	}
+
+	.profile-picture-drop-area {
+			@apply relative;
+		}
 
 	.rank {
 		@apply w-16 h-auto mt-12;
@@ -153,11 +167,11 @@
 	} */
 
 	.username-wrapper {
-		@apply justify-center inline-flex items-center relative text-4xl;
+		@apply ml-0 justify-center inline-flex items-center relative text-4xl transition-all duration-300 ease-in-out;
 	}
 
 	.username-text {
-		@apply justify-center items-center px-2;
+		@apply lg:text-4xl md:text-3xl text-xl justify-center items-center px-2 transition-all duration-300 ease-in-out;
 	}
 
 	.content-wrapper {
