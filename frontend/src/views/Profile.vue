@@ -63,7 +63,9 @@
 	import { storeToRefs } from 'pinia';
 	import router from '@/router';
 	import { io } from 'socket.io-client';
+	import { utils } from '../utils/utils';
 
+	const util = new utils();
 	const rank = ref(0);
 	const userStore = useUserStore();
 	const { username } = storeToRefs(userStore);
@@ -130,20 +132,9 @@
 			usernameInput.value.style.width = (username.value.length + 1) + "ch";
 		}
 	}
-
-	const getUsernameFromCookie = () => {
-		const cookie = document.cookie.split(';').find(cookie => cookie.trim().startsWith('username='));
-		if (cookie) {
-			const usernameJson = cookie.split('=')[1];
-			const user_name = JSON.parse(decodeURIComponent(usernameJson));
-			return user_name;
-		}
-		return null;
-	};
-
 	onMounted(async () => {
 		try {
-			const cookie_username = getUsernameFromCookie();
+			const cookie_username = util.getUsernameFromCookie();
 			if (!cookie_username) {
 				router.push('/'); //do we need to return after that?
 				return ;

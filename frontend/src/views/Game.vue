@@ -13,26 +13,18 @@
 	import { useGameStore } from '../stores/GameStore';
 	import router from '@/router';
 	import axios from 'axios';
+	import { utils } from '../utils/utils';
 	
+	const util = new utils();
 	const userStore = useUserStore();
 	const gameStore = useGameStore();
 	const showStart = ref(true);
 	const showMatch = ref(false);
 	const showEnd = ref(false);
 
-	const getUsernameFromCookie = () => {
-		const cookie = document.cookie.split(';').find(cookie => cookie.trim().startsWith('username='));
-		if (cookie) {
-			const usernameJson = cookie.split('=')[1];
-			const user_name = JSON.parse(decodeURIComponent(usernameJson));
-			return user_name;
-		}
-		return null;
-	};
-
 	onMounted(async () => {
 		try {
-			const cookie_username = getUsernameFromCookie();
+			const cookie_username = util.getUsernameFromCookie();
 			if (!cookie_username)
 			{
 				router.push('/');

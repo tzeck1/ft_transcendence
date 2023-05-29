@@ -38,7 +38,7 @@
 		</header>
 		<main class="flex-grow">
 			<router-link to="/"></router-link>
-			<router-view/>
+			<router-view :key="$route.fullPath"/>
 		</main>
 		<div class="chat-box" v-if="!isIntro" :class="{'blur': (inputFocus || hovering) === true}" @mouseover="hovering=true" @mouseleave="hovering=false">
 			<div class="chat-input-container">
