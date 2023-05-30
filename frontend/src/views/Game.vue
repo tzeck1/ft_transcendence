@@ -53,12 +53,13 @@
 	});
 
 	onBeforeUnmount(() => {
-		if (gameStore.socket?.connected == true) {
-			console.log("onbeforeunmount of game.vue is disconnecting the socket");
+		if (gameStore.socket?.connected == true && gameStore.was_invited == false) {
+			console.log("onbeforeunmount of game.vue is setting ingame to false and disconnecting the socket whose mode is", gameStore.mode);
 			gameStore.disconnectSocket();
+			userStore.socket?.emit("setIngameStatus", false);
 		}
-		console.log("onbeforeunmount of game.vue is setting ingame status to false");
-		userStore.socket?.emit("setIngameStatus", false);
+		console.log("onbeforeunmount of game.vue is setting invited flag to false");
+		gameStore.was_invited = false;
 	});
 
 	function startMatch() {

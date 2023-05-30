@@ -5,13 +5,13 @@
 				<span class="logo">PONG</span>
 				<div class="nav-buttons">
 					<router-link to="/profile" v-slot="{ navigate, isActive }">
-						<button id="profileButton" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro">Profile</button>
+						<button id="profileButton" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro || is_endgame">Profile</button>
 					</router-link>
 					<router-link to="/game" v-slot="{ navigate, isActive }">
-						<button class="game-button" id="game-button" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro">Game</button>
+						<button class="game-button" id="game-button" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro || is_endgame">Game</button>
 					</router-link>
 					<router-link to="/leaderboard" v-slot="{ navigate, isActive }">
-						<button id="leaderboardButton" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro">Leaderboard</button>
+						<button id="leaderboardButton" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro || is_endgame">Leaderboard</button>
 					</router-link>
 				</div>
 				<div class="logout-button" @click="loadIntro" :disabled="isIntro">
@@ -23,13 +23,13 @@
 					</button>
 					<div class="dropdown-menu" v-if="dropdownVisible">
 						<router-link to="/profile" v-slot="{ navigate, isActive }">
-							<button class="dropdown-buttons" @click="hideDropdown(); navigate();" :class="{'active-button': isActive}" :disabled="isIntro">Profile</button>
+							<button class="dropdown-buttons" @click="hideDropdown(); navigate();" :class="{'active-button': isActive}" :disabled="isIntro || is_endgame">Profile</button>
 						</router-link>
 						<router-link to="/game" v-slot="{ navigate, isActive }">
-							<button class="dropdown-buttons" @click="hideDropdown(); navigate();" :class="{'active-button': isActive}" :disabled="isIntro">Game</button>
+							<button class="dropdown-buttons" @click="hideDropdown(); navigate();" :class="{'active-button': isActive}" :disabled="isIntro || is_endgame">Game</button>
 						</router-link>
 						<router-link to="/leaderboard" v-slot="{ navigate, isActive }">
-							<button class="dropdown-buttons" @click="hideDropdown(); navigate();" :class="{'active-button': isActive}" :disabled="isIntro">Leaderboard</button>
+							<button class="dropdown-buttons" @click="hideDropdown(); navigate();" :class="{'active-button': isActive}" :disabled="isIntro || is_endgame">Leaderboard</button>
 						</router-link>
 						<button class="dropdown-buttons" @click="hideDropdown(); loadIntro();" :disabled="isIntro">Logout</button>
 					</div>
@@ -40,7 +40,7 @@
 			<router-link to="/"></router-link>
 			<router-view/>
 		</main>
-		<div class="chat-box" v-if="!isIntro" :class="{'blur': (inputFocus || hovering) === true}" @mouseover="hovering=true" @mouseleave="hovering=false">
+		<div class="chat-box" v-if="!isIntro && !is_endgame" :class="{'blur': (inputFocus || hovering) === true}" @mouseover="hovering=true" @mouseleave="hovering=false">
 			<div class="chat-input-container">
 				<div class="chat-history" v-show="inputFocus || hovering" ref="chatHistory">
 					<div class="flex-grow"></div>
@@ -61,6 +61,7 @@
 	import { useUserStore } from './stores/UserStore';
 	import { useGameStore } from './stores/GameStore';
 	import { io } from 'socket.io-client';
+import { storeToRefs } from 'pinia';
 
 	const router = useRouter();
 	const route = useRoute();
@@ -71,10 +72,32 @@
 	const active_channel = ref('');
 	const lastMessages = ref<[string, string][]>([]);
 	const inputFocus = ref(false);
-	const isIntro = computed(() => route.path === '/');
+	const { is_endgame } = storeToRefs(userStore);
+	const isIntro = computed(() => (route.path === '/'));
 	var blocked_users: string[];
 	const hovering = ref(false);
 	const chatHistory = ref<HTMLElement | null>(null);
+
+	document.addEventListener("visibilitychange", () => {
+		if (document.hidden) {
+			console.log("page is hidden from APP.vue!, ROUTE.NAME is:", route.name);
+			if (gameStore.socket != null && route.name != 'Game') {
+				console.log("visibility check in App.vue sends to profile, disconnects socket and sets ingame status to false");
+				// if (isLooking.value == true){ // in queue, so get out of there and update the isLooking flag
+				// 	socket.emit("cancelQueue", userStore.intra);
+				// 	isLooking.value = false;
+				// } else {//user is ingame, not only in queue
+				// router.push('/profile');
+				//	//sending other user to profile in the onDisconnect handling function
+				// }
+				gameStore.disconnectSocket();//maybe need to test around with order of router.push and disconnect
+				userStore.socket?.emit("setIngameStatus", false);
+				window.location.href = '/profile';
+			}
+		} else {//document.hidden != true
+			console.log("page is visible from app.vue");
+		}
+	});
 
 	watch( () => userStore.intra, (newVal, oldVal) => {
 		if (newVal != undefined && newVal != "") {
@@ -98,6 +121,7 @@
 				lastMessages.value = chat_history.reverse();
 			});
 			userStore.socket.on("sendToProfile", (intra: string) => {
+				console.log("sendtoprofile usersocket uses href to profile");
 				window.location.href = '/profile/' + intra;
 			});
 			userStore.socket.on("reloadPage", () => {
@@ -151,13 +175,24 @@
 				gameStore.socket!.on('connect', function() {
 					console.log('game socket Connected');
 				});
-				gameStore.socket!.on("sendToProfile", () => {
-					router.push('/profile/');
-				});
+				if (gameStore.socket?.hasListeners("sendToProfile") == false) {
+					gameStore.socket!.on("sendToProfile", () => {
+						console.log("calling hrefprofile on gamesocket in app.vue");
+						window.location.href = "/profile";
+						// router.push('/profile/');
+					});
+				}
 				gameStore.socket!.on("hrefProfile", () => {//sends to page and reloads
+					console.log("calling hrefprofile on gamesocket");
+					// gameStore.socket?.disconnect();
 					window.location.href = "/profile";
 				});
-				console.log("emitting inviteplay with socket", gameStore.socket?.connected);
+				// gameStore.socket!.on("setInvited", (status) => {
+				// 	console.log("gamestore socket sets invited to", status);
+				// 	gameStore.was_invited = status;
+				// });
+				gameStore.was_invited = true;
+				console.log("emitting inviteplay with socket", gameStore.socket);
 				gameStore.socket!.emit("invitePlay", {intra: intra, other_intra: other_intra});
 			});
 		}

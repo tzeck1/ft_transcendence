@@ -79,12 +79,16 @@
 				if (isLooking.value == true){ // in queue, so get out of there and update the isLooking flag
 					socket.emit("cancelQueue", userStore.intra);
 					isLooking.value = false;
+					userStore.socket?.emit("setIngameStatus", false);
+					gameStore.disconnectSocket();//maybe need to test around with order of router.push and disconnect
 				} else {//user is ingame, not only in queue
-					router.push('/profile');
+
+					gameStore.disconnectSocket();//maybe need to test around with order of router.push and disconnect
+					userStore.socket?.emit("setIngameStatus", false);
+					window.location.href = '/profile';
+					// router.push('/profile');
 					//sending other user to profile in the onDisconnect handling function
 				}
-				gameStore.disconnectSocket();//maybe need to test around with order of router.push and disconnect
-				userStore.socket?.emit("setIngameStatus", false);
 			}
 		} else {//document.hidden != true
 			console.log("page is visible");
@@ -148,7 +152,7 @@
 	// }
 
 	onBeforeUnmount(() => {
-		console.log("onBeforeUnmount called");
+		console.log("onBeforeUnmount of StartGame.vue called");
 		if (isLooking.value == true) {
 			console.log("onbeforeunmount is also doing stuff");
 			socket.emit("cancelQueue", userStore.intra);
@@ -178,9 +182,9 @@
 		if (fun == true)
 		{
 			let tmp = document.getElementById("mode");
-			if (tmp == "") //no mode selcted
+			if (tmp.value == "") //no mode selcted
 				return ;
-			gameStore.setMode(tmp);
+			gameStore.setMode(tmp.value);
 		}
 		//establish connection
 		if (!isLooking.value) {
@@ -208,9 +212,12 @@
 			socket.on('noOpponent', function() {
 				console.log("No fitting opponent in matchmaking, waiting...");
 			});
-			gameStore.socket!.on("sendToProfile", () => {
-				router.push('/profile/');
-			});
+			if (gameStore.socket?.hasListeners("sendToProfile") == false) {
+				gameStore.socket!.on("sendToProfile", () => {
+					console.log("calling hrefprofile on gamesocket in startgame.vue sendtoprofile");
+					window.location.href = "/profile";
+				});
+			}
 			if (gameStore.mode == "")
 				socket.emit("createOrJoin", userStore.intra);
 			else

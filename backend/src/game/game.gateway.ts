@@ -38,7 +38,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	handleDisconnect(client: Socket) {
-		console.log(`Game Client Disconnected: ${client.id}`);
+		console.log(`Game Client Disconnected, starting to set DB and kick other: ${client.id}`);
 
 		// i disconnect, so i should get a lose and my enemy gets a win
 		for (let [room_id, room] of this.rooms) {
@@ -58,10 +58,11 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 																					0, 0);
 				}
 				let other_player_socket = room.getRightPlayer().getSocket();
+				console.log("other player to be hrefed is", other_player_socket.id, "intra:", room.getLeftPlayer().getIntraname(), "their socket connected is", other_player_socket.connected);
 				other_player_socket.emit("sendToProfile");
 				// other_player_socket.emit("hrefProfile");
 				this.rooms.delete(room_id);
-				other_player_socket.disconnect();
+				// other_player_socket.disconnect();
 				return;
 			}
 			if (room.getRightPlayer().getSocket().id == client.id) {
@@ -81,9 +82,10 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				}
 				let other_player_socket = room.getLeftPlayer().getSocket();
 				other_player_socket.emit("sendToProfile");
+				console.log("other player to be hrefed is", other_player_socket.id, "intra:", room.getLeftPlayer().getIntraname(), "their socket connected is", other_player_socket.connected);
 				// other_player_socket.emit("hrefProfile");
 				this.rooms.delete(room_id);
-				other_player_socket.disconnect();
+				// other_player_socket.disconnect();
 				return;
 			}
 		}
@@ -95,13 +97,14 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	@SubscribeMessage("setGameDataAndRoute")
 	handleSetGameDataAndRoute(client: Socket, ...args: any[]) {
-		// TODO calling setGameData
 		this.gameService.setGameData(args[0].intra, args[0].player, args[0].enemy, args[0].player_score, args[0].enemy_score,
 									args[0].ranked, args[0].paddle_hits_e, args[0].paddle_hits_m);
-
+		console.log("href next for socket", client.id);
 		client.emit("hrefProfile");
+		console.log("href done");
 		console.log("room is destroyed");
 		this.rooms.delete(args[0].room_id);
+		console.log("client.disconnect will be called in game.gateway.ts' setGameDataAndRoute");
 		client.disconnect();
 	}
 
