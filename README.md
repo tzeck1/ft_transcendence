@@ -39,7 +39,7 @@ cd ft_transcendence
 docker-compose up --build
 ```
 
-3. Access the website:
+3. Access the website in your browser:
 
 ```console
 http://<your ip>:8080
