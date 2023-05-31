@@ -3,7 +3,9 @@
 		<div class="content-wrapper" :class="{ blur: qrCodeVisible || showTFA }">
 			<div class="sidebar">
 				<div class="profile-picture-drop-area" @dragenter.prevent.stop="highlight" @dragover.prevent.stop="highlight" @dragleave.prevent.stop="unhighlight" @drop.prevent.stop="handleDrop">
-					<img id="profile-picture" class="profile-picture" :src="profile_picture"/>
+					<div class="profile-picture-container">
+						<img id="profile-picture" class="profile-picture" :src="profile_picture"/>
+					</div>
 					<div class="drop-icon" v-show="showDropIcon">&#x21E3;</div>
 				</div>
 				<div class="name-container">
@@ -18,17 +20,17 @@
 				</div>
 				<span v-if="showUsernameError" class="username-error" >{{ error_text }}</span>
 				<span class="mt-7 font-bold">Rank</span>
-				<img class="rank" src="../assets/ranks/floppy_2.png" alt="Rank" v-if="rank < 15" />
-				<img class="rank" src="../assets/ranks/memorycard.png" alt="Rank" v-if="rank < 35 && rank > 15" />
+				<img class="rank" src="../assets/ranks/floppy_2.png" alt="Rank" v-if="rank <= 15" />
+				<img class="rank" src="../assets/ranks/memorycard.png" alt="Rank" v-if="rank <= 35 && rank > 15" />
 				<img class="ssd" src="../assets/ranks/ssd.png" alt="Rank" v-if="rank > 35" />
 				<span>{{ rank }}</span>
 				<button class="two-factor-button" @click="toggle2FA">{{ twoFactorButtonText }}</button>
 			</div>
 			<div class="feature-grid">
 				<MatchHistory class="grid-item"></MatchHistory>
-				<Stats class="grid-item"></Stats>
-				<Achievements class="grid-item"></Achievements>
 				<Friends class="grid-item">Friends</Friends>
+				<Stats class="grid-item"></Stats>
+				<Achievements class="grid-item-s"></Achievements>
 			</div>
 		</div>
 		<div v-if="qrCodeVisible || showTFA" class="qr-code-overlay" @click="hideQRCode">
@@ -61,7 +63,9 @@
 	import { storeToRefs } from 'pinia';
 	import router from '@/router';
 	import { io } from 'socket.io-client';
+	import { utils } from '../utils/utils';
 
+	const util = new utils();
 	const rank = ref(0);
 	const userStore = useUserStore();
 	const { username } = storeToRefs(userStore);
@@ -128,20 +132,9 @@
 			usernameInput.value.style.width = (username.value.length + 1) + "ch";
 		}
 	}
-
-	const getUsernameFromCookie = () => {
-		const cookie = document.cookie.split(';').find(cookie => cookie.trim().startsWith('username='));
-		if (cookie) {
-			const usernameJson = cookie.split('=')[1];
-			const user_name = JSON.parse(decodeURIComponent(usernameJson));
-			return user_name;
-		}
-		return null;
-	};
-
 	onMounted(async () => {
 		try {
-			const cookie_username = getUsernameFromCookie();
+			const cookie_username = util.getUsernameFromCookie();
 			if (!cookie_username) {
 				router.push('/'); //do we need to return after that?
 				return ;
@@ -277,8 +270,13 @@
 		width: 25vw;
 	}
 
+	.profile-picture-container {
+		@apply relative lg:w-48 md:w-40 sm:w-36 w-24 h-0 my-10 transition-all duration-300 ease-in-out;
+		padding-top: 100%;
+	}
+
 	.profile-picture {
-		@apply rounded-full object-cover w-48 h-48 my-10;
+		@apply rounded-full object-cover absolute top-0 left-0 w-full h-full;
 	}
 
 	.rank {
@@ -292,16 +290,14 @@
 	.feature-grid {
 		@apply grid w-4/5 max-h-full grid-cols-1 lg:grid-cols-2 grid-rows-2;
 		height: calc(100vh - 128px);
-		width: 75vw;
-		/* position: fixed;
-		right: 0px; */
-		/* @apply border border-blue-300 grid-cols-2 grid-rows-2 gap-4 w-4/5 h-full p-8; */
 	}
 
 	.grid-item {
 		@apply overflow-auto py-10;
-		/* @apply border overflow-auto; */
-		/* h-1/4 border-red-300 flex justify-center items-center bg-black bg-opacity-50 rounded-2xl text-3xl */
+	}
+
+	.grid-item-s {
+		@apply overflow-auto py-10 hidden lg:flex;
 	}
 
 	.grid-item::-webkit-scrollbar { /* Chrome, Safari and Edge */
@@ -321,23 +317,23 @@
 	}
 
 	.two-factor-button {
-		@apply mt-4 text-2xl;
+		@apply mt-4 text-2xl p-4;
 	}
 	
-	/* .name-container {
-		@apply flex justify-center w-full;
-	} */
+	.name-container {
+		@apply flex justify-center items-center w-full;
+	}
 
 	.username-wrapper {
-		@apply ml-14 justify-center inline-flex items-center relative text-4xl;
+		@apply md:ml-14 ml-0 justify-center inline-flex items-center relative text-4xl transition-all duration-300 ease-in-out;
 	}
 
 	.username-text {
-		@apply justify-center items-center px-2;
+		@apply lg:text-4xl md:text-3xl text-xl justify-center items-center px-2 transition-all duration-300 ease-in-out;
 	}
 
 	#toggle-username {
-		@apply p-3 ml-3;
+		@apply p-3 ml-3 md:block hidden text-4xl;
 	}
 
 	#toggle-username:hover {

@@ -73,6 +73,7 @@
 	.game-overlay {
 		@apply flex-col flex items-center;
 	}
+
 	.grid {
 		@apply mt-20 mb-10 inline-flex w-full max-w-7xl justify-center;
 	}

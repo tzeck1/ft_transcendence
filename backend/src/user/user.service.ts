@@ -210,6 +210,13 @@ export class Users {
 		});
 	}
 
+	async setZucc(intra: string) {
+		return await prisma.users.update({
+			where: { intra_name: intra },
+			data: { zucc: true }
+		});
+	}
+
 	async setFRequest(sendTo: string, cameFrom: string)
 	{
 		return await prisma.users.update({
@@ -218,13 +225,34 @@ export class Users {
 		});
 	}
 
-	async setFriend(friend1: string, friend2: string)
+	async unSetFRequest(sendTo: string, cameFrom: string)
 	{
-		const usersEntry = await prisma.users.findUnique( {where: {intra_name: friend1}} );
-		const newReqs = usersEntry.f_requests.filter(item => item !== friend2);
+		const usersEntry = await prisma.users.findUnique( {where: {intra_name: sendTo}} );
+		const newReqs = usersEntry.f_requests.filter(item => item !== cameFrom);
 		return await prisma.users.update({
-			where: { intra_name: friend1 },
-			data: { friends: { push: friend2 }, f_requests: newReqs }
+			where: { intra_name: sendTo },
+			data: { f_requests: newReqs }
 		});
+	}
+
+	async setFriend(intra: string, amigo: string)
+	{
+		const usersEntry = await prisma.users.findUnique( {where: {intra_name: intra}} );
+		const newReqs = usersEntry.f_requests.filter(item => item !== amigo);
+		return await prisma.users.update({
+			where: { intra_name: intra },
+			data: { friends: { push: amigo }, f_requests: newReqs }
+		});
+	}
+
+	async killFriend(intra: string, amigo: string)
+	{
+		const usersEntry = await prisma.users.findUnique( {where: {intra_name: intra}} );
+		const newFriends = usersEntry.friends.filter(item => item !== amigo);
+		await prisma.users.update({
+			where: { intra_name: intra },
+			data: { friends: newFriends }
+		});
+		return (newFriends);
 	}
 }

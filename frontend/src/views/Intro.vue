@@ -32,6 +32,7 @@
 	import { useUserStore } from '../stores/UserStore';
 	import axios from 'axios';
 	import IntroGame from '../components/IntroArt.vue';
+	import { utils } from '../utils/utils';
 
 	export default defineComponent({
 		name: 'Intro',
@@ -48,6 +49,7 @@
 			const showTFA = ref(false);
 			const showTFAerror = ref(false);
 			const showAuth = ref(true);
+			const util = new utils();
 
 			const auth_intra = async () => {
 				try {
@@ -62,20 +64,10 @@
 				}
 			};
 
-			const getUsernameFromCookie = () => {
-				const cookie = document.cookie.split(';').find(cookie => cookie.trim().startsWith('username='));
-				if (cookie) {
-					const usernameJson = cookie.split('=')[1];
-					const user_name = JSON.parse(decodeURIComponent(usernameJson));
-					return user_name;
-				}
-				return null;
-			};
-
 			onMounted(async () => {
 				try {
-					if (getUsernameFromCookie()) {
-						userStore.setIntra(getUsernameFromCookie());
+					if (util.getUsernameFromCookie()) {
+						userStore.setIntra(util.getUsernameFromCookie());
 						const response = await axios.get(`http://${location.hostname}:3000/auth/getUserData?intra=${userStore.intra}`);
 						const data = response.data;
 						userStore.setUsername(data.username);
