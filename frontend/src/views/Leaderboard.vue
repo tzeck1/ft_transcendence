@@ -20,6 +20,7 @@
 	import { useUserStore } from '@/stores/UserStore';
 	import { storeToRefs } from 'pinia';
 	import router from '@/router';
+	import { utils } from '../utils/utils';
 
 	interface User {
 		id: number;
@@ -30,6 +31,7 @@
 		games_played: number;
 	}
 
+	const util = new utils();
 	const users = ref<User[]>([]);
 	const userStore = useUserStore();
 	const { username } = storeToRefs(userStore);
@@ -38,18 +40,8 @@
 		router.push(`/profile/${intra}`);
 	}
 
-	const getUsernameFromCookie = () => {
-		const cookie = document.cookie.split(';').find(cookie => cookie.trim().startsWith('username='));
-		if (cookie) {
-			const usernameJson = cookie.split('=')[1];
-			const user_name = JSON.parse(decodeURIComponent(usernameJson));
-			return user_name;
-		}
-		return null;
-	};
-
 	onMounted(async () => {
-		const cookie_username = getUsernameFromCookie();
+		const cookie_username = util.getUsernameFromCookie();
 		if (!cookie_username)
 		{
 			router.push('/'); //do we need to return after that?
@@ -96,7 +88,7 @@
 	}
 
 	.picture-container {
-		@apply flex justify-center w-1/5;
+		@apply flex justify-center lg:w-1/5 w-1/4 transition-all duration-300 ease-in-out;
 	}
 
 	.profile_picture {
@@ -104,19 +96,19 @@
 	}
 
 	.position {
-		@apply text-center w-1/5 text-3xl;
+		@apply text-center lg:w-1/5 w-1/4 text-3xl transition-all duration-300 ease-in-out;
 	}
 
 	.username {
-		@apply text-center w-1/5;
+		@apply text-center lg:w-1/5 w-1/4 transition-all duration-300 ease-in-out;
 	}
 
 	.rank {
-		@apply text-center w-1/5;
+		@apply text-center lg:w-1/5 w-1/4 transition-all duration-300 ease-in-out;
 	}
 
 	.played {
-		@apply text-center w-1/5;
+		@apply text-center lg:w-1/5 lg:block hidden transition-all duration-300 ease-in-out;
 	}
 
 	.highlight {

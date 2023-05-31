@@ -6,25 +6,30 @@
 						<span v-show="!isLooking">Queue</span>
 						<span v-show="isLooking">Cancel</span>
 				</button>
-				<span class="block-title">Settings</span>
 			</div>
 			<div :class="['comp-block', 'block-style', compBlockClass]" @click="selectCompBlock">
 				<img src="../../assets/pong.gif" class="block-image">
 				<span class="block-title">Competitive</span>
+				<span class="block-help" v-show="compBlockSelected">Face off against random players globally in this thrilling mode. Each victory earns you rank points to climb the leaderboard. Skill and strategy are key</span>
 			</div>
 			<div :class="['fun-block', 'block-style', funBlockClass]" @click="selectFunBlock">
 				<img src="../../assets/pong.gif" class="block-image">
 				<span class="block-title">Fun Mode</span>
+				<span class="block-help" v-show="funBlockSelected">Queue against a random opponent for a carefree challenge. Play classic pong or spice things up with Speed Pong or Dodge Ball. Choice is yours</span>
 			</div>
 			<div :class="['block-style', funSetClass]">
 				<button class="set-button" @click="search_game(true, false)" v-if="funBlockSelected">
 						<span v-show="!isLooking">Queue</span>
 						<span v-show="isLooking">Cancel</span>
 				</button>
-				<select name="mode" id="mode" multiple>
+				<div class="gamemode">
+					<button class="mode" @click="speed_mode" :class="{'highlight': mode == 'speed'}">Speed Pong</button>
+					<button class="mode" @click="dodge_mode" :class="{'highlight': mode == 'dodge'}">Dodge Ball</button>
+				</div>
+				<!-- <select name="mode" id="mode" multiple>
   					<option value="speed">Speed pong</option>
   					<option value="dodge">Dodge ball</option>
-				</select>
+				</select> -->
 			</div>
 		</div>
 		<div class="countdown-overlay" v-if="showCount">
@@ -88,6 +93,7 @@
 	const { profile_picture } = storeToRefs(userStore);
 	const { enemy_name } = storeToRefs(gameStore);
 	const { enemy_picture } = storeToRefs(gameStore);
+	const	mode = ref('none');
 	const emit = defineEmits(["start-match", "show-end", "show-start"]);
 
 	document.addEventListener("visibilitychange", () => {
@@ -162,10 +168,9 @@
 			gameStore.setMode("");
 		if (fun == true && invited == false)
 		{
-			let tmp = document.getElementById("mode");
-			if (tmp.value == "") //no mode selcted
+			if (mode.value == 'none') //no mode selcted
 				return ;
-			gameStore.setMode(tmp.value);
+			gameStore.setMode(mode.value);
 		}
 		console.log("Game mode is: ", gameStore.mode);
 		//establish connection
@@ -215,6 +220,20 @@
 			isLooking.value = false;
 			gameStore.disconnectSocket();
 		}
+	}
+
+	function speed_mode() {
+		if (mode.value == 'none' || mode.value == 'dodge')
+			mode.value = 'speed';
+		else if (mode.value == 'speed')
+			mode.value = 'none';
+	}
+
+	function dodge_mode() {
+		if (mode.value == 'none' || mode.value == 'speed')
+			mode.value = 'dodge';
+		else if (mode.value == 'dodge')
+			mode.value = 'none';
 	}
 
 	function selectCompBlock() {
@@ -286,7 +305,7 @@
 	}
 
 	.set-button {
-		@apply flex text-2xl bg-white bg-opacity-10 px-6 py-4 mb-2;
+		@apply flex lg:text-2xl md:text-xl sm:text-lg text-base bg-white bg-opacity-10 px-6 py-4 mb-2;
 	}
 
 	.set-button:hover {
@@ -298,7 +317,7 @@
 	}
 
 	.block-title {
-		@apply block text-center mt-4 text-xl;
+		@apply mb-4 block text-center mt-4 font-extrabold lg:text-xl md:text-lg sm:text-sm text-xs transition-all duration-300 ease-in-out;
 	}
 
 	.fun-block-visible, .comp-block-visible {
@@ -382,4 +401,19 @@
 		@apply mt-32 py-10 px-20 text-5xl;
 	}
 
+	.gamemode {
+		@apply flex xl:flex-row flex-col mt-6;
+	}
+
+	.mode {
+		@apply py-4 px-4 lg:text-2xl md:text-xl sm:text-lg text-xs whitespace-nowrap;
+	}
+
+	.highlight {
+		@apply bg-white bg-opacity-10;
+	}
+
+	.block-help {
+		@apply lg:block hidden text-lg px-6 text-center transition-all duration-300 ease-in-out;
+	}
 </style>

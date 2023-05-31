@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { User } from 'src/chat/chat.service';
 import prisma from 'src/prisma';
 
 @Injectable()
@@ -126,6 +127,20 @@ export class Users {
 		};
 	}
 
+	async getFRequests(intra: string) {
+		const usersEntry = await prisma.users.findUnique( {where: {intra_name: intra}} );
+		let requests = usersEntry.f_requests;
+
+		let f_requests = [];
+		for (let req in requests) {
+			let user = await prisma.users.findUnique( { where: { intra_name: requests[req] } });
+			// let req_to_push = {id: user.id, intra_name: user.intra_name, username: user.username, profile_picture: user.profile_picture, rank: user.rank}
+			// console.log(req_to_push);
+			f_requests.push(user);
+		}
+		return f_requests;
+	}
+
 	/*	========== SETTER ==========	*/
 
 	async setUsername(intra: string, new_username: string) {
@@ -198,5 +213,51 @@ export class Users {
 			where: { intra_name: intra },
 			data: { hackerman: true }
 		});
+	}
+
+	async setZucc(intra: string) {
+		return await prisma.users.update({
+			where: { intra_name: intra },
+			data: { zucc: true }
+		});
+	}
+
+	async setFRequest(sendTo: string, cameFrom: string)
+	{
+		return await prisma.users.update({
+			where: { intra_name: sendTo },
+			data: { f_requests: { push: cameFrom } }
+		});
+	}
+
+	async unSetFRequest(sendTo: string, cameFrom: string)
+	{
+		const usersEntry = await prisma.users.findUnique( {where: {intra_name: sendTo}} );
+		const newReqs = usersEntry.f_requests.filter(item => item !== cameFrom);
+		return await prisma.users.update({
+			where: { intra_name: sendTo },
+			data: { f_requests: newReqs }
+		});
+	}
+
+	async setFriend(intra: string, amigo: string)
+	{
+		const usersEntry = await prisma.users.findUnique( {where: {intra_name: intra}} );
+		const newReqs = usersEntry.f_requests.filter(item => item !== amigo);
+		return await prisma.users.update({
+			where: { intra_name: intra },
+			data: { friends: { push: amigo }, f_requests: newReqs }
+		});
+	}
+
+	async killFriend(intra: string, amigo: string)
+	{
+		const usersEntry = await prisma.users.findUnique( {where: {intra_name: intra}} );
+		const newFriends = usersEntry.friends.filter(item => item !== amigo);
+		await prisma.users.update({
+			where: { intra_name: intra },
+			data: { friends: newFriends }
+		});
+		return (newFriends);
 	}
 }

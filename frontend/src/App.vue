@@ -38,7 +38,7 @@
 		</header>
 		<main class="flex-grow">
 			<router-link to="/"></router-link>
-			<router-view/>
+			<router-view :key="$route.fullPath"/>
 		</main>
 		<div class="chat-box" v-if="!isIntro" :class="{'blur': (inputFocus || hovering) === true}" @mouseover="hovering=true" @mouseleave="hovering=false">
 			<div class="chat-input-container">
@@ -48,7 +48,7 @@
 				</div>
 				<div class="chat-input-button-container">
 					<input type="text" v-model="message" class="chat-input" @focus="inputFocus=true" @blur="inputFocus=false" @keyup.enter="sendMessage()" :placeholder="active_channel" :maxlength="250">
-					<button class="chat-send" @click="sendMessage()">Send</button>
+					<button class="chat-send" @click="sendMessage()">&#9084;</button>
 				</div>
 			</div>
 		</div>
@@ -56,7 +56,8 @@
 </template>
  
 <script setup lang="ts">
-	import { ref, computed, watch, createHydrationRenderer, nextTick } from 'vue';
+
+	import { ref, computed, watch, nextTick } from 'vue';
 	import { useRouter, useRoute } from 'vue-router';
 	import { useUserStore } from './stores/UserStore';
 	import { useGameStore } from './stores/GameStore';
@@ -262,7 +263,7 @@ import { storeToRefs } from 'pinia';
 	}
 
 	.chat-send {
-		@apply p-2 rounded cursor-pointer;
+		@apply px-2 py-1 rounded cursor-pointer text-4xl;
 	}
 
 	.chat-history {

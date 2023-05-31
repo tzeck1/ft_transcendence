@@ -112,13 +112,17 @@
 			axios.post(`http://${location.hostname}:3000/users/setTopThree`, { intra: intra });
 			ladder.value = true;
 		}
+		if (!friends.value && userData.data.friends.length >= 5) {
+			axios.post(`http://${location.hostname}:3000/users/setZucc`, { intra: intra });
+			friends.value = true;
+		}
 	});
 </script>
 
 <style scoped>
 
 .achievements-container {
-	@apply hidden lg:flex h-full flex-col items-center justify-center;
+	@apply flex h-full flex-col items-center justify-center;
 	scrollbar-width: thin;
 	scrollbar-color: transparent transparent;
 }
@@ -128,7 +132,7 @@
 }
 
 .achievements-list {
-	@apply w-full flex flex-col items-center h-full;
+	@apply w-full flex flex-col items-center h-full gap-2;
 }
 
 .achievements-item {
@@ -136,7 +140,7 @@
 }
 
 h1 {
-	@apply font-bold text-xl mb-5;
+	@apply font-bold xl:text-xl text-lg mb-5 transition-all duration-300 ease-in-out;
 }
 
 img {
@@ -144,7 +148,7 @@ img {
 }
 
 span {
-	@apply text-gray-200;
+	@apply xl:text-base text-sm text-gray-200 transition-all duration-300 ease-in-out;
 }
 
 .friend-logo {

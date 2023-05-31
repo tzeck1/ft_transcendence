@@ -203,7 +203,7 @@
 }
 
 .slide-button {
-	@apply rounded-full flex justify-center items-center px-2 py-0 text-4xl;
+	@apply rounded-full flex justify-center items-center px-7 -mx-3 py-0 text-4xl;
 }
 
 .slide-button:hover {

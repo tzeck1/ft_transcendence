@@ -42,10 +42,13 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		let sender = "Floppy: ";
 		let message_body = "Welcome to ft_transcendence!\nType '/help' for a list of commands.";
 		client.emit("messageToClient", sender, message_body);
+		this.server.emit("updateFriendStatus", intra, "Online");
+		//console.log("emitting that", this.chatService.getIntraFromSocket(client), "is now Online");
 	}
 
 	handleDisconnect(client: Socket) {
 		console.log(`Chat Client Disconnected: ${client.id}`);
+		this.server.emit("updateFriendStatus", this.chatService.getIntraFromSocket(client), "Offline");
 	}
 
 	@SubscribeMessage("messageToServer")
@@ -145,5 +148,26 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		let user = this.chatService.getUserFromSocket(client);
 		let status = args[0];
 		user.setIngameStatus(status);
+		if (status == true)
+			this.server.emit("updateFriendStatus", this.chatService.getIntraFromSocket(client), "In Game");
+		else
+			this.server.emit("updateFriendStatus", this.chatService.getIntraFromSocket(client), "Online");
+	}
+
+	@SubscribeMessage("getFriendStatus")
+	handleGetFriendStatus(client: Socket, ...args: any[]) {
+		let friend_intras = args[0];
+		for (let intra of friend_intras) {
+			console.log("checking out ", intra);
+			let user = this.chatService.getUserFromIntra(intra);
+			if (user == undefined)
+				client.emit("updateFriendStatus", intra, "Offline");
+			else if (user.getSocket().connected == false)
+				client.emit("updateFriendStatus", intra, "Offline");
+			else if (user.getIngameStatus() == true)
+				client.emit("updateFriendStatus", intra, "In Game");
+			else
+				client.emit("updateFriendStatus", intra, "Online");
+		}
 	}
 }

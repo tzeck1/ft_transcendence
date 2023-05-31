@@ -2,6 +2,7 @@ import { Body, Controller, Get, Post, Query, Req, Res, UseGuards } from '@nestjs
 import { Users } from './user.service';
 import { PrismaClient } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { send } from 'process';
 
 @Controller('users')
 export class UserController {
@@ -39,6 +40,12 @@ export class UserController {
 	}
 
 	@UseGuards(JwtAuthGuard)
+	@Get('getFRequests')
+	async getFRequests(@Query('intra') intra: string) {
+		return this.users.getFRequests(intra);
+	}
+
+	@UseGuards(JwtAuthGuard)
 	@Post('setAvatar')
 	async setAvatar(@Body('intra') intra: string, @Body('picture') picture: string) {
 		console.log("Avatar changed to:", picture);
@@ -71,5 +78,36 @@ export class UserController {
 	@Post('setHackerman')
 	async setHackerman(@Body('intra') intra: string) {
 		await this.users.setHackerman(intra);
+	}
+
+	@Post('setZucc')
+	async setZucc(@Body('intra') intra: string) {
+		await this.users.setZucc(intra);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Post('setFRequest')
+	async setFRequest(@Body('intra') sendTo: string, @Body('amigo') cameFrom: string, @Body('sending') sending: boolean) {
+		const amigo = await this.getUser(cameFrom);
+		if (amigo.f_requests.includes(sendTo) && sending == true)
+			await this.setFriends(sendTo, cameFrom);
+		else if (sending == true)
+			await this.users.setFRequest(sendTo, cameFrom);
+		else if (sending == false)
+			await this.users.unSetFRequest(sendTo, cameFrom);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Post('setFriends')
+	async setFriends(@Body('intra') intra: string, @Body('amigo') amigo: string) {
+		await this.users.setFriend(intra, amigo);
+		await this.users.setFriend(amigo, intra);
+	}
+
+	@UseGuards(JwtAuthGuard)
+	@Post('killFriend')
+	async killFriends(@Body('intra') intra: string, @Body('amigo') amigo: string) {
+		await this.users.killFriend(amigo, intra);
+		return await this.users.killFriend(intra, amigo);
 	}
 }
