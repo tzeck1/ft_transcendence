@@ -186,10 +186,12 @@
 					window.location.href = "/profile";
 				});
 			}
-			if (gameStore.mode == "")
+			if (invited == true)
+				socket.emit("createOrJoinMode", userStore.intra, gameStore.mode, router.currentRoute.value.query.opponent, true);
+			else if (gameStore.mode == "")
 				socket.emit("createOrJoin", userStore.intra);
 			else
-				socket.emit("createOrJoinMode", userStore.intra, gameStore.mode);
+				socket.emit("createOrJoinMode", userStore.intra, gameStore.mode, "", false);
 
 			isLooking.value = true;
 		}

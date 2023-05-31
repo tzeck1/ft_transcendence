@@ -886,8 +886,8 @@ export class ChatService {
 		let mode = this.invites.get(other_user.getIntra() + user.getIntra());
 		if (mode == undefined)
 			return [client.id, "Error: ", "could not get an invite from this user."];
-		user.getSocket().emit("sendToInvite", mode);
-		other_user.getSocket().emit("sendToInvite", mode);
+		user.getSocket().emit("sendToInvite", mode, other_user.getUsername());
+		other_user.getSocket().emit("sendToInvite", mode, user.getUsername());
 		this.invites.delete(other_user.getIntra() + user.getIntra());
 		let recipient = client.id;
 		let sender = "Floppy: ";

@@ -97,7 +97,7 @@
 			if (gameStore.mode == "")
 				socket.emit("createOrJoin", userStore.intra);
 			else
-				socket.emit("createOrJoinMode", userStore.intra, gameStore.mode);
+				socket.emit("createOrJoinMode", userStore.intra, gameStore.mode, gameStore.enemy_name, true);
 			gameStore.setPlayAgain(true);
 		}
 		else {

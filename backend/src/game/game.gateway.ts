@@ -9,6 +9,7 @@ import {
 import { Server, Socket } from 'socket.io';
 import { Games, Game, Room, Player } from './game.service';
 import { Users } from '../user/user.service';
+import { ChatService } from '../chat/chat.service'
 
 @WebSocketGateway({
 	namespace: '/game_socket',
@@ -176,13 +177,14 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		}
 	}
 
+	//data2 opponent name, data3 if invited
 	@SubscribeMessage("createOrJoinMode")
 	async handleCreateOrJoinMode(client: Socket, data: any) {
 		this.reapInactiveSocketsLobby();
-		let searching_player = new Player(client, data[0], this.users, data[1]);
+		let searching_player = new Player(client, data[0], this.users, data[1], data[2]);
 		await searching_player.updateUserData();
 		for (let [intraname, lobby_player] of this.lobby) {
-			if (searching_player.getMode() == lobby_player.getMode()) {
+			if (searching_player.getMode() == lobby_player.getMode() && (data[3] == false || lobby_player.getOpponent() == searching_player.getUsername())) {
 				this.createAndJoinRoom(searching_player, lobby_player);
 				return;
 			}
