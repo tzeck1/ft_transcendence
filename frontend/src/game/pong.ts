@@ -29,8 +29,6 @@ export default class Pong extends Phaser.Scene {
 	old_time = 0;
 	width = 1920;
 	height = 1080;
-	left_score = 0;
-	right_score = 0;
 	left_paddle_hits_m = 0;
 	left_paddle_hits_e = 0;
 	right_paddle_hits_m = 0;
@@ -87,6 +85,7 @@ export default class Pong extends Phaser.Scene {
 /********************************** CREATE *************************************/
 
 	create() {
+		this.gameStore.setScores(0, 0);
 		this.router = useRouter();
 		if (this.gameStore.mode == "speed")
 			this.paddle_velocity = 32;
@@ -127,14 +126,14 @@ export default class Pong extends Phaser.Scene {
 		this.ball.alpha = 0;
 		this.ball.body.setMaxSpeed(2000);
 		this.ball_trail = this.createBallTrail(this.ball, "ball");
-		this.left_score_txt = this.add.text(this.width / 3, this.height / 4, String(this.left_score), { fontFamily: "ibm-3270", fontSize: "128px",
+		this.left_score_txt = this.add.text(this.width / 3, this.height / 4, String(this.gameStore.left_score), { fontFamily: "ibm-3270", fontSize: "128px",
 			shadow: {
 				color: '#999',
 				blur: 12,
 				fill: true,
 		} }).setScale(this.left_score_scale);
 
-		this.right_score_txt = this.add.text(2 * this.width / 3 - 64, this.height / 4, String(this.right_score), { fontFamily: "ibm-3270", fontSize: "128px",
+		this.right_score_txt = this.add.text(2 * this.width / 3 - 64, this.height / 4, String(this.gameStore.right_score), { fontFamily: "ibm-3270", fontSize: "128px",
 			shadow: {
 				color: '#999',
 				blur: 12,
@@ -160,17 +159,16 @@ export default class Pong extends Phaser.Scene {
 			this.left_player.y += this.paddle_velocity;
 		});
 		this.socket.on("newScore", (left_score, right_score) => {
-			this.left_score = left_score;
-			this.right_score = right_score;
-			this.left_score_txt.text = String(this.left_score);
-			this.right_score_txt.text = String(this.right_score);
-			if (this.left_score == this.winning_score || this.right_score == this.winning_score) {
+			this.gameStore.setScores(left_score, right_score);
+			this.left_score_txt.text = String(this.gameStore.left_score);
+			this.right_score_txt.text = String(this.gameStore.right_score);
+			if (this.gameStore.left_score == this.winning_score || this.gameStore.right_score == this.winning_score) {
 				this.socket.emit("endGame", { left_e: this.left_paddle_hits_e, left_m: this.left_paddle_hits_m, right_e: this.right_paddle_hits_e, right_m: this.right_paddle_hits_m, room_id: this.room_id });
 			}
 		});
 		this.socket.on("destroyGame", (paddle_hits_e, paddle_hits_m) => {
 			console.log("winning score!");
-			this.gameStore.socket!.emit("setGameDataAndRoute", { intra: this.gameStore.intra, player: this.userStore.username, enemy: this.gameStore.enemy_name, player_score: this.left_score, enemy_score: this.right_score, ranked: (this.gameStore.mode == ""), paddle_hits_e: paddle_hits_e, paddle_hits_m: paddle_hits_m, room_id: this.room_id });
+			this.gameStore.socket!.emit("setGameDataAndRoute", { intra: this.gameStore.intra, player: this.userStore.username, enemy: this.gameStore.enemy_name, player_score: this.gameStore.left_score, enemy_score: this.gameStore.right_score, ranked: (this.gameStore.mode == ""), paddle_hits_e: paddle_hits_e, paddle_hits_m: paddle_hits_m, room_id: this.room_id });
 			this.game.destroy(true);
 		});
 
@@ -306,7 +304,7 @@ export default class Pong extends Phaser.Scene {
 	}
 
 	player_scored() {
-		if (this.left_score == this.winning_score || this.right_score == this.winning_score)
+		if (this.gameStore.left_score == this.winning_score || this.gameStore.right_score == this.winning_score)
 			return;
 		let left_player_scored = false;
 		if (this.ball.body.blocked.right)

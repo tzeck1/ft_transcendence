@@ -11,6 +11,8 @@ export const useGameStore = defineStore({
 		enemy_picture: "",
 		mode: "",
 		play_again: false,
+		left_score: 0,
+		right_score: 0,
 	}),
 	actions: {
 		setIntra(newIntra: string) {
@@ -33,6 +35,10 @@ export const useGameStore = defineStore({
 		},
 		setPlayAgain(again: boolean) {
 			this.play_again = again;
+		},
+		setScores(score_left: number, score_right: number) {
+			this.left_score = score_left;
+			this.right_score = score_right;
 		},
 		disconnectSocket() {
 			if (this.socket != null) {

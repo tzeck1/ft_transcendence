@@ -51,11 +51,8 @@
 	const result = ref('');
 
 	onMounted(async () => {
-		const gameData = await axios.get(`http://${location.hostname}:3000/game/getLastGame?intra=${userStore.intra}`);
-		player_score.value = gameData.data.player_score;
-		console.log("player_score: ", player_score);
-		enemy_score.value = gameData.data.enemy_score;
-		console.log("enemy_score: ", enemy_score);
+		player_score.value = String(gameStore.left_score);
+		enemy_score.value = String(gameStore.right_score);
 		if (player_score.value > enemy_score.value)
 			result.value = "Winner!";
 		else
