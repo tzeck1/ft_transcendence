@@ -188,6 +188,8 @@
 				isLooking.value = false;
 				gameStore.setIntra(userStore.intra);
 				gameStore.setRoomId(room_id);
+				gameStore.setEnemyName(username);
+				gameStore.setEnemyPicture(pic);
 				showCount.value = true;
 				countdown();
 			});

@@ -175,7 +175,6 @@ import { storeToRefs } from 'pinia';
 						router.push('/profile/');
 					});
 				}
-				gameStore.was_invited = true;
 				console.log("emitting inviteplay with socket", gameStore.socket);
 				gameStore.socket!.emit("invitePlay", {intra: intra, other_intra: other_intra});
 			});

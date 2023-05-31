@@ -29,7 +29,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	private invite_array: [string, string, Player][] = new Array<[string, string, Player]>;
 
 	private room_counter = 0;
-	private threshold = 20;
+	private threshold = 300;
 
 	@WebSocketServer() server: Server;
 
@@ -103,7 +103,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	handleSetGameDataAndRoute(client: Socket, ...args: any[]) {
 		this.gameService.setGameData(args[0].intra, args[0].player, args[0].enemy, args[0].player_score, args[0].enemy_score,
 									args[0].ranked, args[0].paddle_hits_e, args[0].paddle_hits_m);
-		client.emit("sendToProfile");
 		console.log("room is destroyed");
 		this.rooms.delete(args[0].room_id);
 		console.log("client.disconnect will be called in game.gateway.ts' setGameDataAndRoute");
@@ -185,7 +184,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		let searching_player = new Player(client, data[0], this.users, data[1], data[2]);
 		await searching_player.updateUserData();
 		for (let [intraname, lobby_player] of this.lobby) {
-			if (searching_player.getMode() == lobby_player.getMode() && ((data[3] == false && lobby_player.getOpponent() == "") || lobby_player.getOpponent() == searching_player.getUsername())) {
+			if (searching_player.getIntraname() != lobby_player.getIntraname() && searching_player.getMode() == lobby_player.getMode() && ((data[3] == false && lobby_player.getOpponent() == "") || lobby_player.getOpponent() == searching_player.getUsername())) {
 				this.createAndJoinRoom(searching_player, lobby_player);
 				return;
 			}
@@ -204,7 +203,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		let searching_player = new Player(client, intra, this.users);
 		await searching_player.updateUserData();
 		for (let [intraname, lobby_player] of this.lobby) {
-			if (lobby_player.getMode() == "" && lobby_player.getScore() - this.threshold < searching_player.getScore() && searching_player.getScore() < lobby_player.getScore() + this.threshold) {
+			if (searching_player.getIntraname() != lobby_player.getIntraname() && lobby_player.getMode() == "" && lobby_player.getRank() - this.threshold < searching_player.getRank() && searching_player.getRank() < lobby_player.getRank() + this.threshold) {
 				this.createAndJoinRoom(searching_player, lobby_player);
 				return;
 			}

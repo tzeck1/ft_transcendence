@@ -95,10 +95,10 @@ export class Users {
 		return usersEntry.tfa_enabled;
 	}
 
-	async getScore(intra_name: string): Promise<number> {
-		const id = await this.getId(intra_name);
-		const statsEntry = await prisma.stats.findUnique( {where: {id: id}} );
-		return statsEntry.score;
+	async getRank(intra_name: string): Promise<number> {
+		const usersEntry = await prisma.users.findUnique( {where: {intra_name: intra_name}} );
+		console.log("getRank will check user", usersEntry.intra_name, "their rank is:", usersEntry.rank);
+		return usersEntry.rank;
 	}
 
 	async getPaddleStats(intra: string) {

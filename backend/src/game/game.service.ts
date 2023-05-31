@@ -20,12 +20,12 @@ export class Player {
 
 	private username: string;
 	private picture: string;
-	private score: number;
+	private rank: number;
 
 	async updateUserData() {
 		this.username = await this.users.getUsernameByIntra(this.intraname);
 		this.picture = await this.users.getAvatarByIntra(this.intraname);
-		this.score = await this.users.getScore(this.intraname);
+		this.rank = await this.users.getRank(this.intraname);
 	}
 
 	getSocket(): Socket { return this.socket; }
@@ -34,7 +34,7 @@ export class Player {
 	getOpponent(): string { return this.opponent; }
 	getUsername(): string { if (this.username == undefined) this.updateUserData(); return this.username; }
 	getPicture(): string { if (this.picture == undefined) this.updateUserData(); return this.picture; }
-	getScore(): number { if (this.score == undefined) this.updateUserData(); return this.score; }
+	getRank(): number { this.updateUserData(); return this.rank; }// TODO check if the if condition should be removed here
 }
 
 export class Room {

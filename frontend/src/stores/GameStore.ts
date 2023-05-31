@@ -10,7 +10,6 @@ export const useGameStore = defineStore({
 		enemy_name: "",
 		enemy_picture: "",
 		mode: "",
-		was_invited: false,
 		play_again: false,
 	}),
 	actions: {
@@ -49,7 +48,6 @@ export const useGameStore = defineStore({
 			this.enemy_name = "";
 			this.enemy_picture = "";
 			this.mode = "";
-			this.was_invited = false;
 			this.play_again = false;
 		}
 	},
@@ -62,5 +60,4 @@ interface State {
 	enemy_name: string;
 	enemy_picture: string;
 	mode: string;
-	was_invited: boolean;
 }
