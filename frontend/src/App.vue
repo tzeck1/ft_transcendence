@@ -82,16 +82,9 @@ import { storeToRefs } from 'pinia';
 			console.log("page is hidden from APP.vue!, ROUTE.NAME is:", route.name);
 			if (gameStore.socket != null && route.name != 'Game') {
 				console.log("visibility check in App.vue sends to profile, disconnects socket and sets ingame status to false");
-				// if (isLooking.value == true){ // in queue, so get out of there and update the isLooking flag
-				// 	socket.emit("cancelQueue", userStore.intra);
-				// 	isLooking.value = false;
-				// } else {//user is ingame, not only in queue
-				// router.push('/profile');
-				//	//sending other user to profile in the onDisconnect handling function
-				// }
 				gameStore.disconnectSocket();//maybe need to test around with order of router.push and disconnect
 				userStore.socket?.emit("setIngameStatus", false);
-				window.location.href = '/profile';
+				router.push('/profile');
 			}
 		} else {//document.hidden != true
 			console.log("page is visible from app.vue");
@@ -120,8 +113,7 @@ import { storeToRefs } from 'pinia';
 				lastMessages.value = chat_history.reverse();
 			});
 			userStore.socket.on("sendToProfile", (intra: string) => {
-				console.log("sendtoprofile usersocket uses href to profile");
-				window.location.href = '/profile/' + intra;
+				router.push('/profile/' + intra);
 			});
 			userStore.socket.on("sendToInvite", (mode: string, opponent_intra: string) => {
 				console.log("send to Invite");
@@ -180,20 +172,9 @@ import { storeToRefs } from 'pinia';
 				});
 				if (gameStore.socket?.hasListeners("sendToProfile") == false) {
 					gameStore.socket!.on("sendToProfile", () => {
-						console.log("calling hrefprofile on gamesocket in app.vue");
-						window.location.href = "/profile";
-						// router.push('/profile/');
+						router.push('/profile/');
 					});
 				}
-				gameStore.socket!.on("hrefProfile", () => {//sends to page and reloads
-					console.log("calling hrefprofile on gamesocket");
-					// gameStore.socket?.disconnect();
-					window.location.href = "/profile";
-				});
-				// gameStore.socket!.on("setInvited", (status) => {
-				// 	console.log("gamestore socket sets invited to", status);
-				// 	gameStore.was_invited = status;
-				// });
 				gameStore.was_invited = true;
 				console.log("emitting inviteplay with socket", gameStore.socket);
 				gameStore.socket!.emit("invitePlay", {intra: intra, other_intra: other_intra});

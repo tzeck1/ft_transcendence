@@ -70,8 +70,6 @@
 	import { io, Socket } from 'socket.io-client';
 	import { storeToRefs } from 'pinia';
 	import { useGameStore } from '../../stores/GameStore';
-	import Game from '../../views/Game.vue'
-	import endGame from '../Game/EndGame.vue'
 	import router from '@/router';
 
 	const userStore = useUserStore();
@@ -105,8 +103,7 @@
 
 					gameStore.disconnectSocket();//maybe need to test around with order of router.push and disconnect
 					userStore.socket?.emit("setIngameStatus", false);
-					window.location.href = '/profile';
-					// router.push('/profile');
+					router.push('/profile');
 					//sending other user to profile in the onDisconnect handling function
 				}
 			}
@@ -197,8 +194,7 @@
 			});
 			if (gameStore.socket?.hasListeners("sendToProfile") == false) {
 				gameStore.socket!.on("sendToProfile", () => {
-					console.log("calling hrefprofile on gamesocket in startgame.vue sendtoprofile");
-					window.location.href = "/profile";
+					router.push('/profile');
 				});
 			}
 			if (invited == true)

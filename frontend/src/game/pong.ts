@@ -166,23 +166,12 @@ export default class Pong extends Phaser.Scene {
 			this.right_score_txt.text = String(this.right_score);
 			if (this.left_score == this.winning_score || this.right_score == this.winning_score) {
 				this.socket.emit("endGame", { left_e: this.left_paddle_hits_e, left_m: this.left_paddle_hits_m, right_e: this.right_paddle_hits_e, right_m: this.right_paddle_hits_m, room_id: this.room_id });
-				// console.log("winning score!");
-				// // Someone won regularly:
-				// // save in database, destroy phaser thing, destroy room and disconnect socket
-				// this.gameStore.socket!.emit("setGameDataAndRoute", { intra: this.gameStore.intra, player: this.userStore.username, enemy: this.gameStore.enemy_name, player_score: this.left_score, enemy_score: this.right_score, ranked: (this.gameStore.mode == ""), left_paddle_hits_e: this.left_paddle_hits_e, left_paddle_hits_m: this.left_paddle_hits_m, room_id: this.room_id, right_paddle_hits_e: this.right_paddle_hits_e, right_paddle_hits_m: this.right_paddle_hits_m });
-				// // if (this.gameStore.mode == "")
-				// // axios.post(`http://${location.hostname}:3000/game/setGameData`, { intra: this.gameStore.intra, player: this.userStore.username, enemy: this.gameStore.enemy_name, player_score: this.left_score, enemy_score: this.right_score, ranked: (this.gameStore.mode == ""), paddle_hits_e: this.paddle_hits_e, paddle_hits_m: this.paddle_hits_m });
-				// this.game.destroy(true); //don't know if destroy is the correct way to end instance of pong
-				// // this.gameStore.socket!.emit("destroyRoom", this.room_id);
-				// // this.gameStore.socket!.disconnect();
-				// // if (this.gameStore.mode != "")
-				// // 	this.router.push('/profile');
 			}
 		});
 		this.socket.on("destroyGame", (paddle_hits_e, paddle_hits_m) => {
 			console.log("winning score!");
 			this.gameStore.socket!.emit("setGameDataAndRoute", { intra: this.gameStore.intra, player: this.userStore.username, enemy: this.gameStore.enemy_name, player_score: this.left_score, enemy_score: this.right_score, ranked: (this.gameStore.mode == ""), paddle_hits_e: paddle_hits_e, paddle_hits_m: paddle_hits_m, room_id: this.room_id });
-			this.game.destroy(true); //don't know if destroy is the correct way to end instance of pong
+			this.game.destroy(true);
 		});
 
 		this.socket.on("spawnBall", (y_position, x_velocity, y_velocity) => {

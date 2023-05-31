@@ -89,8 +89,7 @@
 			});
 			if (gameStore.socket?.hasListeners("sendToProfile") == false) {
 				gameStore.socket!.on("sendToProfile", () => {
-					console.log("calling hrefprofile on gamesocket in startgame.vue sendtoprofile");
-					window.location.href = "/profile";
+					router.push('/profile');
 				});
 			}
 			if (gameStore.mode == "")
