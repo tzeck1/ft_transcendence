@@ -60,7 +60,6 @@
 			result.value = "Winner!";
 		else
 			result.value = "Loser!";
-		userStore.is_endgame = true;
 	});
 
 	function playAgain() {
@@ -112,7 +111,6 @@
 	function quit() {
 		gameStore.disconnectSocket();
 		userStore.socket?.emit("setIngameStatus", false);
-		userStore.is_endgame = false;
 		router.push("/profile");
 	};
 

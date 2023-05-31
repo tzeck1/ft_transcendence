@@ -193,7 +193,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		let searching_player = new Player(client, data[0], this.users, data[1], data[2]);
 		await searching_player.updateUserData();
 		for (let [intraname, lobby_player] of this.lobby) {
-			if (searching_player.getMode() == lobby_player.getMode() && (data[3] == false || lobby_player.getOpponent() == searching_player.getUsername())) {
+			if (searching_player.getMode() == lobby_player.getMode() && ((data[3] == false && lobby_player.getOpponent() == "") || lobby_player.getOpponent() == searching_player.getUsername())) {
 				this.createAndJoinRoom(searching_player, lobby_player);
 				return;
 			}

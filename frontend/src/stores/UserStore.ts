@@ -10,7 +10,6 @@ export const useUserStore = defineStore({
 		profile_picture: '',
 		tfa_enabled: false,
 		socket: null as (Socket | null),
-		is_endgame: false,
 	}),
 	actions: {
 		setIntra(newIntra: string) {
@@ -37,7 +36,6 @@ export const useUserStore = defineStore({
 			this.tfa_enabled = false;
 			this.socket?.disconnect();
 			this.socket = null;
-			this.is_endgame = false;
 		}
 	},
 });
@@ -49,5 +47,4 @@ interface State {
 	profile_picture: string;
 	tfa_enabled: boolean;
 	socket: Socket;
-	is_endgame: boolean;
 }
