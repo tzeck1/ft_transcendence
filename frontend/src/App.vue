@@ -48,7 +48,7 @@
 				</div>
 				<div class="chat-input-button-container">
 					<input type="text" v-model="message" class="chat-input" @focus="inputFocus=true" @blur="inputFocus=false" @keyup.enter="sendMessage()" :placeholder="active_channel" :maxlength="250">
-					<button class="chat-send" @click="sendMessage()">Send</button>
+					<button class="chat-send" @click="sendMessage()">&#9084;</button>
 				</div>
 			</div>
 		</div>
@@ -227,7 +227,7 @@
 	}
 
 	.chat-send {
-		@apply p-2 rounded cursor-pointer;
+		@apply px-2 py-1 rounded cursor-pointer text-4xl;
 	}
 
 	.chat-history {

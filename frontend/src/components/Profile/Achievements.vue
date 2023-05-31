@@ -132,7 +132,7 @@
 }
 
 .achievements-list {
-	@apply w-full flex flex-col items-center h-full;
+	@apply w-full flex flex-col items-center h-full gap-2;
 }
 
 .achievements-item {
