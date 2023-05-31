@@ -42,10 +42,25 @@
 				</div>
 			</div>
 		</div>
-		<button class="set-button" @click="search_game(true, true)" v-if="invited">
-			<span v-show="!isLooking">Ready</span>
-			<span v-show="isLooking">Cancel</span>
-		</button>
+		<div class="private_game_container" v-if="invited">
+			<div class="grid rdy-page">
+				<div class="player">
+					<img id="player-picture" class="profile-picture rdy-pic" :src="profile_picture"/>
+					<h1 class="username-text">{{ username }}</h1>
+				</div>
+				<div class="vs-text">
+					<span>vs.</span>
+				</div>
+				<div class="enemy">
+					<img id="enemy-picture" class="profile-picture rdy-pic" :src="enemy_picture"/>
+					<h1 class="username-text">{{ enemy_name }}</h1>
+				</div>
+			</div>
+			<button class="rdy-button" @click="search_game(true, true)" v-if="invited">
+				<span v-show="!isLooking">Ready</span>
+				<span v-show="isLooking">Cancel</span>
+			</button>
+		</div>
 	</div>
 </template>
 
@@ -342,7 +357,7 @@
 	}
 
 	.profile-picture {
-		@apply w-40 h-40 rounded-full object-cover;
+		@apply lg:w-40 lg:h-40 md:w-32 md:h-32 sm:w-20 sm:h-20 w-16 h-16 rounded-full object-cover;
 	}
 
 	.username-text {
@@ -352,4 +367,21 @@
 	.countdown {
 		@apply text-9xl animate-ping;
 	}
+
+	.private_game_container {
+		@apply flex flex-col items-center justify-center;
+	}
+
+	.rdy-page {
+		@apply mt-32;
+	}
+
+	.vs-text {
+		@apply text-4xl font-extrabold -mx-10;
+	}
+
+	.rdy-button{
+		@apply mt-32 py-10 px-20 text-5xl;
+	}
+
 </style>
