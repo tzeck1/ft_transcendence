@@ -45,6 +45,11 @@ export class Users {
 		return usersEntry.username;
 	}
 
+	async getPicByUsername(username: string): Promise<string> {
+		const usersEntry = await prisma.users.findUnique( {where: {username: username}} );
+		return usersEntry.profile_picture;
+	}
+
 	async getIntraByUsername(username: string): Promise<string> {
 		const usersEntry = await prisma.users.findUnique( {where: {username: username}} );
 		if (usersEntry == undefined)
