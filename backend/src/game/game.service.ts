@@ -185,6 +185,8 @@ export class Game {
 
 	/*	========== SETTER ==========	*/
 	async setGameData(intra: string, player: string, enemy: string, player_score: number, enemy_score: number, ranked: boolean, paddle_hits_e: number, paddle_hits_m: number) {
+		if (ranked == false)
+			return;
 		const newUsersEntry = await prisma.games.create( {
 			data: {
 				intra:				intra,
@@ -198,7 +200,7 @@ export class Game {
 				paddle_hits_m:		paddle_hits_m,
 			},
 		});
-		if (ranked == true && player_score > enemy_score) {
+		if (player_score > enemy_score) {
 			console.log("user won!");
 			await prisma.users.update({
 				where: {
@@ -211,7 +213,7 @@ export class Game {
 				}
 			})
 		}
-		else if (ranked == true && player_score < enemy_score) {
+		else if (player_score < enemy_score) {
 			console.log("user lost!");
 			const user = await prisma.users.findUnique({
 				where: {
