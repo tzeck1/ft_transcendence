@@ -135,51 +135,8 @@ import { storeToRefs } from 'pinia';
 				console.log("oldVal is defined and newVal too");
 				gameStore.socket?.emit("cancelQueue", userStore.intra);
 			}
-			inviteListeners();
 		}
 	});
-
-	function inviteListeners() {
-		if (userStore.socket?.hasListeners("gameInvite") == false) {
-			// console.log("setup listener for gameInvite");
-			userStore.socket!.on("gameInvite", (intra: string, other_intra: string, mode: string) => {
-				console.log("executing gameInvite");
-				console.log("mode is", mode);
-				gameStore.setMode(mode);
-				console.log("and inside gamestore it's", gameStore.mode);
-				gameStore.setSocket(io(`${location.hostname}:3000/game_socket`, {autoConnect: false}));
-				if (gameStore.socket?.hasListeners("privatePlayReady") == false) {
-					console.log("setup listener for privatePlayReady");
-					gameStore.socket!.on("privatePlayReady", (username: string, pic: string, room_id: string) => {
-						console.log("executing privatePlayReady!");
-						gameStore.setIntra(userStore.intra);
-						gameStore.setEnemyName(username);
-						gameStore.setEnemyPicture(pic);
-						gameStore.setRoomId(room_id);
-						// showCount.value = true;
-						console.log("countdown!!");
-						// countdown();
-						// emit('start-match');
-						router.push('/invites');
-					});
-				}
-				gameStore.socket!.on("disconnect", () => {
-					console.log('game socket Disconnected');
-					userStore.socket!.emit("setIngameStatus", false);
-				});
-				gameStore.socket!.on('connect', function() {
-					console.log('game socket Connected');
-				});
-				if (gameStore.socket?.hasListeners("sendToProfile") == false) {
-					gameStore.socket!.on("sendToProfile", () => {
-						router.push('/profile/');
-					});
-				}
-				console.log("emitting inviteplay with socket", gameStore.socket);
-				gameStore.socket!.emit("invitePlay", {intra: intra, other_intra: other_intra});
-			});
-		}
-	}
 
 	function loadIntro() {
 		const cookies = document.cookie.split(";"); // for deleteing cookies

@@ -109,43 +109,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		client.disconnect();
 	}
 
-	@SubscribeMessage("invitePlay")
-	handleInvitePlay(client: Socket, ...args: any[]) {
-		console.log("event 'invitePlay' was triggered. I am", client.id);
-		this.reapInactiveSocketsInvites();
-		let intra = args[0].intra;
-		let other_intra = args[0].other_intra;
-		let player = new Player(client, intra, this.users);
-		let other_player = this.searchInviteArray(intra, other_intra);
-		if (other_player != undefined) {// This is executed when the second player gets into handleInvitePlay
-			console.log("invitePlay with second user is called");
-			player.updateUserData();
-			other_player.updateUserData();
-			let x = 0;
-			for (let tuple of this.invite_array) {
-				if (((tuple[0] == intra && tuple[1] == other_intra) || (tuple[1] == intra && tuple[0] == other_intra)) && tuple[2] == other_player) {
-					this.invite_array.splice(x, 1);
-					console.log("found and deleted our invite_array entry, YAY");
-					break;
-				}
-				x++;
-			}
-			this.room_counter += 1;
-			let room_id = "game" + this.room_counter.toString();
-			let room = new Room(room_id, player, other_player);
-			this.rooms.set(room_id, room);
-			player.getSocket().join(room_id);
-			other_player.getSocket().join(room_id);
-			console.log("emitting privatePlayReady!");
-			player.getSocket().emit("privatePlayReady", other_player.getUsername(), other_player.getPicture(), room_id);
-			other_player.getSocket().emit("privatePlayReady", player.getUsername(), player.getPicture(), room_id);
-		} else { // This is executed when the first player gets into handleInvitePlay
-			console.log("invitePlay with first user is called, pushing intra:", args[0].intra, ", otherintra:", args[0].other_intra, "player.getintra:", player.getSocket().id);
-			console.log("player socket is connected:", player.getSocket().connected);
-			this.invite_array.push([args[0].intra, args[0].other_intra, player]);
-		}
-	}
-
 	private searchInviteArray(intra: string, other_intra: string): Player {
 		console.log(this.invite_array);
 		for (let tuple of this.invite_array) {

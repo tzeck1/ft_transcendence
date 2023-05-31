@@ -99,13 +99,11 @@
 					socket.emit("cancelQueue", userStore.intra);
 					isLooking.value = false;
 					userStore.socket?.emit("setIngameStatus", false);
-					gameStore.disconnectSocket();//maybe need to test around with order of router.push and disconnect
+					gameStore.disconnectSocket();
 				} else {//user is ingame, not only in queue
-
-					gameStore.disconnectSocket();//maybe need to test around with order of router.push and disconnect
+					gameStore.disconnectSocket();
 					userStore.socket?.emit("setIngameStatus", false);
 					router.push('/profile');
-					//sending other user to profile in the onDisconnect handling function
 				}
 			}
 		} else {//document.hidden != true
