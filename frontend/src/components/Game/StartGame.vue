@@ -15,7 +15,7 @@
 			<div :class="['fun-block', 'block-style', funBlockClass]" @click="selectFunBlock">
 				<img src="../../assets/pong.gif" class="block-image">
 				<span class="block-title">Fun Mode</span>
-				<span class="block-help" v-show="funBlockSelected">Queue against a random opponent for a carefree challenge. Play classic pong or spice things up with Speed Pong or Dodge Ball. Choice is yours</span>
+				<span class="block-help" v-show="funBlockSelected">Queue against a random opponent for a carefree challenge. Spice things up with Speed Pong or Dodge Ball. Choice is yours</span>
 			</div>
 			<div :class="['block-style', funSetClass]">
 				<button class="set-button" @click="search_game(true, false)" v-if="funBlockSelected">
