@@ -862,7 +862,7 @@ export class ChatService {
 		else if (other_user.getIngameStatus() == true)
 			return [client.id, "Error: ", other_user.getUsername() + " is currently ingame."];
 
-		other_user.getSocket().emit("messageToClient", "Floppy: ", user.getUsername() + " invited you to a game", other_user.getIntra());
+		other_user.getSocket().emit("messageToClient", "Floppy: ", user.getUsername() + " invited you to a game of " + mode + " pong", other_user.getIntra());
 		this.invites.set(user.getIntra() + other_user.getIntra(), mode);
 		let recipient = client.id;
 		let sender = "Floppy: ";
