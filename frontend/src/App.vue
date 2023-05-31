@@ -5,13 +5,13 @@
 				<span class="logo">PONG</span>
 				<div class="nav-buttons">
 					<router-link to="/profile" v-slot="{ navigate, isActive }">
-						<button id="profileButton" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro || is_endgame">Profile</button>
+						<button id="profileButton" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro">Profile</button>
 					</router-link>
 					<router-link to="/game" v-slot="{ navigate, isActive }">
-						<button class="game-button" id="game-button" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro || is_endgame">Game</button>
+						<button class="game-button" id="game-button" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro">Game</button>
 					</router-link>
 					<router-link to="/leaderboard" v-slot="{ navigate, isActive }">
-						<button id="leaderboardButton" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro || is_endgame">Leaderboard</button>
+						<button id="leaderboardButton" @click="navigate" :class="{'active-button': isActive}" :disabled="isIntro">Leaderboard</button>
 					</router-link>
 				</div>
 				<div class="logout-button" @click="loadIntro" :disabled="isIntro">
@@ -23,13 +23,13 @@
 					</button>
 					<div class="dropdown-menu" v-if="dropdownVisible">
 						<router-link to="/profile" v-slot="{ navigate, isActive }">
-							<button class="dropdown-buttons" @click="hideDropdown(); navigate();" :class="{'active-button': isActive}" :disabled="isIntro || is_endgame">Profile</button>
+							<button class="dropdown-buttons" @click="hideDropdown(); navigate();" :class="{'active-button': isActive}" :disabled="isIntro">Profile</button>
 						</router-link>
 						<router-link to="/game" v-slot="{ navigate, isActive }">
-							<button class="dropdown-buttons" @click="hideDropdown(); navigate();" :class="{'active-button': isActive}" :disabled="isIntro || is_endgame">Game</button>
+							<button class="dropdown-buttons" @click="hideDropdown(); navigate();" :class="{'active-button': isActive}" :disabled="isIntro">Game</button>
 						</router-link>
 						<router-link to="/leaderboard" v-slot="{ navigate, isActive }">
-							<button class="dropdown-buttons" @click="hideDropdown(); navigate();" :class="{'active-button': isActive}" :disabled="isIntro || is_endgame">Leaderboard</button>
+							<button class="dropdown-buttons" @click="hideDropdown(); navigate();" :class="{'active-button': isActive}" :disabled="isIntro">Leaderboard</button>
 						</router-link>
 						<button class="dropdown-buttons" @click="hideDropdown(); loadIntro();" :disabled="isIntro">Logout</button>
 					</div>
@@ -40,7 +40,7 @@
 			<router-link to="/"></router-link>
 			<router-view/>
 		</main>
-		<div class="chat-box" v-if="!isIntro && !is_endgame" :class="{'blur': (inputFocus || hovering) === true}" @mouseover="hovering=true" @mouseleave="hovering=false">
+		<div class="chat-box" v-if="!isIntro" :class="{'blur': (inputFocus || hovering) === true}" @mouseover="hovering=true" @mouseleave="hovering=false">
 			<div class="chat-input-container">
 				<div class="chat-history" v-show="inputFocus || hovering" ref="chatHistory">
 					<div class="flex-grow"></div>
@@ -72,7 +72,6 @@ import { storeToRefs } from 'pinia';
 	const active_channel = ref('');
 	const lastMessages = ref<[string, string][]>([]);
 	const inputFocus = ref(false);
-	const { is_endgame } = storeToRefs(userStore);
 	const isIntro = computed(() => (route.path === '/'));
 	var blocked_users: string[];
 	const hovering = ref(false);
