@@ -5,11 +5,11 @@
 
 | Name      | Github Profile | Intra Profile
 | ----------- | ----------- | ----------- |
-| Ben | [Profile Link](https://github.com/benzlinger) | [Intra Link](https://profile.intra.42.fr/users/btenzlin) |
-| Tom | [Profile Link](https://github.com/tzeck1) | [Intra Link](https://profile.intra.42.fr/users/tzeck) |
-| Roman | [Profile Link](https://github.com/cptbboy) | [Intra Link](https://profile.intra.42.fr/users/rsiebert) |
-| Max | [Profile Link](https://github.com/mmeising) | [Intra Link](https://profile.intra.42.fr/users/mmeising) |
-| Elias | [Profile Link](https://github.com/eschirni) | [Intra Link](https://profile.intra.42.fr/users/eschirni) |
+| Ben | [Github Link](https://github.com/benzlinger) | [Intra Link](https://profile.intra.42.fr/users/btenzlin) |
+| Tom | [Github Link](https://github.com/tzeck1) | [Intra Link](https://profile.intra.42.fr/users/tzeck) |
+| Roman | [Github Link](https://github.com/cptbboy) | [Intra Link](https://profile.intra.42.fr/users/rsiebert) |
+| Max | [Github Link](https://github.com/mmeising) | [Intra Link](https://profile.intra.42.fr/users/mmeising) |
+| Elias | [Github Link](https://github.com/eschirni) | [Intra Link](https://profile.intra.42.fr/users/eschirni) |
 
 ### Tech Stack
 
