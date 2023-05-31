@@ -109,6 +109,11 @@
 		}
 		else if (response.data == 2)
 		{
+			error_text.value = "Username contains more than 8 chars!";
+			showUsernameError.value = true;
+		}
+		else if (response.data == 3)
+		{
 			error_text.value = "Username already in use!";
 			showUsernameError.value = true;
 		}
