@@ -96,6 +96,15 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		console.log(`Game Client Connected: ${client.id}`);
 	}
 
+	@SubscribeMessage("endGame")
+	handleEndGame(client: Socket, ...args: any[]) {
+		let room = this.rooms.get(args[0].room_id);
+		if (room.getLeftPlayer().getSocket() != client)
+			return;
+		room.getLeftPlayer().getSocket().emit("destroyGame", args[0].left_e, args[0].left_m);
+		room.getRightPlayer().getSocket().emit("destroyGame", args[0].right_e, args[0].right_m);
+	}
+
 	@SubscribeMessage("setGameDataAndRoute")
 	handleSetGameDataAndRoute(client: Socket, ...args: any[]) {
 		this.gameService.setGameData(args[0].intra, args[0].player, args[0].enemy, args[0].player_score, args[0].enemy_score,
