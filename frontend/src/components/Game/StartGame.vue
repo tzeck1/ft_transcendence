@@ -71,6 +71,7 @@
 	import { storeToRefs } from 'pinia';
 	import { useGameStore } from '../../stores/GameStore';
 	import router from '@/router';
+	import axios from 'axios';
 
 	const userStore = useUserStore();
 	const gameStore = useGameStore();
@@ -112,21 +113,24 @@
 		}
 	});
 
-	onMounted(() => {
+	async function setInvited()
+	{
 		if (router.currentRoute.value.query.invited == "true")
 		{
 			invited.value = true;
+			gameStore.setEnemyName(router.currentRoute.value.query.opponent);
+			let pic = await axios.get(`http://${location.hostname}:3000/users/getPicByUsername?username=${router.currentRoute.value.query.opponent}`);
+			gameStore.setEnemyPicture(pic.data);
 			gameStore.setMode(router.currentRoute.value.query.mode);
 		}
-		console.log("onmounted of startGame.vue");
+	}
+
+	onMounted(async () => {
+		await setInvited();
 	});
 
-	watch( () => router.currentRoute.value.query.invited, (newVal, oldVal) => {
-		if (newVal == "true")
-		{
-			invited.value = true;
-			gameStore.setMode(router.currentRoute.value.query.mode);
-		}
+	watch( () => router.currentRoute.value.query.invited, async (newVal, oldVal) => {
+		await setInvited();
 	});
 
 	onBeforeUnmount(() => {
@@ -183,8 +187,6 @@
 				console.log("foundOpponent which also calls countdown was called");
 				isLooking.value = false;
 				gameStore.setIntra(userStore.intra);
-				gameStore.setEnemyName(username);
-				gameStore.setEnemyPicture(pic);
 				gameStore.setRoomId(room_id);
 				showCount.value = true;
 				countdown();
