@@ -8,10 +8,10 @@ services:
       - db
     ports:
       - '3000:3000'
-    volumes:
-      - './backend:/app'
+    # volumes:
+    #   - './backend:/app'
     #   - '/app/node_modules'
-    command: npm run start:dev
+    # command: npm run start:dev
     networks:
       - backend-net
       - db-net

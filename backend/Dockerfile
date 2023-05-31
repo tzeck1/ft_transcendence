@@ -3,10 +3,14 @@ FROM node:14
 WORKDIR /app
 
 COPY package*.json ./
+COPY prisma ./prisma
+
 RUN npm install
 
-# COPY . .
+COPY . .
+RUN npm run build
+
 
 EXPOSE 3000
 
-CMD ["npm", "run", "start:dev"]
+CMD ["npm", "run", "start:migrate:prod"]
