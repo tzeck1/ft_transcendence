@@ -17,7 +17,7 @@
 			</div>
 		</div>
 		<div class="buttons">
-			<button class="game-button" @click="playAgain" >Play Again</button>
+			<button class="game-button" @click="playAgain" v-if="gameStore.mode != ''" >Play Again</button>
 			<button class="quit-button" @click="quit" >Back To Profile</button>
 		</div>
 	</div>

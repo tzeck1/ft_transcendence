@@ -1,6 +1,6 @@
 <template>
-	<div class="startgame" v-if="!invited">
-		<div class="slideshow" :class="{ blur: showCount }">
+	<div class="startgame">
+		<div class="slideshow" :class="{ blur: showCount }" v-if="!invited">
 			<div :class="['block-style', compSetClass]">
 				<button class="set-button" @click="search_game(false, false)" v-if="compBlockSelected">
 						<span v-show="!isLooking">Queue</span>
@@ -42,11 +42,11 @@
 				</div>
 			</div>
 		</div>
-	</div>
-	<button class="set-button" @click="search_game(true, true)" v-if="invited">
+		<button class="set-button" @click="search_game(true, true)" v-if="invited">
 			<span v-show="!isLooking">Ready</span>
 			<span v-show="isLooking">Cancel</span>
-	</button>
+		</button>
+	</div>
 </template>
 
 <script setup lang="ts">
