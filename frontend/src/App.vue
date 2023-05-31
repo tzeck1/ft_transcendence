@@ -124,6 +124,10 @@ import { storeToRefs } from 'pinia';
 				console.log("sendtoprofile usersocket uses href to profile");
 				window.location.href = '/profile/' + intra;
 			});
+			userStore.socket.on("sendToInvite", (mode: string) => {
+				console.log("send to Invite");
+				router.push(`game?invited=true&mode=${mode}`);
+			});
 			userStore.socket.on("reloadPage", () => {
 				window.location.reload();
 			});

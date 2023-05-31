@@ -8,6 +8,7 @@
 	import StartGame from '../components/Game/StartGame.vue'
 	import Pong from '../components/Game/Pong.vue'
 	import EndGame from '../components/Game/EndGame.vue'
+	import Invites from '../components/Game/Invites.vue';
 	import { onBeforeMount, onMounted, onBeforeUnmount, ref, watch } from 'vue';
 	import { useUserStore } from '../stores/UserStore';
 	import { useGameStore } from '../stores/GameStore';

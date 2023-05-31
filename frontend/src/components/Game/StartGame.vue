@@ -1,8 +1,8 @@
 <template>
-	<div class="startgame">
+	<div class="startgame" v-if="!invited">
 		<div class="slideshow" :class="{ blur: showCount }">
 			<div :class="['block-style', compSetClass]">
-				<button class="set-button" @click="search_game(false)" v-if="compBlockSelected">
+				<button class="set-button" @click="search_game(false, false)" v-if="compBlockSelected">
 						<span v-show="!isLooking">Queue</span>
 						<span v-show="isLooking">Cancel</span>
 				</button>
@@ -17,7 +17,7 @@
 				<span class="block-title">Fun Mode</span>
 			</div>
 			<div :class="['block-style', funSetClass]">
-				<button class="set-button" @click="search_game(true)" v-if="funBlockSelected">
+				<button class="set-button" @click="search_game(true, false)" v-if="funBlockSelected">
 						<span v-show="!isLooking">Queue</span>
 						<span v-show="isLooking">Cancel</span>
 				</button>
@@ -43,6 +43,10 @@
 			</div>
 		</div>
 	</div>
+	<button class="set-button" @click="search_game(true, true)" v-if="invited">
+			<span v-show="!isLooking">Ready</span>
+			<span v-show="isLooking">Cancel</span>
+	</button>
 </template>
 
 <script setup lang="ts">
@@ -64,6 +68,7 @@
 	const isLooking = ref(false);
 	const showCount = ref(false);
 	const timeLeft = ref(4);
+	const invited = ref(false);
 	var socket;
 	const { username } = storeToRefs(userStore);
 	const { profile_picture } = storeToRefs(userStore);
@@ -95,22 +100,23 @@
 		}
 	});
 
-	// // redundancy (watch and onMounted) because watch is needed when page is reloaded on game page (new socket created),
-	// // and onMounted is needed when just switching to game page
-	// watch( () => userStore.socket, (newVal, oldVal) => {
-	// 	// console.log("triggered watch, userStore.socket changed to", newVal, "from", oldVal);
-	// 	// if (newVal != undefined)
-	// 	// 	// inviteListeners();
-	// 	// else
-	// 	// 	console.log("newVal was undefined in the watch function");//does this ever happen?
-	// });
-
-	// redundancy (watch and onMounted) because watch is needed when page is reloaded on game page (new socket created),
-	// and onMounted is needed when just switching to game page
 	onMounted(() => {
+		if (router.currentRoute.value.query.invited == "true")
+		{
+			invited.value = true;
+			gameStore.setMode(router.currentRoute.value.query.mode);
+		}
 		console.log("onmounted of startGame.vue");
 		// inviteListeners();
 	});
+
+	// watch( () => router.currentRoute.value.query.invited, () => {
+	// 	if (router.currentRoute.value.query.invited == "true")
+	// 	{
+	// 		invited.value = true;
+	// 		gameStore.setMode(router.currentRoute.value.query.mode);
+	// 	}
+	// });
 
 	// function inviteListeners() {
 	// 	if (userStore.socket?.hasListeners("gameInvite") == false) {
@@ -176,16 +182,18 @@
 		}
 	}
 
-	function search_game(fun: boolean)
+	function search_game(fun: boolean, invited: boolean)
 	{
-		gameStore.setMode("");
-		if (fun == true)
+		if (invited == false)
+			gameStore.setMode("");
+		if (fun == true && invited == false)
 		{
 			let tmp = document.getElementById("mode");
 			if (tmp.value == "") //no mode selcted
 				return ;
 			gameStore.setMode(tmp.value);
 		}
+		console.log("Game mode is: ", gameStore.mode);
 		//establish connection
 		if (!isLooking.value) {
 			socket = io(`${location.hostname}:3000/game_socket`);

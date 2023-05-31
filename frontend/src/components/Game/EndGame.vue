@@ -64,8 +64,7 @@
 		gameStore.disconnectSocket();
 		userStore.socket?.emit("setIngameStatus", false);
 		userStore.is_endgame = false;
-		window.location.href = "/profile";
-		// emit("show-start");
+		emit("show-start");
 	};
 
 </script>
