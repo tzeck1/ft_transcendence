@@ -4,6 +4,7 @@ import { useUserStore } from '@/stores/UserStore';
 import { Socket } from 'socket.io-client';
 import pongComp from '../components/Game/Pong.vue';
 import axios from 'axios';
+import { useRouter, useRoute } from 'vue-router';
 
 export default class Pong extends Phaser.Scene {
 	left_player!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
@@ -28,10 +29,10 @@ export default class Pong extends Phaser.Scene {
 	old_time = 0;
 	width = 1920;
 	height = 1080;
-	left_score = 0;
-	right_score = 0;
-	paddle_hits_m = 0;
-	paddle_hits_e = 0;
+	left_paddle_hits_m = 0;
+	left_paddle_hits_e = 0;
+	right_paddle_hits_m = 0;
+	right_paddle_hits_e = 0;
 	winning_score = 3;
 	next_ball_spawn_left = false;
 	next_ball_spawn_right = false;
@@ -59,11 +60,13 @@ export default class Pong extends Phaser.Scene {
 	player_trail_scale = 1;
 	players_ready = false;
 	frame_count = 0;
+	ranked = true;
 	inputPayload = {
 		room: this.room_id,
 		up: false,
 		down: false,
 	};
+	router;
 
 	constructor() {
 		super("pong");
@@ -82,6 +85,8 @@ export default class Pong extends Phaser.Scene {
 /********************************** CREATE *************************************/
 
 	create() {
+		this.gameStore.setScores(0, 0);
+		this.router = useRouter();
 		if (this.gameStore.mode == "speed")
 			this.paddle_velocity = 32;
 		if (this.input.keyboard == undefined)
@@ -121,24 +126,22 @@ export default class Pong extends Phaser.Scene {
 		this.ball.alpha = 0;
 		this.ball.body.setMaxSpeed(2000);
 		this.ball_trail = this.createBallTrail(this.ball, "ball");
-		this.left_score_txt = this.add.text(this.width / 3, this.height / 4, String(this.left_score), { fontFamily: "ibm-3270", fontSize: "128px",
+		this.left_score_txt = this.add.text(this.width / 3, this.height / 4, String(this.gameStore.left_score), { fontFamily: "ibm-3270", fontSize: "128px",
 			shadow: {
 				color: '#999',
 				blur: 12,
 				fill: true,
 		} }).setScale(this.left_score_scale);
 
-		this.right_score_txt = this.add.text(2 * this.width / 3 - 64, this.height / 4, String(this.right_score), { fontFamily: "ibm-3270", fontSize: "128px",
+		this.right_score_txt = this.add.text(2 * this.width / 3 - 64, this.height / 4, String(this.gameStore.right_score), { fontFamily: "ibm-3270", fontSize: "128px",
 			shadow: {
 				color: '#999',
 				blur: 12,
 				fill: true,
 		} }).setScale(this.right_score_scale);
 
-		this.left_player.name = "left";
-		this.right_player.name = "right";
-		this.left_collider = this.physics.add.collider(this.left_player, this.ball, () => this.calculateRebound(this.left_player), undefined, this);
-		this.right_collider = this.physics.add.collider(this.right_player, this.ball, () => this.calculateRebound(this.right_player), undefined, this);
+		this.left_collider = this.physics.add.collider(this.left_player, this.ball, () => this.calcLeft(this.left_player), undefined, this);
+		this.right_collider = this.physics.add.collider(this.right_player, this.ball, () => this.calcRight(this.right_player), undefined, this);
 
 		this.socket.on("startTheGame", () => {
 			this.players_ready = true;
@@ -156,22 +159,25 @@ export default class Pong extends Phaser.Scene {
 			this.left_player.y += this.paddle_velocity;
 		});
 		this.socket.on("newScore", (left_score, right_score) => {
-			this.left_score = left_score;
-			this.right_score = right_score;
-			this.left_score_txt.text = String(this.left_score);
-			this.right_score_txt.text = String(this.right_score);
-			if (this.left_score == this.winning_score || this.right_score == this.winning_score) {
-				// save score in db
-				axios.post(`http://${location.hostname}:3000/game/setGameData`, { intra: this.gameStore.intra, player: this.userStore.username, enemy: this.gameStore.enemy_name, player_score: this.left_score, enemy_score: this.right_score, ranked: true, paddle_hits_e: this.paddle_hits_e, paddle_hits_m: this.paddle_hits_m });
-				this.game.destroy(true); //don't know if destroy is the correct way to end instance of pong
-				// TODO end game here
+			this.gameStore.setScores(left_score, right_score);
+			this.left_score_txt.text = String(this.gameStore.left_score);
+			this.right_score_txt.text = String(this.gameStore.right_score);
+			if (this.gameStore.left_score == this.winning_score || this.gameStore.right_score == this.winning_score) {
+				this.socket.emit("endGame", { left_e: this.left_paddle_hits_e, left_m: this.left_paddle_hits_m, right_e: this.right_paddle_hits_e, right_m: this.right_paddle_hits_m, room_id: this.room_id });
 			}
-		})
+		});
+		this.socket.on("destroyGame", (paddle_hits_e, paddle_hits_m) => {
+			console.log("winning score!");
+			this.gameStore.socket!.emit("setGameDataAndRoute", { intra: this.gameStore.intra, player: this.userStore.username, enemy: this.gameStore.enemy_name, player_score: this.gameStore.left_score, enemy_score: this.gameStore.right_score, ranked: (this.gameStore.mode == ""), paddle_hits_e: paddle_hits_e, paddle_hits_m: paddle_hits_m, room_id: this.room_id });
+			this.game.destroy(true);
+		});
+
 		this.socket.on("spawnBall", (y_position, x_velocity, y_velocity) => {
 			if (this.gameStore.mode != "")
 			{
 				x_velocity = 2000;
 				y_velocity *= 4;
+				this.ranked = false;
 			}
 			this.ball.setPosition(this.width / 2, y_position);
 			this.ball.setVelocity(x_velocity, y_velocity);
@@ -203,7 +209,7 @@ export default class Pong extends Phaser.Scene {
 
 		/*  Scoring condition  */
 		if (this.ball.body.onWall() && this.left_player.body.touching.none && this.right_player.body.touching.none && this.gameStore.mode != "dodge") {
-			this.player_scored("");
+			this.player_scored();
 			this.old_time = time;
 		}
 
@@ -222,6 +228,34 @@ export default class Pong extends Phaser.Scene {
 
 
 /********************************* METHODS *************************************/
+
+	calcLeft(player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody){
+		if (this.gameStore.mode == "dodge")
+		{
+			this.socket.emit('scoreRequest', {left_player_scored: false, room: this.room_id});
+			this.ball_ingame = false;
+			this.ball.setVelocity(0);
+			this.ball.setPosition(this.width / 2, this.height / 2);
+			this.ball_trail.stop();
+			this.ball.alpha = 0;
+		}
+		else
+			this.calculateRebound(player);
+	}
+
+	calcRight(player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody){
+		if (this.gameStore.mode == "dodge")
+		{
+			this.socket.emit('scoreRequest', {left_player_scored: true, room: this.room_id});
+			this.ball_ingame = false;
+			this.ball.setVelocity(0);
+			this.ball.setPosition(this.width / 2, this.height / 2);
+			this.ball_trail.stop();
+			this.ball.alpha = 0;
+		}
+		else
+			this.calculateRebound(player);
+	}
 
 	calculateRebound(player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody) {
 		if (this.gameStore.mode == "dodge")
@@ -242,15 +276,23 @@ export default class Pong extends Phaser.Scene {
 		if (angle === 0) {
 			if (player === this.left_player)
 			{
-				this.paddle_hits_m++;
+				this.left_paddle_hits_m++;
 				// console.log(player + 's paddle_hits_m: ' + this.paddle_hits_m)
+			}
+			else if (player === this.right_player)
+			{
+				this.right_paddle_hits_m++;
 			}
 		}
 		else {
 			if (player === this.left_player)
 			{
-				this.paddle_hits_e++;
+				this.left_paddle_hits_e++;
 				// console.log(player + 's paddle_hits_e: ' + this.paddle_hits_e)
+			}
+			else if (player === this.right_player)
+			{
+				this.right_paddle_hits_e++;
 			}
 		}
 		if ((player.y > this.ball.y && this.ball.x < this.width / 2) || player.y < this.ball.y && this.ball.x > this.width / 2)
@@ -261,11 +303,11 @@ export default class Pong extends Phaser.Scene {
 		this.ball.body.velocity.scale(this.ball_velocity_scale);
 	}
 
-	player_scored(player_name: string) {
-		if (this.left_score == this.winning_score || this.right_score == this.winning_score)
+	player_scored() {
+		if (this.gameStore.left_score == this.winning_score || this.gameStore.right_score == this.winning_score)
 			return;
 		let left_player_scored = false;
-		if (this.ball.body.blocked.right || player_name == "right")
+		if (this.ball.body.blocked.right)
 			left_player_scored = true;
 		this.socket.emit('scoreRequest', {left_player_scored: left_player_scored, room: this.room_id});
 		/* ending game in 'newScore' listener now */

@@ -15,24 +15,26 @@ export class Player {
 		private readonly intraname: string,
 		private readonly users: Users,
 		private readonly mode: string = "",
+		private readonly opponent: string = "",
 	){}
 
 	private username: string;
 	private picture: string;
-	private score: number;
+	private rank: number;
 
 	async updateUserData() {
 		this.username = await this.users.getUsernameByIntra(this.intraname);
 		this.picture = await this.users.getAvatarByIntra(this.intraname);
-		this.score = await this.users.getScore(this.intraname);
+		this.rank = await this.users.getRank(this.intraname);
 	}
 
 	getSocket(): Socket { return this.socket; }
 	getIntraname(): string { return this.intraname; }
 	getMode(): string { return this.mode; }
+	getOpponent(): string { return this.opponent; }
 	getUsername(): string { if (this.username == undefined) this.updateUserData(); return this.username; }
 	getPicture(): string { if (this.picture == undefined) this.updateUserData(); return this.picture; }
-	getScore(): number { if (this.score == undefined) this.updateUserData(); return this.score; }
+	getRank(): number { this.updateUserData(); return this.rank; }// TODO check if the if condition should be removed here
 }
 
 export class Room {
@@ -102,6 +104,15 @@ export class Room {
 			this.right_player_status = true;
 	}
 
+	// TODO probably gone when instant enemy win
+	invalidatePlayer(player: string) {
+		if (player == "left")
+			this.left_player_status = false;;
+		if (player == "right")
+			this.right_player_status = false;
+		// Can use this here to do stuff when a player left the game
+	}
+
 	validateScore(client: Socket) {
 		if (client == this.left_player.getSocket())
 			this.left_score_status = true;
@@ -111,7 +122,7 @@ export class Room {
 
 	spawn_ball() {
 		let x: number, y: number, p: number;
-		console.log("spawnball was called");
+		// console.log("spawnball was called");
 
 		if (Math.random() < 0.5)
 			p = Math.random() * (this.height / this.ball_spawn_distance);
@@ -136,11 +147,11 @@ export class Room {
 	}
 
 	playerScored(player: Player) {
-		console.log("playerScored was called from", player.getIntraname());
-		if (player == this.left_player)
-			console.log("He was true left player");
-		else
-			console.log("He was NOT the true left player");
+		// console.log("playerScored was called from", player.getIntraname());
+		// if (player == this.left_player)
+			// console.log("He was true left player");
+		// else
+			// console.log("He was NOT the true left player");
 		if (this.left_player == player)
 			this.left_score++;
 		else
@@ -155,8 +166,27 @@ export class Room {
 @Injectable()
 export class Game {
 
+	calculateNewRank(rank1: number, rank2: number, win: number): number {
+		if (rank1 == -1 || rank2 == -1)
+			return 1;
+		let new_rank;
+
+		new_rank = rank1 + 50 * (win - this.calculateExpect(rank1, rank2));
+
+		console.log("calculateNewRank called with rank1:", rank1, "rank2:", rank2, "and win:", win, "new Rank is:", new_rank);
+		return new_rank;
+	}
+
+	calculateExpect(rank1: number, rank2: number) {
+		let expect = (1 / (1 + (10 ** ((rank2 - rank1) / 400))));
+		console.log("calculateExpect called with rank1:", rank1, "rank2:", rank2, "expect is:", expect);
+		return expect;
+	}
+
 	/*	========== SETTER ==========	*/
 	async setGameData(intra: string, player: string, enemy: string, player_score: number, enemy_score: number, ranked: boolean, paddle_hits_e: number, paddle_hits_m: number) {
+		if (ranked == false)
+			return;
 		const newUsersEntry = await prisma.games.create( {
 			data: {
 				intra:				intra,
@@ -171,17 +201,20 @@ export class Game {
 			},
 		});
 		if (player_score > enemy_score) {
+			console.log("user won!");
 			await prisma.users.update({
 				where: {
 					intra_name: intra,
 				},
 				data: {
-					rank: { increment: 1},
+					rank: Math.round(this.calculateNewRank(await this.getUserRankByUsername(player),
+												await this.getUserRankByUsername(enemy), 1)),
 					games_won: { increment: 1 }
 				}
 			})
 		}
-		else {
+		else if (player_score < enemy_score) {
+			console.log("user lost!");
 			const user = await prisma.users.findUnique({
 				where: {
 				  intra_name: intra,
@@ -193,7 +226,8 @@ export class Game {
 						intra_name: intra,
 					},
 					data: {
-						rank: { decrement: 1},
+						rank: Math.round(this.calculateNewRank(await this.getUserRankByUsername(player),
+													await this.getUserRankByUsername(enemy), 0)),
 						games_lost: { increment: 1 }
 					}
 				})
@@ -254,6 +288,17 @@ export class Game {
 		});
 
 		return userGames;
+	}
+
+	async getUserRankByUsername(username: string) {
+		const user = await prisma.users.findUnique({
+			where: {
+				username: username,
+			},
+		});
+		if (user == undefined || user == null)
+			return (-1);
+		return user.rank;
 	}
 
 }

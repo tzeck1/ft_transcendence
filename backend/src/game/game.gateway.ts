@@ -7,8 +7,9 @@ import {
 	SubscribeMessage,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { Games, Room, Player } from './game.service';
+import { Games, Game, Room, Player } from './game.service';
 import { Users } from '../user/user.service';
+import { ChatService } from '../chat/chat.service'
 
 @WebSocketGateway({
 	namespace: '/game_socket',
@@ -17,7 +18,7 @@ import { Users } from '../user/user.service';
 	},
 })
 export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
-	constructor(private readonly games: Games, private readonly users: Users) {}
+	constructor(private readonly games: Games, private readonly users: Users, private readonly gameService: Game) {}
 
 	//		key: room_id
 	private rooms: Map<string, Room> = new Map<string, Room>;
@@ -28,7 +29,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	private invite_array: [string, string, Player][] = new Array<[string, string, Player]>;
 
 	private room_counter = 0;
-	private threshold = 20;
+	private threshold = 300;
 
 	@WebSocketServer() server: Server;
 
@@ -38,39 +39,74 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	}
 
 	handleDisconnect(client: Socket) {
-		console.log(`Game Client Disconnected: ${client.id}`);
+		console.log(`Game Client Disconnected, starting to set DB and kick other: ${client.id}`);
+
+		// i disconnect, so i should get a lose and my enemy gets a win
+		for (let [room_id, room] of this.rooms) {
+			if (room.getLeftPlayer().getSocket().id == client.id) {
+				if (room.getLeftPlayer().getMode() == "") {
+					this.gameService.setGameData(room.getLeftPlayer().getIntraname(),
+																					room.getLeftPlayer().getUsername(),
+																					room.getRightPlayer().getUsername(),
+																					0, 3,
+																					(room.getLeftPlayer().getMode() == ""),
+																					0, 0);
+					this.gameService.setGameData(room.getRightPlayer().getIntraname(),
+																					room.getRightPlayer().getUsername(),
+																					room.getLeftPlayer().getUsername(),
+																					3, 0,
+																					(room.getRightPlayer().getMode() == ""),
+																					0, 0);
+				}
+				let other_player_socket = room.getRightPlayer().getSocket();
+				other_player_socket.emit("sendToProfile");
+				this.rooms.delete(room_id);
+				return;
+			}
+			if (room.getRightPlayer().getSocket().id == client.id) {
+				if (room.getLeftPlayer().getMode() == "") {
+					this.gameService.setGameData(room.getRightPlayer().getIntraname(),
+																					room.getRightPlayer().getUsername(),
+																					room.getLeftPlayer().getUsername(),
+																					0, 3,
+																					(room.getRightPlayer().getMode() == ""),
+																					0, 0);
+					this.gameService.setGameData(room.getLeftPlayer().getIntraname(),
+																					room.getLeftPlayer().getUsername(),
+																					room.getRightPlayer().getUsername(),
+																					3, 0,
+																					(room.getLeftPlayer().getMode() == ""),
+																					0, 0);
+				}
+				let other_player_socket = room.getLeftPlayer().getSocket();
+				other_player_socket.emit("sendToProfile");
+				this.rooms.delete(room_id);
+				return;
+			}
+		}
 	}
 
 	handleConnection(client: Socket, ...args: any[]) {
 		console.log(`Game Client Connected: ${client.id}`);
 	}
 
-	@SubscribeMessage("invitePlay")
-	handleInvitePlay(client: Socket, ...args: any[]) {
-		// console.log("event 'invitePlay' was triggered. I am", client.id);
-		let intra = args[0].intra;
-		let other_intra = args[0].other_intra;
-		let player = new Player(client, intra, this.users);
-		let other_player = this.searchInviteArray(intra, other_intra);
-		if (other_player != undefined) {// This is executed when the second player gets into handleInvitePlay
-			player.updateUserData();
-			other_player.updateUserData();
-			let index = this.invite_array.indexOf([other_intra, intra, other_player]);
-			if (index == -1)
-				index = this.invite_array.indexOf([intra, other_intra, other_player]);
-			if (index == -1)
-				console.log("Error in handleInvitePlay due to invalid return from indexOf (invite_array)", other_player.getSocket().id);
-			this.invite_array.splice(index, 1);
-			this.room_counter += 1;
-			let room_id = "game" + this.room_counter.toString();
-			let room = new Room(room_id, player, other_player);
-			this.rooms.set(room_id, room);
-			player.getSocket().join(room_id);
-			other_player.getSocket().join(room_id);
-			player.getSocket().emit("privatePlayReady", other_player.getUsername(), other_player.getPicture(), room_id);
-			other_player.getSocket().emit("privatePlayReady", player.getUsername(), player.getPicture(), room_id);
-		} else // This is executed when the first player gets into handleInvitePlay
-			this.invite_array.push([args[0].intra, args[0].other_intra, player]);
+	@SubscribeMessage("endGame")
+	handleEndGame(client: Socket, ...args: any[]) {
+		let room = this.rooms.get(args[0].room_id);
+		if (room.getLeftPlayer().getSocket() != client)
+			return;
+		room.getLeftPlayer().getSocket().emit("destroyGame", args[0].left_e, args[0].left_m);
+		room.getRightPlayer().getSocket().emit("destroyGame", args[0].right_e, args[0].right_m);
+	}
+
+	@SubscribeMessage("setGameDataAndRoute")
+	handleSetGameDataAndRoute(client: Socket, ...args: any[]) {
+		this.gameService.setGameData(args[0].intra, args[0].player, args[0].enemy, args[0].player_score, args[0].enemy_score,
+									args[0].ranked, args[0].paddle_hits_e, args[0].paddle_hits_m);
+		console.log("room is destroyed");
+		this.rooms.delete(args[0].room_id);
+		console.log("client.disconnect will be called in game.gateway.ts' setGameDataAndRoute");
+		client.disconnect();
 	}
 
 	private searchInviteArray(intra: string, other_intra: string): Player {
@@ -83,12 +119,37 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		return undefined;
 	}
 
+	reapInactiveSocketsLobby() {
+		for (let [intra, player] of this.lobby) {
+			if (player.getSocket().connected == false) {
+				this.lobby.delete(intra);
+				this.reapInactiveSocketsLobby();
+				return;
+			}
+		}
+	}
+
+	reapInactiveSocketsInvites() {
+		for (let tuple of this.invite_array) {
+			if (tuple[2].getSocket().connected == false) {
+				let index = this.invite_array.indexOf(tuple);
+				this.invite_array.splice(index, 1);
+				this.reapInactiveSocketsInvites();
+				return;
+			}
+		}
+	}
+
+	//data2 opponent name, data3 if invited
 	@SubscribeMessage("createOrJoinMode")
 	async handleCreateOrJoinMode(client: Socket, data: any) {
-		let searching_player = new Player(client, data[0], this.users, data[1]);
+		this.reapInactiveSocketsLobby();
+		let searching_player = new Player(client, data[0], this.users, data[1], data[2]);
 		await searching_player.updateUserData();
 		for (let [intraname, lobby_player] of this.lobby) {
-			if (searching_player.getMode() == lobby_player.getMode()) {
+			if (searching_player.getIntraname() == lobby_player.getIntraname())
+				return ;
+			else if (searching_player.getMode() == lobby_player.getMode() && ((data[3] == false && lobby_player.getOpponent() == "") || lobby_player.getOpponent() == searching_player.getUsername())) {
 				this.createAndJoinRoom(searching_player, lobby_player);
 				return;
 			}
@@ -103,10 +164,13 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	@SubscribeMessage("createOrJoin")
 	async handleCreateOrJoin(client: Socket, intra: string) {
+		this.reapInactiveSocketsLobby();
 		let searching_player = new Player(client, intra, this.users);
 		await searching_player.updateUserData();
 		for (let [intraname, lobby_player] of this.lobby) {
-			if (lobby_player.getMode() == "" && lobby_player.getScore() - this.threshold < searching_player.getScore() && searching_player.getScore() < lobby_player.getScore() + this.threshold) {
+			if (searching_player.getIntraname() == lobby_player.getIntraname())
+				return ;
+			else if (lobby_player.getMode() == "" && lobby_player.getRank() - this.threshold < searching_player.getRank() && searching_player.getRank() < lobby_player.getRank() + this.threshold) {
 				this.createAndJoinRoom(searching_player, lobby_player);
 				return;
 			}
@@ -135,16 +199,21 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 	@SubscribeMessage("cancelQueue")
 	handleCancelQueue(client: Socket, intra: string) {
-		console.log("calling handleCancel");
+		console.log("cancelQueue was called");
 		let player = this.lobby.get(intra);
 		client.leave("lobby");
 		this.lobby.delete(player.getIntraname());
 		//client.disconnect(true);
 	}
 
+	@SubscribeMessage("destroyRoom")
+	handleDestroyRoom(client: Socket, room_id: string) {
+		console.log("room is destroyed");
+		this.rooms.delete(room_id);
+	}
+
 	@SubscribeMessage("scoreRequest")
 	handleScoreRequest(client: Socket, data: any) {
-		console.log(client.id, "sends", data.left_player_scored, "and", data.room)
 		let room = this.rooms.get(data.room);
 		let player;
 		if (data.left_player_scored == true/*client == room.getLeftPlayer().getSocket()*/)
@@ -153,7 +222,6 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			player = room.getRightPlayer();
 		room.validateScore(client);
 		if (/*room.isScoreTrue() == true*/client == room.getLeftPlayer().getSocket()) {
-			console.log("inside if of isScoreTrue was called");
 			room.playerScored(player);
 			room.spawn_ball();
 		}

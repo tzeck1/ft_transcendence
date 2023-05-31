@@ -22,6 +22,12 @@ export class UserController {
 	}
 
 	@UseGuards(JwtAuthGuard)
+	@Get('getPicByUsername')
+	async getPicByUsername(@Query('username') username: string) {
+		return this.users.getPicByUsername(username);
+	}
+
+	@UseGuards(JwtAuthGuard)
 	@Get('getUsers')
 	async getUsers() {
 		return this.users.getUsers();

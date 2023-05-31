@@ -35,8 +35,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 			this.chatService.addUser(intra, client);
 			console.log(`Chat Client Connected: ${client.id}`);
 		}
-		else
+		else {
+			console.log("disconnecting in chat.gateway.ts handleconnection");
 			client.disconnect(true);
+		}
 		let sender = "Floppy: ";
 		let message_body = "Welcome to ft_transcendence!\nType '/help' for a list of commands.";
 		client.emit("messageToClient", sender, message_body);

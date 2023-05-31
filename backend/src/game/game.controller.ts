@@ -12,7 +12,9 @@ export class GameController {
 	@Post('setGameData')
 	async setGameData(@Body('intra') intra: string, @Body('player') player: string, @Body('enemy') enemy: string, @Body('player_score') player_score: number, @Body('enemy_score') enemy_score: number, @Body('ranked') ranked: boolean, @Body('paddle_hits_e') paddle_hits_e: number, @Body('paddle_hits_m') paddle_hits_m: number) {
 		console.log("went into setGameData");
-		return this.games.setGameData(intra, player, enemy, player_score, enemy_score, ranked, paddle_hits_e, paddle_hits_m);
+		let temp = this.games.setGameData(intra, player, enemy, player_score, enemy_score, ranked, paddle_hits_e, paddle_hits_m)
+		
+		return temp;
 	}
 
 	@UseGuards(JwtAuthGuard)

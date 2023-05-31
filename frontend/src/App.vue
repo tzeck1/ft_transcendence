@@ -56,23 +56,41 @@
 </template>
  
 <script setup lang="ts">
+
 	import { ref, computed, watch, nextTick } from 'vue';
 	import { useRouter, useRoute } from 'vue-router';
 	import { useUserStore } from './stores/UserStore';
+	import { useGameStore } from './stores/GameStore';
 	import { io } from 'socket.io-client';
+import { storeToRefs } from 'pinia';
 
 	const router = useRouter();
 	const route = useRoute();
 	const dropdownVisible = ref(false);
 	const userStore = useUserStore();
+	const gameStore = useGameStore();
 	const message = ref('');
 	const active_channel = ref('');
 	const lastMessages = ref<[string, string][]>([]);
 	const inputFocus = ref(false);
-	const isIntro = computed(() => route.path === '/');
+	const isIntro = computed(() => (route.path === '/'));
 	var blocked_users: string[];
 	const hovering = ref(false);
 	const chatHistory = ref<HTMLElement | null>(null);
+
+	document.addEventListener("visibilitychange", () => {
+		if (document.hidden) {
+			console.log("page is hidden from APP.vue!, ROUTE.NAME is:", route.name);
+			if (gameStore.socket != null && route.name != 'Game') {
+				console.log("visibility check in App.vue sends to profile, disconnects socket and sets ingame status to false");
+				gameStore.disconnectSocket();//maybe need to test around with order of router.push and disconnect
+				userStore.socket?.emit("setIngameStatus", false);
+				router.push('/profile');
+			}
+		} else {//document.hidden != true
+			console.log("page is visible from app.vue");
+		}
+	});
 
 	watch( () => userStore.intra, (newVal, oldVal) => {
 		if (newVal != undefined && newVal != "") {
@@ -98,24 +116,42 @@
 			userStore.socket.on("sendToProfile", (intra: string) => {
 				router.push('/profile/' + intra);
 			});
+			userStore.socket.on("sendToInvite", (mode: string, opponent_intra: string) => {
+				console.log("send to Invite");
+				router.push(`game?invited=true&mode=${mode}&opponent=${opponent_intra}`);
+			});
+			userStore.socket.on("reloadPage", () => {
+				window.location.reload();
+			});
 			userStore.socket.on("sendToGame", () => {
 				router.push('/game/');
 			});
 			userStore.socket.on("updateBlockedUsers", (new_blocked_users: string[]) => {
 				blocked_users = new_blocked_users;
 			});
+			userStore.socket.on("disconnect", () => {
+				console.log("User Socket disconnected?");
+			});
+			if (oldVal != undefined) {//socket was there before (page reload)
+				console.log("oldVal is defined and newVal too");
+				gameStore.socket?.emit("cancelQueue", userStore.intra);
+			}
 		}
-	})
+	});
 
 	function loadIntro() {
-		const cookies = document.cookie.split(";"); // for deleteing coockies
+		const cookies = document.cookie.split(";"); // for deleteing cookies
 		for (let i = 0; i < cookies.length; i++) {
 			const cookie = cookies[i];
 			const eqPos = cookie.indexOf("=");
 			const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
 			document.cookie = name + "=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/";
 		}
+		gameStore.socket?.emit("cancelQueue", userStore.intra);
+		userStore.socket?.emit("setIngameStatus", false);
+		gameStore.disconnectSocket();
 		userStore.delContent();
+		gameStore.delContent();
 		router.push('/');
 	}
 

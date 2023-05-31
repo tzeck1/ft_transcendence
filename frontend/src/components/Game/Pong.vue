@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-	import { ref, onMounted } from 'vue';
+	import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 	import Phaser from 'phaser';
 	import Pong from '../../game/pong';
 	import router from '@/router';
@@ -33,9 +33,7 @@
 	const { profile_picture } = storeToRefs(userStore);
 	const { enemy_name } = storeToRefs(gameStore);
 	const { enemy_picture } = storeToRefs(gameStore);
-
-	onMounted(() => {
-		const config: Phaser.Types.Core.GameConfig = {
+	const config: Phaser.Types.Core.GameConfig = {
 			type: Phaser.AUTO,
 			width: 1920,
 			height: 1080,
@@ -56,8 +54,9 @@
 				height: 1080
 			},
 			scene: [Pong]
-		};
+	};
 
+	function createGame(){
 		console.log("New game instance!");
 		game.value = new Phaser.Game(config);
 		game.value.events.on('destroy', () => {
@@ -65,6 +64,25 @@
 			console.log('Game instance destroyed!');
 			emit('show-end');
 		});
+	}
+
+	onMounted(() => {
+		createGame();
+	});
+
+	onBeforeUnmount(() => {
+		console.log("Phaser.vue on before unmount was called, destroying game.value now");
+		game.value?.destroy(true);
+		userStore.socket?.emit("setIngameStatus", false);
+		gameStore.socket?.disconnect();
+	});
+
+	watch( () => gameStore.play_again, (newVal, oldVal) => {
+		if (newVal == true)
+		{
+			gameStore.setPlayAgain(false);
+			createGame();
+		}
 	});
 </script>
 
