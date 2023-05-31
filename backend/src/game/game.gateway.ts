@@ -147,7 +147,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		let searching_player = new Player(client, data[0], this.users, data[1], data[2]);
 		await searching_player.updateUserData();
 		for (let [intraname, lobby_player] of this.lobby) {
-			if (searching_player.getIntraname() != lobby_player.getIntraname() && searching_player.getMode() == lobby_player.getMode() && ((data[3] == false && lobby_player.getOpponent() == "") || lobby_player.getOpponent() == searching_player.getUsername())) {
+			if (searching_player.getIntraname() == lobby_player.getIntraname())
+				return ;
+			else if (searching_player.getMode() == lobby_player.getMode() && ((data[3] == false && lobby_player.getOpponent() == "") || lobby_player.getOpponent() == searching_player.getUsername())) {
 				this.createAndJoinRoom(searching_player, lobby_player);
 				return;
 			}
@@ -166,7 +168,9 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 		let searching_player = new Player(client, intra, this.users);
 		await searching_player.updateUserData();
 		for (let [intraname, lobby_player] of this.lobby) {
-			if (searching_player.getIntraname() != lobby_player.getIntraname() && lobby_player.getMode() == "" && lobby_player.getRank() - this.threshold < searching_player.getRank() && searching_player.getRank() < lobby_player.getRank() + this.threshold) {
+			if (searching_player.getIntraname() == lobby_player.getIntraname())
+				return ;
+			else if (lobby_player.getMode() == "" && lobby_player.getRank() - this.threshold < searching_player.getRank() && searching_player.getRank() < lobby_player.getRank() + this.threshold) {
 				this.createAndJoinRoom(searching_player, lobby_player);
 				return;
 			}
