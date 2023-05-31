@@ -3,13 +3,13 @@
 
 ### The Team
 
-| Name      | Github Profile | 
-| ----------- | ----------- |
-| Ben [btenzlin] | [Profile Link](https://github.com/benzlinger) |
-| Tom [tzeck] | [Profile Link](https://github.com/tzeck1) |
-| Roman [siebert] | [Profile Link](https://github.com/cptbboy) |
-| Max [mmeising] | [Profile Link](https://github.com/mmeising) |
-| Elias [eschirni] | [Profile Link](https://github.com/eschirni) |
+| Name      | Github Profile | Intra Profile
+| ----------- | ----------- | ----------- |
+| Ben | [Profile Link](https://github.com/benzlinger) | [Intra Link](https://profile.intra.42.fr/users/btenzlin) |
+| Tom | [Profile Link](https://github.com/tzeck1) | [Intra Link](https://profile.intra.42.fr/users/tzeck) |
+| Roman | [Profile Link](https://github.com/cptbboy) | [Intra Link](https://profile.intra.42.fr/users/rsiebert) |
+| Max | [Profile Link](https://github.com/mmeising) | [Intra Link](https://profile.intra.42.fr/users/mmeising) |
+| Elias | [Profile Link](https://github.com/eschirni) | [Intra Link](https://profile.intra.42.fr/users/eschirni) |
 
 ### Tech Stack
 
