@@ -18,7 +18,7 @@
 		</div>
 		<div class="buttons">
 			<!-- cancel button eventually -->
-			<button class="game-button" @click="playAgain" v-if="gameStore.mode != ''" >
+			<button class="game-button" @click="playAgain">
 				<span v-show="!gameStore.play_again">Play again</span>
 				<span v-show="gameStore.play_again">Cancel</span>
 			</button>
