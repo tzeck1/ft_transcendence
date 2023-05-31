@@ -107,55 +107,15 @@
 			gameStore.setMode(router.currentRoute.value.query.mode);
 		}
 		console.log("onmounted of startGame.vue");
-		// inviteListeners();
 	});
 
-	// watch( () => router.currentRoute.value.query.invited, () => {
-	// 	if (router.currentRoute.value.query.invited == "true")
-	// 	{
-	// 		invited.value = true;
-	// 		gameStore.setMode(router.currentRoute.value.query.mode);
-	// 	}
-	// });
-
-	// function inviteListeners() {
-	// 	if (userStore.socket?.hasListeners("gameInvite") == false) {
-	// 		// console.log("setup listener for gameInvite");
-	// 		userStore.socket!.on("gameInvite", (intra: string, other_intra: string, mode: string) => {
-	// 			console.log("executing gameInvite");
-	// 			console.log("mode is", mode);
-	// 			gameStore.setMode(mode);
-	// 			console.log("and inside gamestore it's", gameStore.mode);
-	// 			gameStore.setSocket(io(`${location.hostname}:3000/game_socket`, {autoConnect: false}));
-	// 			if (gameStore.socket!.hasListeners("privatePlayReady") == false) {
-	// 				console.log("setup listener for privatePlayReady");
-	// 				gameStore.socket!.on("privatePlayReady", (username: string, pic: string, room_id: string) => {
-	// 					console.log("executing privatePlayReady");
-	// 					gameStore.setIntra(userStore.intra);
-	// 					gameStore.setEnemyName(username);
-	// 					gameStore.setEnemyPicture(pic);
-	// 					gameStore.setRoomId(room_id);
-	// 					showCount.value = true;
-	// 					console.log("countdown!!");
-	// 					countdown();
-	// 					// emit('start-match');
-	// 				});
-	// 			}
-	// 			gameStore.socket!.on("disconnect", () => {
-	// 				console.log('game socket Disconnected');
-	// 				userStore.socket!.emit("setIngameStatus", false);
-	// 			});
-	// 			gameStore.socket!.on('connect', function() {
-	// 				console.log('game socket Connected');
-	// 			});
-	// 			gameStore.socket!.on("sendToProfile", () => {
-	// 				router.push('/profile/');
-	// 			});
-	// 			console.log("emitting inviteplay");
-	// 			gameStore.socket!.emit("invitePlay", {intra: intra, other_intra: other_intra});
-	// 		});
-	// 	}
-	// }
+	watch( () => router.currentRoute.value.query.invited, (newVal, oldVal) => {
+		if (newVal == "true")
+		{
+			invited.value = true;
+			gameStore.setMode(router.currentRoute.value.query.mode);
+		}
+	});
 
 	onBeforeUnmount(() => {
 		console.log("onBeforeUnmount of StartGame.vue called");
