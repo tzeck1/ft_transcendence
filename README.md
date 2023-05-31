@@ -39,4 +39,10 @@ cd ft_transcendence
 docker-compose up --build
 ```
 
+3. Access the website:
+
+```console
+http://<your ip>:8080
+```
+
 Please note that you should have Docker installed in your system to build and run the containers.
