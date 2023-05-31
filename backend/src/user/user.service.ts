@@ -146,6 +146,8 @@ export class Users {
 	async setUsername(intra: string, new_username: string) {
 		if (new_username.length < 2)
 			return ("1");
+		if (new_username.length > 8)
+			return ("2")
 		const existingUser = await prisma.users.findFirst({
 		  where: {
 			AND: [
@@ -155,7 +157,7 @@ export class Users {
 		  },
 		});
 		if (existingUser) {
-			return ("2");
+			return ("3");
 		}
 
 		const updateUser = await prisma.users.update({
