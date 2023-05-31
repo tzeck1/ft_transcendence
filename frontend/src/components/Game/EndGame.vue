@@ -18,7 +18,7 @@
 		</div>
 		<div class="buttons">
 			<button class="game-button" @click="playAgain" >Play Again</button>
-			<button class="quit-button" @click="quit" >Back To Start</button>
+			<button class="quit-button" @click="quit" >Back To Profile</button>
 		</div>
 	</div>
 </template>
@@ -30,6 +30,7 @@
 	import { useUserStore } from '@/stores/UserStore';
 	import { storeToRefs } from 'pinia';
 	import axios from 'axios';
+import router from '@/router';
 
 	const emit = defineEmits(["start-match", "show-start"]);
 	const gameStore = useGameStore();
@@ -64,7 +65,7 @@
 		gameStore.disconnectSocket();
 		userStore.socket?.emit("setIngameStatus", false);
 		userStore.is_endgame = false;
-		emit("show-start");
+		router.push("/profile");
 	};
 
 </script>
