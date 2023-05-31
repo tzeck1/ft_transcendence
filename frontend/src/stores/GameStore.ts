@@ -11,6 +11,7 @@ export const useGameStore = defineStore({
 		enemy_picture: "",
 		mode: "",
 		was_invited: false,
+		play_again: false,
 	}),
 	actions: {
 		setIntra(newIntra: string) {
@@ -31,6 +32,9 @@ export const useGameStore = defineStore({
 		setMode(newMode: string) {
 			this.mode = newMode;
 		},
+		setPlayAgain(again: boolean) {
+			this.play_again = again;
+		},
 		disconnectSocket() {
 			if (this.socket != null) {
 				this.socket.disconnect();
@@ -46,6 +50,7 @@ export const useGameStore = defineStore({
 			this.enemy_picture = "";
 			this.mode = "";
 			this.was_invited = false;
+			this.play_again = false;
 		}
 	},
 });
