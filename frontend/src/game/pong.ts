@@ -21,6 +21,8 @@ export default class Pong extends Phaser.Scene {
 	cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
 	left_collider!: Phaser.Physics.Arcade.Collider;
 	right_collider!: Phaser.Physics.Arcade.Collider;
+	up!: Phaser.Input.Keyboard.Key;
+	down!: Phaser.Input.Keyboard.Key;
 
 	gameStore = useGameStore();
 	userStore = useUserStore();
@@ -91,7 +93,9 @@ export default class Pong extends Phaser.Scene {
 			this.paddle_velocity = 32;
 		if (this.input.keyboard == undefined)
 			console.error("Keyboard is ", this.input.keyboard);
-		this.cursors = this.input.keyboard!.createCursorKeys();
+		// this.cursors = this.input.keyboard!.createCursorKeys();
+		this.up = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.UP);
+		this.down = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN);
 		this.pattern_mask = this.add.graphics()
 			.fillStyle(0xffffff);
 
@@ -202,8 +206,8 @@ export default class Pong extends Phaser.Scene {
 			return;
 
 		/*  Movement  */
-		this.inputPayload.up = this.cursors.up.isDown;
-		this.inputPayload.down = this.cursors.down.isDown;
+		this.inputPayload.up = this.up.isDown;
+		this.inputPayload.down = this.down.isDown;
 		if (this.inputPayload.up || this.inputPayload.down)
 			this.socket.emit("paddleMovement", this.inputPayload);
 

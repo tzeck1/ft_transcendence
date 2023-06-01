@@ -128,7 +128,7 @@
 
 	@font-face {
 		font-family: ibm-3270;
-		src: url('./assets/3270-Regular.ttf') format('truetype');
+		src: url('../assets/3270-Regular.ttf') format('truetype');
 	}
 
 	.intro {

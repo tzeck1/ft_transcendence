@@ -43,7 +43,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
 		// i disconnect, so i should get a lose and my enemy gets a win
 		for (let [room_id, room] of this.rooms) {
-			if (room.getLeftPlayer().getSocket().id == client.id) {
+			if (room && room.getLeftPlayer().getSocket().id == client.id) {
 				if (room.getLeftPlayer().getMode() == "") {
 					this.gameService.setGameData(room.getLeftPlayer().getIntraname(),
 																					room.getLeftPlayer().getUsername(),
@@ -63,7 +63,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 				this.rooms.delete(room_id);
 				return;
 			}
-			if (room.getRightPlayer().getSocket().id == client.id) {
+			if (room && room.getRightPlayer().getSocket().id == client.id) {
 				if (room.getLeftPlayer().getMode() == "") {
 					this.gameService.setGameData(room.getRightPlayer().getIntraname(),
 																					room.getRightPlayer().getUsername(),
@@ -93,7 +93,7 @@ export class GameGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 	@SubscribeMessage("endGame")
 	handleEndGame(client: Socket, ...args: any[]) {
 		let room = this.rooms.get(args[0].room_id);
-		if (room.getLeftPlayer().getSocket() != client)
+		if (room == undefined || room.getLeftPlayer().getSocket() != client)
 			return;
 		room.getLeftPlayer().getSocket().emit("destroyGame", args[0].left_e, args[0].left_m);
 		room.getRightPlayer().getSocket().emit("destroyGame", args[0].right_e, args[0].right_m);
