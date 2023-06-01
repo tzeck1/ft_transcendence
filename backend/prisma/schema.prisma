@@ -46,6 +46,7 @@ model games {
 	paddle_hits_e	Int			@default(0)
 	paddle_hits_m	Int			@default(0)
 	user			users @relation(fields: [intra], references: [intra_name])
+	rank_changed		Int			@default(0)
 }
 
 model stats {
