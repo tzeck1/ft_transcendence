@@ -37,6 +37,7 @@
 		enemy_score: number;
 		formattedDate: Date;
 		result: string;
+		changed_rank: number;
 	}
 
 	const userStore = useUserStore();

@@ -187,6 +187,12 @@ export class Game {
 	async setGameData(intra: string, player: string, enemy: string, player_score: number, enemy_score: number, ranked: boolean, paddle_hits_e: number, paddle_hits_m: number) {
 		if (ranked == false)
 			return;
+		let changed_rank = 0;
+
+		if (ranked == true) {
+			changed_rank = Math.round(this.calculateNewRank(await this.getUserRankByUsername(player),
+												await this.getUserRankByUsername(enemy), (player_score > enemy_score ? 1 : 0)))
+		}
 		const newUsersEntry = await prisma.games.create( {
 			data: {
 				intra:				intra,
@@ -198,6 +204,7 @@ export class Game {
 				date:				new Date(),
 				paddle_hits_e:		paddle_hits_e,
 				paddle_hits_m:		paddle_hits_m,
+				rank_changed:		changed_rank,
 			},
 		});
 		if (player_score > enemy_score) {
@@ -215,23 +222,16 @@ export class Game {
 		}
 		else if (player_score < enemy_score) {
 			console.log("user lost!");
-			const user = await prisma.users.findUnique({
+			await prisma.users.update({
 				where: {
-				  intra_name: intra,
+					intra_name: intra,
 				},
-			});
-			if (user && user.rank > 0) {
-				await prisma.users.update({
-					where: {
-						intra_name: intra,
-					},
-					data: {
-						rank: Math.round(this.calculateNewRank(await this.getUserRankByUsername(player),
-													await this.getUserRankByUsername(enemy), 0)),
-						games_lost: { increment: 1 }
-					}
-				})
-			}
+				data: {
+					rank: Math.round(this.calculateNewRank(await this.getUserRankByUsername(player),
+												await this.getUserRankByUsername(enemy), 0)),
+					games_lost: { increment: 1 }
+				}
+			})
 		}
 		await prisma.users.update({
 			where: {
@@ -285,6 +285,7 @@ export class Game {
 
 		userGames.forEach(game => {
 			(game as any).formattedDate = formatDate(game.date);
+			(game as any).changed_rank = game.rank_changed;
 		});
 
 		return userGames;

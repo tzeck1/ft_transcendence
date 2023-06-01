@@ -136,12 +136,7 @@
 		const labels = games.map((game, index) => game.formattedDate );
 		let rank = 0;
 		const data = games.map(game => {
-			if(game.player_score > game.enemy_score) {
-				rank++;
-			} else {
-				if (rank != 0)
-					rank--;
-			}
+			rank = game.changed_rank;
 			return rank;
 		});
 
