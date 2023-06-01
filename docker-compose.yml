@@ -8,13 +8,12 @@ services:
       - db
     ports:
       - '3000:3000'
-    # volumes:
-    #   - './backend:/app'
-    #   # - '/app/node_modules'
-    # command: npm run start:dev
+    env_file:
+      - ./backend/.env
     networks:
       - backend-net
       - db-net
+    restart: on-failure
 
   frontend:
     container_name: frontend
@@ -34,11 +33,9 @@ services:
 
   db:
     container_name: database
-    image: postgres:13
-    environment:
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-      POSTGRES_DB: mydatabase
+    image: postgres:15.3
+    env_file:
+      - ./backend/.env
     volumes:
       - 'v_database:/var/lib/postgresql/data'
     ports:

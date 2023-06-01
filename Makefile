@@ -8,7 +8,7 @@ ps:
 	docker-compose ps -a
 
 db:
-	docker-compose exec db psql -U myuser -W -d mydatabase
+	docker-compose exec db psql -U <database_username> -W -d <database_name>
 
 # WARNING: deletes all content in DB
 prune:
