@@ -2,7 +2,7 @@
 
 ### The Team
 
-| Name      | Github Profile | Intra Profile
+| Name      | Github Profile | 42 Intra Profile
 | ----------- | ----------- | ----------- |
 | Ben | [Github Link](https://github.com/benzlinger) | [Intra Link](https://profile.intra.42.fr/users/btenzlin) |
 | Tom | [Github Link](https://github.com/tzeck1) | [Intra Link](https://profile.intra.42.fr/users/tzeck) |
