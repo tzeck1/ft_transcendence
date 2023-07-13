@@ -1,5 +1,7 @@
 # 🏓 ft_transcendence
 
+![trans_repo_gif](https://github.com/tzeck1/ft_transcendence/assets/65648486/7b63e08b-fbe4-4b2b-861a-f606ff84d4ed)
+
 ### The Team
 
 | Name      | Github Profile | 42 Intra Profile
